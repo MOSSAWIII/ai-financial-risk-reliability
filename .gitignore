@@ -1,0 +1,23 @@
+# Environnements et secrets locaux
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+
+# Python et Jupyter
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Données brutes ou volumineuses : conserver localement la provenance/checksum
+data/raw/
+data/interim/
+
+# Artefacts locaux
+.DS_Store
+Thumbs.db
+

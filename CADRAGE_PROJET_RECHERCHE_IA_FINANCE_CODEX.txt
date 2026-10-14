@@ -1,0 +1,400 @@
+CADRAGE FONDATEUR DU PROJET — À LIRE EN ENTIER AVANT DE CODER
+Version initiale : 14 octobre 2026
+Destinataire : Codex, agent de développement et de recherche travaillant dans VS Code
+Statut : instruction de cadrage ; le dépôt local est initialement vide.
+
+==========================================================================
+0. TON RÔLE ET L'ESPRIT DU PROJET
+==========================================================================
+
+Tu es mon partenaire de recherche et d'implémentation scientifique. Ton travail est
+à la fois conceptuel, empirique et logiciel. Ne te comporte pas comme un simple
+générateur de notebooks ni comme un agent chargé d'optimiser des métriques à tout prix.
+
+Je construis progressivement une compétence de chercheur à l'intersection de
+l'économie, de la finance et de l'intelligence artificielle. Je souhaite que le
+projet soit suffisamment rigoureux pour pouvoir, après un travail approfondi,
+servir de base à un projet doctoral, voire à une recherche publiable SI une
+contribution scientifique véritablement originale est démontrée. Il ne faut
+jamais présenter cette ambition comme un résultat déjà acquis.
+
+Mes priorités, dans cet ordre :
+- comprendre réellement le phénomène étudié et la question scientifique ;
+- garantir la validité temporelle, la traçabilité et la reproductibilité ;
+- mettre les références simples et les méthodes complexes sur un pied d'égalité ;
+- relier la performance prédictive à une signification économique et financière ;
+- tester les limites des conclusions et documenter les résultats négatifs ;
+- conserver un projet léger, lisible, exécutable en local et si possible sur Colab.
+
+Ne suppose pas que les choix de méthode sont définitivement tranchés. Identifie
+les arbitrages importants et explique-les en termes accessibles avant de les
+figer dans le code. Tu peux proposer mieux que ce document, mais signale
+clairement tout changement d'hypothèse, de périmètre ou de question scientifique.
+
+==========================================================================
+1. NOTRE OBJECTIF SCIENTIFIQUE
+==========================================================================
+
+TITRE DE TRAVAIL (FR)
+« Fiabilité des prévisions du risque financier par l'intelligence artificielle
+   dans un environnement économique instable ».
+
+TITRE DE TRAVAIL (EN)
+« Reliability of AI-Based Financial Risk Forecasts under Changing Economic
+   Regimes ».
+
+QUESTION CENTRALE
+Dans quelle mesure les changements de conditions économiques affectent-ils la
+fiabilité des modèles de prévision du risque financier, et comment concevoir ou
+adapter des méthodes d'IA capables de reconnaître, quantifier et limiter cette
+perte de fiabilité ?
+
+LA CIBLE PRINCIPALE
+La fiabilité conditionnelle des prévisions : un modèle peut-il rester précis,
+correctement calibré, robuste et utile financièrement lorsque l'environnement
+économique et les distributions de marché changent ?
+
+Il ne s'agit PAS, en premier lieu, de battre un benchmark avec un nouveau
+algorithme. Nous cherchons à comprendre quand les modèles échouent, pourquoi
+leurs erreurs ont des conséquences différentes et dans quelle mesure une
+meilleure modélisation de l'incertitude peut aider.
+
+Notre premier objet empirique est la prévision du risque de marché à horizon
+court, notamment la volatilité réalisée sur les 5 séances suivantes. La cible,
+la convention d'annualisation et l'information disponible à la date de prévision
+devront être spécifiées mathématiquement et auditées. L'extension à VaR/Expected
+Shortfall et à des décisions financières vient après cette base.
+
+==========================================================================
+2. LES TROIS NIVEAUX — UN SEUL PROGRAMME DE RECHERCHE
+==========================================================================
+
+NIVEAU A — ÉCONOMIE : POURQUOI LE RISQUE ET SA PRÉVISIBILITÉ CHANGENT-ILS ?
+Étudier les mécanismes potentiellement associés à la prévisibilité du risque :
+cycle économique, politique monétaire, structure des taux, inflation, incertitude,
+chocs et changements de régime. Distinguer une volatilité durablement forte
+d'une transition soudaine entre environnements. Ne jamais confondre constat
+prédictif, association et identification causale.
+
+Question A : les erreurs de prévision se concentrent-elles dans certaines
+conditions économiques et, surtout, pendant leurs transitions ?
+
+Hypothèse H1 (à tester, non à présupposer) : les transitions de régime sont
+associées à une dégradation de la fiabilité des prévisions plus importante que
+les régimes établis, même agités.
+
+NIVEAU B — FINANCE : POURQUOI CES ERREURS COMPTENT-ELLES ?
+Étudier volatilité réalisée, risque de pertes extrêmes, VaR et Expected
+Shortfall, puis la traduction des prévisions en décisions financières simples
+et contrôlées (par exemple le ciblage de volatilité d'un portefeuille). Mesurer
+les sous-estimations du risque, les pertes, les contraintes d'exposition, les
+coûts et la stabilité des décisions. Ne pas confondre précision statistique et
+valeur économique.
+
+Question B : un gain de précision hors échantillon améliore-t-il vraiment une
+décision de gestion du risque dans des conditions réalistes ?
+
+Hypothèse H2 : une amélioration de MAE/RMSE ne conduit pas automatiquement à
+une amélioration de performance financière nette ou de maîtrise des risques.
+
+NIVEAU C — IA / STATISTIQUE : COMMENT RENDRE LES PRÉVISIONS PLUS FIABLES ?
+Comparer honnêtement les méthodes statistiques et ML, comprendre les erreurs
+hors distribution, quantifier l'incertitude, vérifier sa calibration et étudier
+l'adaptation temporelle. Privilégier l'interprétabilité et les contrôles
+scientifiques avant la sophistication.
+
+Question C : peut-on améliorer la couverture et l'utilité des intervalles de
+prévision lors des changements de régime sans créer de fausse confiance ?
+
+Hypothèse H3 : certaines procédures adaptatives de prévision/calibration de
+l'incertitude améliorent la fiabilité conditionnelle relativement à des
+références correctement calibrées, sans forcément améliorer la précision
+moyenne. Cela reste à démontrer sur des données jamais utilisées pour choisir
+la méthode.
+
+Ces niveaux s'emboîtent : l'économie caractérise le contexte ; la finance
+mesure les conséquences ; l'IA essaie de prédire et de communiquer le risque
+de façon fiable.
+
+==========================================================================
+3. POINT DE DÉPART RÉEL : UN NOTEBOOK EXPLORATOIRE EXISTE, MAIS PAS ICI
+==========================================================================
+
+Le répertoire VS Code est vierge. Un prototype exploratoire a été réalisé
+séparément sur Google Colab :
+https://colab.research.google.com/drive/1d_2efrGsTOKGJVt5FeXh3EGoFn2BDHN5?usp=sharing
+
+N'en présume ni l'accessibilité depuis ton environnement ni l'exactitude de
+tous les résultats. Si tu ne peux pas lire l'original, indique-le ; ne prétends
+pas l'avoir audité. Tu peux demander le fichier .ipynb ou reconstruire une base
+propre après validation du protocole. Ne modifie pas le notebook Colab original
+sans demande explicite.
+
+CONTEXTE DES RÉSULTATS DÉJÀ OBSERVÉS (EXPLORATOIRES, NON DÉFINITIFS)
+- Données Fama-French quotidiennes, portefeuille de marché américain : environ
+  26 317 observations, juillet 1926 à août 2026 dans le prototype.
+- Cible : volatilité réalisée annualisée des 5 séances futures.
+- Premier test, environ 1 669 observations (2020–2026) : MAE Boosting ~0,0507 ;
+  Ridge ~0,0515 ; EWMA non calibré ~0,0629 ; volatilité historique 20j ~0,0653.
+- Walk-forward avec réentraînement annuel : Boosting ~0,0509 ; Ridge ~0,0516.
+- Bootstrap en blocs de 22 jours sur l'écart de MAE EWMA – Boosting WF :
+  moyenne ~0,0120 ; intervalle empirique 95 % ~[0,0076 ; 0,0173].
+- Intervalles quantiles nominaux 80 % : couverture globale observée ~70,64 % ;
+  ~65,73 % en régime agité, ~72,53 % en régime moins agité.
+
+ATTENTION : ce jeu de résultats a déjà été consulté et a orienté notre réflexion.
+La période 2020–2026 n'est donc PLUS un holdout totalement vierge pour toute
+nouvelle méthode conçue en réponse à ces constats. Prévoir une évaluation
+véritablement indépendante : futurs millésimes non observés, autre marché
+pré-spécifié ou expérience de validation externe correctement gelée. Ne jamais
+qualifier de « confirmation définitive » une amélioration recherchée sur les
+mêmes dates après observation du résultat.
+
+IMPORTANTES LIMITES DÉJÀ IDENTIFIÉES
+- La comparaison des méthodes complexes avec EWMA non calibré n'est pas encore
+  équitable. Calibrer les références et comparer sur la même information.
+- Les modèles quantiles initiaux étaient entraînés statiquement alors que des
+  modèles ponctuels étaient réentraînés : harmoniser les protocoles.
+- La cible à 5 séances se chevauche fortement, ce qui rend les erreurs
+  dépendantes ; adapter l'inférence, les frontières train/test et les tests.
+- Les épisodes agités du notebook sont classés à partir de la volatilité passée,
+  pas d'une vérité économique ou d'un régime objectivement connu en temps réel.
+- Les métriques moyennes ne prouvent ni la valeur financière ni la nouveauté.
+- Ne pas présenter une couverture de 70,64 % pour une cible de 80 % comme
+  une petite différence négligeable.
+
+==========================================================================
+4. LA BONNE STRATÉGIE : RECHERCHE AVANT ARCHITECTURE
+==========================================================================
+
+Ne construis pas tout de suite un grand framework, un dashboard, une API, une
+base de données, un système MLOps ou un gros catalogue de modèles.
+
+Travaille par décisions scientifiques successives :
+(1) question et mécanismes ; (2) définition formelle de la cible ;
+(3) données/provenance ; (4) protocole temporel ; (5) références ;
+(6) diagnostics ; (7) hypothèses explicatives ; (8) extensions contrôlées.
+
+Pour chaque expérience, documenter :
+- question exacte et hypothèse falsifiable ;
+- théorie/motivation économique et financière ;
+- univers, dates, information disponible, variables et unités ;
+- méthode de comparaison et budget d'ajustement comparables ;
+- métrique principale fixée AVANT l'expérience ;
+- résultats, incertitude statistique, interprétation ;
+- limites, contre-explications plausibles et prochaine décision.
+
+Les résultats négatifs, l'absence de différence significative et les échecs
+techniques sont des résultats à conserver, pas à masquer.
+
+==========================================================================
+5. PÉRIMÈTRE EMPIRIQUE INITIAL ET GARDE-FOUS
+==========================================================================
+
+PÉRIMÈTRE INITIAL
+- Un marché de référence : portefeuille de marché américain Fama-French,
+  utilisé d'abord comme série de recherche, non comme ETF directement négociable.
+- Fréquence quotidienne ; horizon cible : 5 séances futures.
+- Références : volatilité historique, EWMA, leurs versions calibrées, Ridge,
+  Gradient Boosting ; ensuite GARCH/GJR-GARCH et référence multi-horizons de
+  type HAR si la qualité des données permet une comparaison interprétable.
+- Données publiques et librement accessibles dans les conditions de leur
+  licence ; conserver dates, URLs, checksums, dictionnaires et transformations.
+- Les variables macrofinancières viendront après le socle : taux, courbe de
+  taux, volatilité implicite, indicateurs d'incertitude ; leur disponibilité
+  historique et leurs horodatages doivent être vérifiés.
+
+RÈGLES DE VALIDITÉ
+A. Fuite d'information : chaque prédicteur doit être observable à l'instant t.
+   La cible future doit utiliser uniquement les rendements t+1...t+5.
+B. Découpage temporel : entraînement, validation, test et période finale
+   indépendante, avec traitement du chevauchement des horizons aux frontières.
+C. Évaluation : commencer par MAE/RMSE, étudier des fonctions adaptées à la
+   variance comme QLIKE lorsque la cible et le proxy le justifient ; annoncer
+   précisément les conventions et unités (pourcentage vs décimal, volatilité
+   vs variance, annualisation).
+D. Statistique : utiliser des comparaisons appariées et tenir compte de la
+   dépendance temporelle (par exemple bootstrap par blocs ; sensibilités aux
+   tailles des blocs, échantillons non chevauchants). Éviter les conclusions
+   catégoriques sur un unique IC.
+E. Calibration : distinguer intervalle de prédiction d'une observation future
+   et intervalle de confiance sur un paramètre ; évaluer couverture, largeur,
+   dépassements et stabilité par périodes/régimes. La couverture globale ne
+   garantit pas la couverture conditionnelle.
+F. Baselines : comparer de manière équitable sur mêmes dates, mêmes données,
+   mêmes budgets raisonnables d'optimisation et mêmes possibilités de mise à
+   jour. Un benchmark naïf ne doit pas devenir un faire-valoir.
+G. Économie : distinguer valeurs révisées, valeurs connues à l'époque et
+   annotations ex post. Des dates officielles de récession identifiées après
+   coup ne doivent pas servir de variables prétendument connues en temps réel.
+H. Finance : backtester sans look-ahead, avec calendrier d'exécution clair,
+   coûts, exposition plafonnée, turnover et risque de sous-estimation. Les
+   mesures de trading simulé ne constituent pas un conseil d'investissement.
+I. Reproductibilité : graines, dépendances, paramètres, données datées,
+   résultats, tests, et provenance sauvegardés. Aucune donnée inventée, aucun
+   chiffre revendiqué sans exécution, aucune référence bibliographique fictive.
+J. Revue de littérature : vérifier les références et leurs contributions
+   exactes. Ne pas présenter comme nouveau un problème déjà résolu.
+
+PRÉCISION ESSENTIELLE SUR LA CIBLE
+Formaliser avant codage, notamment si l'on retient une mesure construite à
+partir de rendements quotidiens au carré :
+  RV5(t) = sqrt((252/5) * sum_{k=1..5} r(t+k)^2)
+avec r exprimé en décimal et 252 comme convention annuelle. Cette formule est
+une possibilité, pas une obligation ; expliquer pourquoi elle est retenue,
+comment elle se distingue d'une variance réalisée, de l'écart-type empirique,
+et quel problème peut poser l'usage de données de clôture ou de rendements
+constitués à partir du portefeuille Fama-French.
+
+==========================================================================
+6. DONNÉES ET LITTÉRATURE : AMORÇAGE, PAS ARGUMENT D'AUTORITÉ
+==========================================================================
+
+Point de départ des données :
+- Kenneth French Data Library :
+  https://mba.tuck.dartmouth.edu/pages/faculty/Ken.French/data_library.html
+  Le rendement de marché peut être reconstruit à partir de Mkt-RF + RF après
+  conversion des rendements exprimés en pourcentage, avec vérifications.
+- FRED / ALFRED pour certaines données macrofinancières et leurs millésimes,
+  si des données réellement connues à la date de décision sont nécessaires.
+- NBER : dates de cycles utilisables pour diagnostics ex post, pas
+  automatiquement comme signaux disponibles en temps réel.
+
+Lectures de départ à vérifier dans leurs sources originales :
+- Hansen & Lunde (2005), « Does Anything Beat a GARCH(1,1)? »
+- Corsi (2009), « A Simple Approximate Long-Memory Model of Realized Volatility »
+- Patton (2011), « Volatility Forecast Comparison Using Imperfect Volatility Proxies »
+- Moreira & Muir (2017), « Volatility-Managed Portfolios »
+- Gibbs & Candès, travaux sur Adaptive Conformal Inference sous changement de
+  distribution.
+
+Ces références servent à construire l'état de l'art et à challenger les
+hypothèses, pas à inventer une contribution. Si tu ne peux pas vérifier une
+publication en ligne, marque explicitement « à vérifier ».
+
+==========================================================================
+7. FEUILLE DE ROUTE PAR PORTES DE VALIDATION
+==========================================================================
+
+PHASE 0 — CADRAGE, PROTOCOLE, RISQUES (À FAIRE MAINTENANT)
+- Inspecte le dossier ; confirme qu'il est vide et n'invente pas de fichiers.
+- Reformule la question centrale en une page claire.
+- Distingue cible, variables accessibles à t, sous-questions, hypothèses et
+  critères permettant d'infirmer une hypothèse.
+- Établis une matrice des expériences prévues : question, comparateur,
+  données, risque méthodologique, résultat mesurable.
+- Produis une revue initiale et honnête de l'état de l'art (avec éléments à
+  vérifier si tu n'as pas d'accès web).
+- Établis les risques majeurs (overlap, fuite temporelle, sélection sur le
+  test, proxy de volatilité, calibration, macro en temps réel).
+- Propose une architecture MINIMALE de dépôt avec raison d'être de chaque
+  fichier. Pas de fichiers vides pour faire « professionnel ».
+- Demande ma validation sur les arbitrages essentiels avant d'élargir.
+
+Livrables possibles, dans un dossier docs/ :
+  01_QUESTION_ET_HYPOTHESES.md
+  02_PROTOCOLE_EXPERIMENTAL.md
+  03_SOURCES_ET_ETAT_DE_L_ART.md
+  04_RISQUES_ET_DECISIONS.md
+  05_PLAN_EXPERIMENTAL.md
+N'ajoute pas cinq documents juste pour cocher des cases : fusionne-les si un
+format plus compact et rigoureux est préférable.
+
+PHASE 1 — SOCLE SCIENTIFIQUE MINIMAL (APRÈS CADRAGE VALIDÉ)
+- Acquisition et archivage de la source Fama-French ; tests sur parsing,
+  périodes, doublons, NA, conversion % -> décimal et contrôle Mkt-RF + RF.
+- Construction d'une cible à 5 séances alignée sans fuite d'information ;
+  tests automatisés du décalage et des séparations temporelles.
+- Benchmark minimal reproduisible : moyenne/historique, EWMA, références
+  calibrées, Ridge et Boosting avec sélection temporelle rigoureuse.
+- Journalisation des versions et résultats dans des artefacts simples.
+- Première revue critique avec anomalies et limites ; ne pas encore annoncer
+  de « meilleur modèle » général.
+
+PHASE 2 — VALIDATION STATISTIQUE
+- Comparaison honnête statique vs walk-forward, périodes de réentraînement.
+- Baselines économétriques justifiées ; MAE, RMSE, QLIKE si adapté.
+- Bootstrap/blocs et sensibilités ; échantillons non chevauchants ; analyse
+  par année et asymétrie des erreurs.
+
+PHASE 3 — CONTEXTE ÉCONOMIQUE
+- Caractériser les régimes sans utiliser une classification indisponible en
+  temps réel pour prédire ; analyser transitions et chocs.
+- Ajouter progressivement indicateurs macrofinanciers point-in-time.
+- Distinguer descriptif, prédictif et causal ; pas de causalité revendiquée
+  sans stratégie d'identification crédible.
+
+PHASE 4 — INCERTITUDE ET ROBUSTESSE IA
+- Intervalles quantiles puis recalibration temporelle ; couverture nominale,
+  empirique, conditionnelle, largeur, dépassements, crises.
+- Méthodes adaptatives/conformal seulement avec protocole adapté aux séries
+  dépendantes et comparaison avec références existantes.
+- Diagnostics de dérive et sensibilité aux hyperparamètres et changements
+  de période.
+
+PHASE 5 — VALEUR FINANCIÈRE
+- Backtest parcimonieux de contrôle du risque, sans look-ahead.
+- Contraintes, turnover, coûts, drawdowns, pertes extrêmes, sous-estimation.
+- Ne pas confondre facteur de recherche et actif investissable.
+
+PHASE 6 — SYNTHÈSE ET CONTRIBUTION
+- Distinguer résultats robustes, résultats exploratoires et échecs.
+- Définir la vraie nouveauté résiduelle par comparaison explicite à la
+  littérature ; préparer éventuellement un article/projet doctoral.
+- Ne pas imposer à l'avance le nombre de figures, pages, métriques ou modèles :
+  le contenu final dépend des conclusions fondées sur les expériences.
+
+==========================================================================
+8. LIVRABLES, STYLE DE COLLABORATION ET CONTRÔLE QUALITÉ
+==========================================================================
+
+Je préfère :
+- un langage français naturel, clair, précis ; les termes techniques sont
+  explicités la première fois et utilisés seulement quand ils aident ;
+- de courtes étapes que je peux maîtriser personnellement ;
+- des résultats interprétés économiquement, pas des tableaux de chiffres seuls ;
+- la transparence sur ce qui est inconnu et sur les échecs ;
+- des arguments plutôt que des affirmations d'autorité ;
+- un README clair, des tests utiles et des scripts simples, pas une usine à gaz.
+
+Dans les points d'avancement, réponds à ces questions :
+1. Qu'avons-nous exactement testé et pourquoi ?
+2. Quelles données et informations le modèle a-t-il réellement utilisées ?
+3. Qu'est-ce qui a fonctionné et échoué ?
+4. Qu'est-ce qui est démontré, seulement suggéré, ou encore inconnu ?
+5. Quel est le prochain test qui permettrait de départager les explications ?
+
+Aucune modification des sources de données brutes ; elles restent immuables.
+Aucune suppression d'un résultat « décevant » ; toutes les expériences utiles
+restent auditables. Ne pas lancer de tâches coûteuses/non maîtrisées par défaut.
+
+Ne pas utiliser un LLM ou un outil de recherche comme preuve scientifique en
+soi. Lire la source primaire, vérifier date/unité/périmètre et noter les limites.
+
+==========================================================================
+9. INSTRUCTION IMMÉDIATE À CODEX POUR CE PREMIER TOUR
+==========================================================================
+
+Tu pars d'un dossier vide. COMMENCE UNIQUEMENT PAR LA PHASE 0.
+
+Première réponse attendue :
+(A) reformulation courte de notre objet scientifique et distinction des trois
+    niveaux économique, financier et IA ;
+(B) principales faiblesses du prototype Colab et points de décision ;
+(C) protocole expérimental initial cohérent et reproductible ;
+(D) proposition MINIMALE de structure locale et liste exacte des premiers
+    fichiers que tu juges nécessaires ;
+(E) 3 à 6 questions réellement bloquantes, seulement si une décision humaine
+    est indispensable pour avancer.
+
+Tu peux créer les documents de cadrage et un journal de décisions dès ce tour.
+NE lance PAS encore de gros entraînements, de backtest financier, d'intégration
+macro ou de refonte ML. NE construis PAS tout le programme d'un seul coup.
+Termine par une proposition très concrète de première expérience falsifiable,
+puis attends mon accord pour passer à la Phase 1.
+
+Critère de réussite du premier tour : je dois pouvoir expliquer moi-même
+pourquoi nous prévoyons ce risque, comment nous le mesurerons, quelles
+comparaisons seraient équitables et ce qui pourrait invalider nos résultats.
+
+FIN DU CADRAGE.
