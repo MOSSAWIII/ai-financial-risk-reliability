@@ -11,22 +11,26 @@ choix d'une licence est une décision ouverte.
 
 ## État du projet
 
-**Phase 0 — cadrage scientifique : non validée, version 2 soumise à examen
-critique.** Aucune donnée n'a été téléchargée et aucun modèle n'a été entraîné.
+**Phase 0 — cadrage scientifique : non validée, version 3 simplifiée soumise à
+examen critique.** Aucune donnée n'a été téléchargée et aucun modèle n'a été
+entraîné.
 
-Le phénomène central n'est plus formulé comme une compétition de prévision de
-variance. Le projet cherche à comprendre pourquoi une prévision du risque de
-marché cesse d'être fiable lorsque l'environnement change, si cette dégradation
-peut être signalée avant ses conséquences, et comment cette information devrait
-affecter une décision de gestion du risque. La cible exacte, la métrique et la
-méthode restent ouvertes tant qu'elles ne sont pas justifiées par cette décision.
+Le projet cherche à comprendre comment les changements d'environnement
+économique affectent la fiabilité des prévisions du risque financier et dans
+quelle mesure les méthodes prédictives peuvent reconnaître leurs limites,
+quantifier leur incertitude et maintenir ou retrouver une fiabilité acceptable.
+L'objet empirique initial reste la volatilité réalisée future à cinq séances du
+marché américain Fama–French ; sa définition exacte doit encore être validée.
+La priorité permanente est la solution la plus simple compatible avec la
+question active. Aucune extension scientifique ne sera intégrée sans validation
+explicite du porteur du projet.
 
 ## Documents actuels
 
 - `CADRAGE_PROJET_RECHERCHE_IA_FINANCE_CODEX.txt` : mandat fondateur fourni par
   le porteur du projet ;
-- `docs/PHASE_0_CADRAGE_SCIENTIFIQUE.md` : question, hypothèses, données,
-  littérature, protocole, risques et première expérience proposée ;
+- `docs/PHASE_0_CADRAGE_SCIENTIFIQUE.md` : audit de périmètre, question,
+  hypothèses, objet empirique et protocole initial simplifié ;
 - `docs/JOURNAL_DECISIONS.md` : décisions, recommandations et points encore à
   valider.
 

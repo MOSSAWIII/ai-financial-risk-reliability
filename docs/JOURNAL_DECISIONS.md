@@ -78,3 +78,40 @@ Toutes les anciennes recommandations relatives à QLIKE, au réentraînement
 annuel, au bootstrap de 22 jours, au marché Developed ex US et à la séquence
 E0–E6 sont explicitement non contraignantes.
 
+## 14 octobre 2026 — simplification et retour strict au mandat fondateur
+
+Le porteur du projet a fixé une règle permanente : aucune extension du périmètre
+scientifique sans demande ou validation explicite. La simplicité, la maîtrise du
+sujet et la progression à partir des résultats observés priment sur
+l'anticipation d'un programme complet.
+
+Cette entrée conserve les propositions D014 à D017 comme trace historique, mais
+met à jour leur statut. Elle ne réécrit pas les décisions antérieures.
+
+| ID | Nouveau statut | Motif et conséquence |
+|---|---|---|
+| D014 | Reformulé selon le mandat | la question centrale reprend le document fondateur ; l'anticipation de la dégradation n'est plus le cœur choisi par l'assistant |
+| D015 | Retiré du protocole actif | le gestionnaire avec budget de risque reste une illustration, pas un utilisateur validé |
+| D016 | Reporté | le contraste niveau–transition demeure une possibilité liée à H1, mais n'est plus la première expérience |
+| D017 | Recadré | la volatilité future à cinq séances est l'objet empirique initial indiqué par le mandat ; sa formule exacte et ses unités restent à valider |
+
+### Nouvelles décisions de gouvernance
+
+| ID | Statut | Décision | Conséquence |
+|---|---|---|---|
+| D018 | Validé par le porteur | aucune extension du périmètre sans demande ou validation explicite | toute nouvelle question, méthode, variable, cible, donnée, expérience, phase ou dépendance doit être proposée séparément avant intégration |
+| D019 | Validé par le porteur | privilégier la solution scientifique la plus simple qui répond à la question active | aucune complexité préventive ; les notebooks restent l'environnement principal après validation |
+| D020 | Proposition à valider | première étape après la Phase 0 : un seul notebook d'audit de la cible à cinq séances et de son alignement temporel | aucun modèle ni test d'hypothèse avant réussite de cet audit |
+
+### Seuls accords actuellement nécessaires
+
+1. Validation ou correction de la question centrale reprise du mandat.
+2. Validation de la formule, de l'annualisation et des unités de la volatilité
+   réalisée future à cinq séances.
+3. Validation de la Phase 0, puis autorisation distincte de créer le notebook
+   unique d'audit des données et de la cible.
+
+Tous les autres choix — utilisateur financier précis, métrique primaire,
+définition de transition, modèle, fréquence de réentraînement, inférence,
+variable économique, calibration adaptative ou marché externe — sont reportés.
+
