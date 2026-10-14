@@ -1,491 +1,520 @@
-# Phase 0 — cadrage scientifique et protocole initial
-
-**Version :** 15 octobre 2026  
-**Statut :** proposition à valider avant toute Phase 1  
-**Portée :** aucun résultat empirique nouveau n'est produit dans ce document.
-
-## 1. Recommandation centrale
-
-### Question retenue
-
-> Dans quelle mesure la fiabilité hors échantillon des prévisions à cinq
-> séances du risque du marché américain se dégrade-t-elle lors de changements
-> d'environnement détectables avec l'information disponible au moment de la
-> prévision, et les méthodes adaptatives réduisent-elles cette dégradation par
-> rapport à des références simples, correctement calibrées et mises à jour de
-> manière comparable ?
-
-Cette formulation est plus étroite que le titre général du projet. Elle est
-recommandée parce qu'elle définit une cible, un horizon, un marché, une notion
-d'information disponible et un critère comparatif. Elle ne promet ni causalité,
-ni supériorité de l'IA.
-
-La « fiabilité » ne sera pas réduite à une métrique moyenne. Elle comprend :
-
-1. l'exactitude ponctuelle hors échantillon ;
-2. la calibration des distributions ou intervalles prédictifs ;
-3. la stabilité de ces propriétés selon le temps et l'état du marché ;
-4. l'absence de sous-estimation systématique dans les périodes critiques ;
-5. plus tard seulement, l'utilité dans une décision financière contrôlée.
-
-### Articulation des trois niveaux
-
-- **Économie :** caractériser les conditions et transitions associées aux
-  erreurs, sans confondre association prédictive et causalité. Les dates NBER
-  sont des annotations ex post, jamais des signaux prétendument disponibles en
-  temps réel.
-- **Finance :** définir correctement le risque prédit et mesurer le coût
-  asymétrique des sous-estimations. Une meilleure erreur moyenne n'implique pas
-  automatiquement une meilleure décision.
-- **IA/statistique :** comparer des modèles simples et flexibles avec le même
-  ensemble d'information, une sélection exclusivement temporelle et des
-  budgets raisonnablement comparables ; quantifier ensuite l'incertitude et la
-  dérive.
-
-Le premier objet empirique reste volontairement limité au niveau prédictif. Le
-backtest de portefeuille, la VaR, l'Expected Shortfall et les variables macro
-sont hors de la première expérience.
-
-## 2. Objet mesuré et ensemble d'information
-
-### Série de rendements
-
-Sous réserve de validation, le rendement de marché quotidien est
-
-\[
-r_t = (\text{Mkt-RF}_t + \text{RF}_t)/100,
-\]
-
-les deux colonnes de la Data Library étant exprimées en pourcentage. Cette
-série est un **portefeuille de recherche**, pas un ETF négociable. Son heure de
-disponibilité historique réelle n'est pas documentée comme celle d'un flux de
-marché. Le protocole supposera donc une prévision de recherche émise après que
-le rendement daté `t` est disponible ; toute revendication de négociabilité
-exigerait une autre source horodatée.
-
-### Cible recommandée
-
-L'objet statistique principal est le proxy de variance annualisée future :
-
-\[
-V^{(5)}_t = \frac{252}{5}\sum_{k=1}^{5} r_{t+k}^{2}.
-\]
-
-Pour l'interprétation seulement, on rapportera aussi :
-
-\[
-\sigma^{(5)}_t = \sqrt{V^{(5)}_t}.
-\]
-
-Cette convention sépare la quantité évaluée en variance de sa présentation en
-volatilité annualisée. Avec seulement cinq rendements quotidiens, il faut parler
-de **proxy de variation fondé sur les rendements au carré**, et non de realized
-variance intrajournalière observée sans bruit. Ce proxy incorpore les mouvements
-entre séances mais reste bruité ; il n'est pas un écart-type empirique centré
-sur une moyenne estimée.
-
-### Information disponible
-
-À l'origine de prévision `t`, toute variable doit être une fonction de données
-datées au plus tard `t`. Une observation d'apprentissage `(X_s, V_s^(5))` n'est
-utilisable que lorsque `s+5 <= t`. Les cinq dernières cibles encore incomplètes
-sont donc purgées lors de chaque estimation. Toutes les transformations
-(standardisation, sélection, imputation, calibration et choix
-d'hyperparamètres) sont ajustées uniquement dans la fenêtre d'apprentissage.
-
-## 3. Questions et hypothèses falsifiables
-
-### Q1 — références équitables
-
-**Question.** L'avantage exploratoire du Gradient Boosting subsiste-t-il face à
-des références simples recalibrées sur la même information ?
-
-**H1a.** Le Gradient Boosting a une perte QLIKE attendue plus faible que l'EWMA
-recalibré dans une évaluation pseudo-hors-échantillon appariée.
-
-**Règle de réfutation opérationnelle.** H1a n'est pas soutenue si l'intervalle
-de confiance bilatéral à 95 % du différentiel moyen
-`QLIKE(EWMA) - QLIKE(Boosting)` contient zéro ou est négatif. Une différence
-positive mais économiquement minuscule sera décrite comme telle, pas comme une
-victoire générale de l'IA.
-
-### Q2 — transitions plutôt que niveau de risque
-
-**Question.** Les erreurs augmentent-elles davantage pendant une transition
-détectée en temps réel que dans un état de volatilité élevée mais établi ?
-
-**H1b.** À niveau de volatilité passée comparable, la perte et la
-sous-prévision sont plus fortes lors des transitions que dans les états
-établis.
-
-**Réfutation.** H1b n'est pas soutenue si l'effet conditionnel de transition
-n'est pas positif, est trop imprécis, ou disparaît sous des définitions
-préspécifiées raisonnables. La définition primaire du détecteur et le seuil
-d'effet substantiel devront être gelés avant ce test ; explorer de nombreux
-détecteurs puis retenir le meilleur invaliderait son caractère confirmatoire.
-
-### Q3 — précision et décision financière
-
-**Question.** Le classement statistique des modèles prédit-il leur classement
-dans une règle simple de ciblage de volatilité après coûts et contraintes ?
-
-**H2.** Une amélioration de perte prédictive moyenne n'implique pas
-nécessairement une amélioration substantielle de contrôle du risque net de
-coûts.
-
-Cette proposition est actuellement trop générale pour un test confirmatoire.
-Elle devra être reformulée avec une règle d'exposition, des coûts, une fonction
-d'utilité et un seuil de matérialité fixés avant la Phase 5.
-
-### Q4 — incertitude adaptative
-
-**Question.** Une procédure adaptative améliore-t-elle la couverture
-conditionnelle pendant les transitions sans rendre les intervalles inutilement
-larges ?
-
-**H3.** Par rapport à une recalibration glissante non adaptative, une méthode
-adaptative préspécifiée réduit l'écart absolu à la couverture nominale dans les
-transitions, sans hausse excessive de largeur moyenne ni dégradation hors
-transition.
-
-Les garanties conformes sous échangeabilité ne doivent pas être transposées
-sans précaution aux séries dépendantes. La couverture marginale de long terme
-n'est pas une garantie conditionnelle par régime.
-
-## 4. Diagnostic du prototype Colab
-
-Le notebook original n'a pas pu être ouvert dans l'environnement de recherche.
-Les chiffres communiqués dans le cadrage sont donc traités comme **résultats
-rapportés, non audités**.
-
-Faiblesses prioritaires :
-
-1. **Test déjà regardé.** La période 2020–août 2026 a influencé la conception ;
-   elle ne peut plus servir de confirmation indépendante.
-2. **Comparaison asymétrique.** Un EWMA non calibré a été opposé à des modèles
-   ajustés ; les calendriers de réentraînement des prévisions ponctuelles et
-   quantiles différaient.
-3. **Cibles chevauchantes.** Deux cibles consécutives partagent quatre
-   rendements sur cinq. Un bootstrap arbitraire de 22 jours ne suffit pas, à lui
-   seul, à valider l'inférence.
-4. **Proxy mal nommé ou insuffisamment défini.** La somme de cinq rendements
-   quotidiens au carré n'est pas une mesure intrajournalière de volatilité
-   réalisée et demeure un proxy bruité.
-5. **Régimes circulaires.** Un régime défini par volatilité passée peut être
-   utile comme état observable, mais ce n'est ni un régime économique objectif,
-   ni une explication causale.
-6. **Sous-couverture importante.** Une couverture de 70,64 % pour un nominal de
-   80 % est un échec de calibration substantiel à expliquer, surtout si elle
-   tombe à 65,73 % en période agitée.
-7. **Sélection et multiplicité inconnues.** Sans le notebook, on ignore le
-   nombre d'essais, les hyperparamètres, les transformations, les graines et les
-   choix faits après observation des résultats.
-8. **Valeur financière non établie.** Les écarts de MAE ne démontrent ni la
-   maîtrise des pertes extrêmes, ni la valeur nette d'une décision.
-
-Le fichier `.ipynb` original reste nécessaire pour reproduire précisément les
-alignements et expliquer les résultats antérieurs. Sa remise n'est toutefois
-pas nécessaire pour reconstruire ensuite un socle indépendant et plus simple.
-
-## 5. Données, accessibilité et limites
-
-| Donnée | Usage | Accessibilité | Limite principale |
-|---|---|---|---|
-| Fama/French 3 Factors Daily | `Mkt-RF`, `RF`, cible et prédicteurs retardés | téléchargement public | portefeuille de recherche, révisions possibles, horaire réel non garanti |
-| Archives Fama/French | figer une version et étudier les révisions | public lorsque disponible | méthodologie CRSP modifiée ; comparer les millésimes |
-| FRED/ALFRED | variables macro point-in-time, plus tard | public, API avec clé pour certains usages | dates de publication, révisions et fréquences hétérogènes |
-| NBER Business Cycle Dates | diagnostic ex post | public | annonce retardée ; interdit comme prédicteur temps réel |
-| Marché développé hors États-Unis, à choisir | validation externe gelée | potentiellement Fama/French daily | historique plus court et construction différente |
-
-La Data Library indique qu'à partir de la livraison de janvier 2025 la source
-CRSP est passée du format historique FIZ au format CIZ, avec des changements de
-construction. Chaque téléchargement futur devra conserver l'URL, la date/heure,
-le fichier brut immuable, son SHA-256, le README source et, si possible, un
-millésime historique.
-
-Les variables macro ne seront intégrées qu'après audit de leurs dates de
-publication et de leurs millésimes ALFRED. Le FRED courant ne représente pas
-nécessairement ce qu'un prévisionniste savait à l'époque.
-
-## 6. État de l'art initial vérifié
-
-### Éléments établis utiles au protocole
-
-- Hansen et Lunde (2005) comparent hors échantillon 330 variantes ARCH/GARCH et
-  montrent que la sophistication ne domine pas uniformément GARCH(1,1). Leur
-  emploi de plusieurs fonctions de perte et de contrôles du data snooping
-  justifie une référence GARCH sérieuse avant toute revendication générale.
-- Corsi (2009) propose HAR-RV pour représenter parcimonieusement plusieurs
-  horizons de volatilité réalisée. Ici, sans données intrajournalières, une
-  construction multi-horizons à partir de carrés de rendements quotidiens ne
-  devra pas être présentée comme une réplication fidèle de HAR-RV.
-- Patton (2011) montre que le classement des prévisions de variance peut être
-  faussé par un proxy imparfait avec certaines pertes, et caractérise des pertes
-  robustes dont QLIKE. Cela motive la variance comme objet principal et QLIKE
-  comme perte primaire.
-- Diebold et Mariano (1995) fournissent un cadre de comparaison de précision
-  prédictive avec erreurs sériellement corrélées ; l'horizon chevauchant impose
-  ici une inférence dépendante.
-- Giacomini et White (2006) étudient la capacité prédictive conditionnelle. Leur
-  cadre est pertinent pour demander *quand* une méthode échoue, mais ses
-  conditions exactes devront être alignées au schéma d'estimation retenu.
-- Gibbs et Candès (2021) proposent l'Adaptive Conformal Inference sous dérive de
-  distribution et une propriété de fréquence de couverture à long terme. Cela
-  ne résout pas automatiquement la couverture conditionnelle dans des séries
-  financières dépendantes.
-- Moreira et Muir (2017) relient l'état de volatilité au levier des portefeuilles
-  et trouvent des gains dans plusieurs facteurs. Cette motivation financière ne
-  dispense pas notre futur backtest de contraintes, coûts, plafonds et tests de
-  robustesse.
-
-### Références primaires consultées ou vérifiées
-
-1. Hansen, P. R. & Lunde, A. (2005), *A Forecast Comparison of Volatility
-   Models: Does Anything Beat a GARCH(1,1)?*, Journal of Applied Econometrics,
-   20, 873–889. DOI : https://doi.org/10.1002/jae.800 — texte intégral consulté.
-2. Corsi, F. (2009), *A Simple Approximate Long-Memory Model of Realized
-   Volatility*, Journal of Financial Econometrics, 7, 174–196. DOI :
-   https://doi.org/10.1093/jjfinec/nbp001 — résumé éditeur consulté ; texte
-   intégral à examiner avant implémentation.
-3. Patton, A. J. (2011), *Volatility Forecast Comparison Using Imperfect
-   Volatility Proxies*, Journal of Econometrics, 160, 246–256. DOI :
-   https://doi.org/10.1016/j.jeconom.2010.03.034 — texte intégral auteur
-   consulté.
-4. Diebold, F. X. & Mariano, R. S. (1995), *Comparing Predictive Accuracy*,
-   Journal of Business & Economic Statistics, 13, 253–263. DOI :
-   https://doi.org/10.1080/07350015.1995.10524599 — résumé éditeur consulté ;
-   texte intégral à relire pour l'implémentation exacte.
-5. Giacomini, R. & White, H. (2006), *Tests of Conditional Predictive Ability*,
-   Econometrica, 74, 1545–1578 — texte disponible identifié ; examen détaillé à
-   faire avant le test conditionnel.
-6. Gibbs, I. & Candès, E. (2021), *Adaptive Conformal Inference Under
-   Distribution Shift*, NeurIPS 34. https://arxiv.org/abs/2106.00170 — article
-   et résumé de conférence consultés.
-7. Moreira, A. & Muir, T. (2017), *Volatility-Managed Portfolios*, Journal of
-   Finance, 72, 1611–1644. DOI : https://doi.org/10.1111/jofi.12513 — résumé et
-   métadonnées éditeur consultés ; texte intégral à examiner avant la Phase 5.
-8. Kenneth R. French Data Library :
-   https://mba.tuck.dartmouth.edu/pages/faculty/Ken.French/data_library.html —
-   page source et avertissement FIZ/CIZ consultés.
-9. FRED/ALFRED, documentation des périodes temps réel :
-   https://fred.stlouisfed.org/docs/api/fred/realtime_period.html —
-   documentation officielle consultée.
-
-### Nouveauté : ce qui est établi et ce qui reste possible
-
-Il est déjà établi que la volatilité est persistante, que des références GARCH
-ou multi-horizons sont fortes, que les proxies sont imparfaits, que les
-comparaisons hors échantillon doivent intégrer la dépendance, et que des méthodes
-conformes adaptatives existent. « Appliquer du boosting à la volatilité » ou
-« observer une sous-couverture en crise » ne constitue donc pas une nouveauté.
-
-Une contribution potentielle — non démontrée — pourrait résider dans un
-protocole commun reliant : détection strictement temps réel des transitions,
-décomposition de la perte de fiabilité ponctuelle et probabiliste, comparaison
-équitable simple/ML/adaptatif, puis matérialité financière. La nouveauté devra
-être réévaluée après une revue systématique plus large.
-
-## 7. Protocole expérimental initial
-
-### Unité de prévision et calendrier
-
-- Origine : chaque séance `t`, après disponibilité du rendement `t`.
-- Horizon : cinq séances futures.
-- Prédictions : quotidiennes, donc chevauchantes.
-- Réestimation des paramètres : annuelle dans le protocole primaire ; données
-  et caractéristiques retardées mises à jour quotidiennement.
-- Fenêtre primaire : croissante ; fenêtre glissante comme sensibilité, pas
-  comme choix post hoc.
-- Purge : aucune cible dont une composante dépasse la date d'estimation.
-
-### Séparation des usages des dates
-
-- Jusqu'à 2019 : zone de développement pseudo-hors-échantillon pour construire
-  et auditer le protocole. Elle ne sera pas qualifiée de confirmation vierge.
-- 2020–août 2026 : zone contaminée par consultation antérieure, utilisable
-  uniquement pour réplication et diagnostic étiquetés.
-- Confirmation : soit données futures accumulées après gel du protocole, soit
-  un marché externe choisi une seule fois avant inspection des résultats. Le
-  choix recommandé est une série quotidienne « Developed ex US » de la même
-  bibliothèque, après vérification de son historique et de sa construction.
-
-Les dates exactes de la zone de développement seront fixées après inspection
-des données et avant calcul des performances ; elles ne doivent pas être
-choisies pour produire un résultat favorable.
-
-### Prédicteurs initiaux communs
-
-Uniquement des fonctions de rendements passés : carrés/sommes sur 1, 5, 22, 60
-et 252 séances, rendement signé retardé et indicateur de baisse pour capter une
-asymétrie simple. Aucun indicateur macro, aucune date NBER, aucun signal issu du
-futur.
-
-### Modèles par portes
-
-1. Historique simple et EWMA, avec et sans facteur multiplicatif calibré sur
-   l'apprentissage selon QLIKE.
-2. Ridge et Gradient Boosting sur le même ensemble de caractéristiques.
-3. Après validation du socle : GARCH(1,1), GJR-GARCH et une référence
-   multi-horizons adaptée aux seules données quotidiennes.
-4. Seulement après les comparaisons ponctuelles : quantiles et calibration
-   adaptative.
-
-L'ajout d'un modèle répondra à une question identifiée. GARCH doit être présent
-avant toute conclusion générale sur une supériorité du ML, mais n'est pas
-nécessaire pour l'audit mécanique de la toute première expérience.
-
-### Sélection et équité
-
-- même date d'origine, même cible et même jeu d'information pour tous ;
-- hyperparamètres choisis dans des découpages temporels internes seulement ;
-- grille réduite et préspécifiée, même fréquence de réestimation des paramètres ;
-- calibration estimée uniquement sur l'historique disponible ;
-- graines et versions enregistrées ;
-- toutes les prévisions sauvegardées avant agrégation des métriques.
-
-### Métriques et inférence
-
-Perte primaire sur variance positive :
-
-\[
-QLIKE(V, \widehat V)=V/\widehat V-\log(V/\widehat V)-1.
-\]
-
-Secondaires : MAE de la volatilité annualisée, RMSE, biais signé et taux de
-sous-prévision. Les métriques par année et par états sont descriptives tant que
-leurs tests ne sont pas préspécifiés.
-
-Chaque comparaison est appariée par date. On rapportera le différentiel moyen,
-son intervalle et la série temporelle des écarts. L'inférence primaire utilisera
-un bootstrap en blocs mobiles de 22 séances, avec sensibilités 5, 10, 44 et 60,
-ainsi qu'une évaluation sur origines non chevauchantes. Une conclusion qui
-dépend d'une seule longueur de bloc sera qualifiée de fragile. Une estimation
-HAC cohérente avec le schéma retenu servira de contrôle, pas d'arbitre unique.
-
-## 8. Matrice des expériences prévues
-
-| Porte | Question mesurable | Comparateur | Risque principal | Sortie attendue |
-|---|---|---|---|---|
-| E0 | cible et alignement sont-ils exacts ? | calcul manuel sur mini-série | fuite `t+1:t+5`, unités | tests d'identité et tableau d'audit |
-| E1 | l'avantage Boosting survit-il à la calibration ? | EWMA calibré primaire | comparaison inéquitable, sélection | différentiel QLIKE apparié + IC |
-| E2 | GARCH/asymétrie changent-ils le classement ? | GARCH, GJR, modèle multi-horizons | optimisation et convergence | classement robuste par pertes |
-| E3 | où les erreurs se concentrent-elles ? | états établis vs transitions temps réel | définition opportuniste | effets conditionnels + sensibilités |
-| E4 | les intervalles sont-ils fiables ? | quantiles glissants vs adaptatif | dépendance, couverture marginale | couverture, largeur, excès par état |
-| E5 | le gain prédit-il une valeur financière ? | règle de risque fixe | coûts/look-ahead/levier | risque réalisé, turnover, coûts |
-| E6 | le résultat se généralise-t-il ? | marché externe gelé | choix après inspection | réplication sans retuning opportuniste |
-
-## 9. Risques méthodologiques et contrôles
-
-| Risque | Conséquence | Contrôle prévu |
+# Phase 0 — cadrage scientifique révisé
+
+**Version :** 2, 15 octobre 2026
+
+**Statut :** Phase 0 non validée ; proposition soumise à nouvel examen critique
+
+**Portée :** aucun téléchargement, calcul, modèle ou résultat empirique nouveau
+
+## 1. Critique substantielle de la version 1
+
+La première version respectait les garde-fous temporels et reproductibles, mais
+elle répondait trop vite à une question qui n'était pas encore suffisamment
+fondée. Elle doit être corrigée sur six points.
+
+1. **Elle a confondu objet empirique et objet scientifique.** La variance à cinq
+   séances peut être un instrument d'étude ; elle n'est pas, par elle-même, le
+   phénomène à comprendre. Le phénomène est la perte de fiabilité d'une
+   prévision lorsque les relations économiques et financières évoluent.
+2. **Elle a organisé le projet comme une compétition de modèles.** La première
+   expérience EWMA contre Boosting traitait une faiblesse du prototype, mais ne
+   répondait pas à la question économique centrale. Une comparaison équitable
+   est une condition de validité, pas une contribution scientifique.
+3. **Elle a relégué l'économie et la finance.** Les mécanismes économiques
+   étaient remplacés par de futures « variables macro » ; la conséquence
+   financière était reportée à un backtest tardif. Cela rompait la chaîne entre
+   cause plausible, erreur de prévision et décision affectée.
+4. **Elle a assimilé plusieurs notions de régime.** Un changement de volatilité,
+   un changement économique, une rupture de distribution et une panne de modèle
+   ne sont pas équivalents. L'un peut survenir sans les autres.
+5. **Elle a figé des moyens avant les fins.** Variance, QLIKE, réestimation
+   annuelle, bootstrap de 22 séances et marché externe étaient raisonnables,
+   mais présentés comme directeurs sans démontrer qu'ils correspondaient à la
+   décision financière et à l'hypothèse testée.
+6. **Elle a produit une feuille de route trop large.** La succession E0–E6
+   décrivait un programme technique possible plutôt qu'une enquête où chaque
+   étape dépend du résultat précédent.
+
+Ces défauts ne rendent pas inutiles les précautions proposées. La disponibilité
+à la date `t`, la contamination de 2020–août 2026, l'immuabilité des données
+brutes et l'équité des comparaisons restent des contraintes valides. En revanche,
+les choix contestés sont rouverts. Leur statut historique est conservé dans le
+journal des décisions et dans Git.
+
+## 2. Phénomène et problématique scientifique
+
+### Le phénomène que nous cherchons à comprendre
+
+Une prévision de risque est apprise dans un environnement où certaines relations
+sont suffisamment régulières : persistance du risque, réaction aux rendements
+passés, structure des nouvelles, liquidité et comportement des intermédiaires.
+Quand l'environnement change, trois choses peuvent arriver :
+
+- le risque augmente mais les relations prédictives restent valides ;
+- les relations changent et le modèle devient systématiquement retardé ou mal
+  calibré ;
+- l'incertitude devient elle-même difficile à estimer, de sorte qu'un système
+  continue d'afficher une confiance injustifiée.
+
+Le second et le troisième cas constituent le cœur du projet. Une forte
+volatilité n'est pas nécessairement une panne : un modèle peut prévoir
+correctement un état durablement agité. Inversement, une transition encore peu
+volatile peut déjà rendre ses relations historiques moins fiables.
+
+### Question centrale révisée
+
+> Pourquoi et dans quelles conditions économico-financières une prévision du
+> risque de marché, jusque-là utilisable, cesse-t-elle d'être fiable ; peut-on
+> reconnaître ou anticiper cette dégradation avec l'information disponible au
+> moment de la décision ; et cette information permet-elle à un gestionnaire de
+> risque d'agir plus prudemment sans renoncer inutilement à toute exposition ?
+
+Cette question ne suppose ni qu'un modèle d'IA soit nécessaire, ni qu'une
+adaptation automatique soit possible. Elle articule :
+
+- une **explication économique** des changements possibles ;
+- une **conséquence financière** définie par une décision sous pertes
+  asymétriques ;
+- un **problème d'IA/statistique** : savoir quand une prédiction et son
+  incertitude ne méritent plus le même degré de confiance.
+
+### Ce que signifierait un résultat négatif
+
+Même si aucun modèle ML ne dépasse un modèle traditionnel, la recherche peut :
+
+- établir que les défaillances sont liées au niveau de risque plutôt qu'aux
+  transitions, ce qui affaiblirait la thèse de dérive ;
+- montrer qu'une dégradation n'est pas anticipable avec l'information retenue ;
+- quantifier le coût d'une confiance excessive et la valeur éventuelle d'un
+  avertissement ou d'une abstention ;
+- délimiter les conditions dans lesquelles la complexité adaptative n'apporte
+  rien de robuste.
+
+Ce seraient des conclusions scientifiques, pas des échecs du projet.
+
+## 3. Quatre notions à ne plus confondre
+
+| Notion | Définition de travail | Ce qu'elle ne prouve pas |
 |---|---|---|
-| fuite temporelle | performance artificielle | audit ligne par ligne, purge de 5 jours, tests automatisés |
-| chevauchement | IC trop étroits | blocs, HAC, origines non chevauchantes |
-| proxy bruité | mauvais classement | QLIKE primaire, langage prudent, future donnée intraday éventuelle |
-| sélection sur 2020–2026 | confirmation invalide | étiquette diagnostic, holdout externe/futur gelé |
-| benchmark faible | fausse supériorité ML | calibration, GARCH/GJR, mêmes informations et mises à jour |
-| régimes ex post | look-ahead et causalité abusive | détecteur unilatéral pour prédire ; NBER descriptif seulement |
-| données révisées | non-reproductibilité | brut immuable, millésime, URL, horodatage, SHA-256 |
-| macro révisée | fuite silencieuse | ALFRED et date de publication, pas seulement date d'observation |
-| multiplicité | faux positifs | question primaire, modèle primaire, corrections/sensibilités déclarées |
-| hyperparamètres | surapprentissage | validation temporelle imbriquée et budget limité |
-| instabilité structurelle | moyenne trompeuse | résultats par sous-période et tests conditionnels préspécifiés |
-| faible matérialité | gain statistique sans intérêt | tailles d'effet et seuils économiques avant Phase 5 |
+| Environnement économique | état des anticipations de croissance, inflation, politique monétaire, incertitude et financement | qu'une rupture statistique est déjà observable |
+| État financier | niveau de volatilité, liquidité, levier, primes et corrélations observables | la cause économique de cet état |
+| Régime statistique | stabilité ou changement de la distribution et des relations entre prédicteurs et risque futur | qu'un mécanisme causal précis agit |
+| Dégradation du modèle | hausse conditionnelle de perte, biais, sous-couverture ou confiance mal alignée | que tout le marché a changé de régime |
 
-### Critères de validité scientifique
+Le terme « transition » devra toujours préciser laquelle de ces notions est
+visée. Une annotation NBER, un détecteur de rupture et une hausse de volatilité
+ne sont donc pas des mesures interchangeables.
 
-Un résultat principal ne sera considéré robuste que si : (i) l'alignement et la
-provenance passent les audits ; (ii) le modèle et la métrique ont été gelés avant
-le holdout ; (iii) l'effet est apparié, accompagné d'incertitude et stable sous
-des contrôles justifiés ; (iv) aucune baseline évidente n'est volontairement
-affaiblie ; (v) la conclusion distingue clairement association, prédiction et
-causalité ; (vi) les résultats négatifs restent auditables ; et (vii) une
-validation indépendante confirme toute revendication de généralisation.
+## 4. Articulation réelle entre économie, finance et IA
 
-## 10. Toute première expérience recommandée
+La chaîne scientifique proposée est :
+
+> mécanisme économique plausible → transmission financière → modification des
+> relations prédictives → erreur coûteuse pour une décision → besoin de
+> diagnostic, d'incertitude ou d'adaptation.
+
+Nous retenons trois familles de mécanismes, suffisamment distinctes pour générer
+des observations différentes sans prétendre couvrir toute la macrofinance.
+
+### Mécanisme A — nouvelles sur les flux futurs et les taux d'actualisation
+
+**Logique économique.** Le prix des actions dépend des flux de trésorerie futurs
+attendus et des taux auxquels ils sont actualisés. Une modification des
+anticipations de croissance, d'inflation ou de politique monétaire peut changer
+leur niveau, leur dispersion et leur sensibilité aux annonces. Schwert (1989)
+relie la volatilité à l'activité, aux variables nominales et au levier, tout en
+montrant qu'aucun facteur simple n'explique une part dominante de ses variations.
+
+**Transmission financière attendue.** Révision simultanée des prix, des taux et
+des primes ; volatilité plus forte autour des nouvelles ; possibles changements
+de corrélations entre actifs.
+
+**Pourquoi la prévisibilité peut changer.** Un modèle ajusté dans une période de
+réactions monétaires stables peut sous-estimer l'effet d'une annonce lorsque la
+fonction de réaction, l'inflation dominante ou la sensibilité des valorisations
+change. Le problème est alors la stabilité des coefficients, pas seulement la
+hausse du niveau de volatilité.
+
+**Observations discriminantes, plus tard.** Surprises macro datées, courbe des
+taux connue à `t`, dispersion des prévisions et millésimes de données ; comparer
+les erreurs autour des annonces et des changements de relation, conditionnellement
+au niveau de risque passé.
+
+**Limite causale.** Une association entre erreurs, inflation ou taux ne sépare
+pas les nouvelles sur les flux, les primes de risque et la réaction de politique
+monétaire. Sans choc identifié ou autre stratégie crédible, nous conclurions à
+une association prédictive, pas à une cause.
+
+### Mécanisme B — incertitude, désaccord et apprentissage sur un environnement nouveau
+
+**Logique économique.** Lors d'un choc inhabituel, les agents ignorent parfois
+quel scénario ou quelle règle est pertinente. Bloom (2009) formalise des chocs
+d'incertitude qui retardent investissement et embauche ; Schwert souligne aussi
+que l'incertitude sur la nature même d'un régime ne se résume pas à sa variance
+historique.
+
+**Transmission financière attendue.** Dispersion accrue des croyances,
+réévaluations discontinues et possibles sauts de prix. Deux périodes de même
+volatilité passée peuvent alors différer fortement par la gamme de scénarios
+envisagés.
+
+**Pourquoi la prévisibilité peut changer.** Les exemples historiques proches du
+nouvel état sont rares ; les résidus peuvent changer avant que leur moyenne
+glissante ne le révèle ; une calibration apprise en environnement familier peut
+devenir trop confiante.
+
+**Observations discriminantes, plus tard.** Dispersion des prévisionnistes,
+ampleur des surprises, fréquence des sauts, largeur des distributions implicites
+et erreurs de couverture. Une dégradation présente à volatilité passée égale,
+mais croissante avec désaccord ou surprise, serait plus compatible avec ce
+mécanisme qu'avec un simple effet d'échelle.
+
+**Limite causale.** Les mesures d'incertitude sont souvent construites à partir
+des prix mêmes que nous voulons expliquer. La simultanéité et les variables
+omises empêchent une interprétation causale automatique.
+
+### Mécanisme C — levier, contraintes de financement et spirales de liquidité
+
+**Logique économique.** Des pertes réduisent les fonds propres, resserrent les
+contraintes et peuvent provoquer des ventes. Brunnermeier et Pedersen (2009)
+montrent comment liquidité de financement et liquidité de marché peuvent se
+renforcer ; Adrian et Shin (2010) documentent un levier d'intermédiaires
+procyclique et un lien entre bilan des dealers et risque de marché.
+
+**Transmission financière attendue.** Asymétrie après rendements négatifs,
+assèchement de liquidité, hausse conjointe des corrélations et de la volatilité,
+avec amplification non linéaire d'un choc initial.
+
+**Pourquoi la prévisibilité peut changer.** Une dynamique autorégressive
+calibrée en temps normal ne représente pas nécessairement un mécanisme de ventes
+forcées ou de marges qui s'active au franchissement d'une contrainte. La vitesse
+du changement, et non son niveau final, devient essentielle.
+
+**Observations discriminantes, plus tard.** Erreurs asymétriques après baisses,
+spreads et profondeur de marché, mesures de financement, levier des
+intermédiaires et mouvements communs entre actifs. Si l'effet de transition
+disparaît en contrôlant les grands rendements mais pas la liquidité, les
+interprétations diffèrent.
+
+**Limite causale.** Volatilité, marges, levier et liquidité se déterminent
+conjointement. Des données observationnelles peuvent tester la cohérence d'un
+mécanisme, non identifier seules le sens causal.
+
+Ces mécanismes peuvent coexister. Le but n'est pas de choisir immédiatement une
+variable par mécanisme, mais de formuler des implications qui permettront plus
+tard de départager des explications.
+
+## 5. Justification financière : une décision concrète
+
+### Utilisateur de référence proposé
+
+Le cas d'usage le plus cohérent avec le portefeuille de marché Fama–French est
+un **gestionnaire du risque d'une exposition actions diversifiée** qui révise à
+courte fréquence un budget de risque ou une borne d'exposition. Il ne s'agit pas
+encore d'un trader cherchant un alpha ni d'un calcul réglementaire de capital.
+
+La décision stylisée est : maintenir, réduire ou différer l'exposition lorsque
+le risque prévu et la confiance accordée à cette prévision changent. Ce choix
+justifie d'étudier une prévision de court horizon, mais ne valide pas encore
+précisément cinq séances.
+
+### Asymétrie des erreurs
+
+- **Sous-prévoir** peut laisser une exposition trop élevée, provoquer un
+  dépassement de budget de risque, aggraver un drawdown ou créer un besoin de
+  réduction forcée au pire moment.
+- **Sur-prévoir** réduit inutilement l'exposition, sacrifie une prime de risque
+  potentielle et peut accroître le turnover si les alertes sont instables.
+- **Changer trop souvent d'avis** est coûteux même si l'erreur moyenne est
+  faible.
+- **Afficher une confiance excessive** est distinct d'une mauvaise prévision
+  ponctuelle : le décideur ne sait pas qu'il devrait ralentir, demander une
+  marge de sécurité ou s'abstenir.
+
+Une baisse moyenne de MAE ne garantit donc pas une meilleure maîtrise du risque.
+La prévision utile doit combiner : niveau de risque, biais de sous-prévision,
+calibration ou honnêteté de l'incertitude, stabilité des alertes et capacité à
+signaler les situations où elle est moins digne de confiance. La fonction de
+perte décisionnelle exacte reste ouverte tant que les règles d'exposition,
+contraintes et coûts ne sont pas définis.
+
+Si le projet choisissait plutôt un responsable du capital réglementaire ou un
+desk d'options, la cible, l'horizon et la fonction de perte devraient changer.
+On ne peut donc pas justifier une métrique statistique avant de choisir
+l'utilisateur.
+
+## 6. Les six problèmes d'IA/statistique sont différents
+
+| Objectif | Question propre | Information nécessaire | Échec caractéristique | Place proposée |
+|---|---|---|---|---|
+| Améliorer la précision | la prévision centrale est-elle plus proche en moyenne ? | cibles observées après coup | petit gain moyen, crises inchangées | secondaire |
+| Détecter la dégradation | le modèle s'est-il déjà détérioré ? | erreurs récemment réalisées | alerte nécessairement retardée | diagnostic indispensable |
+| Anticiper la dégradation | sait-on avant la cible que la confiance devrait baisser ? | signaux disponibles à `t` | faux signaux ou alerte trop tardive | cœur potentiel du projet |
+| Quantifier l'incertitude | l'intervalle/distribution décrit-il honnêtement les issues ? | distribution prédictive et calibration | confiance excessive sous shift | cœur complémentaire |
+| Maintenir la calibration | la propriété reste-t-elle acceptable pendant le changement ? | retour séquentiel des erreurs | couverture moyenne correcte mais locale mauvaise | question ultérieure |
+| Adapter le modèle | quand et comment oublier, pondérer ou réentraîner ? | détection + règle d'intervention | adaptation au bruit, oubli utile | seulement si une dégradation exploitable est établie |
+
+La littérature sur la dérive conceptuelle traite déjà l'apprentissage sous
+contexte changeant ; Giacomini et Rossi (2009) distinguent détection et prévision
+des ruptures de prévision ; Ovadia et al. (2019) montrent que l'incertitude peut
+se dégrader sous changement de distribution ; Gibbs et Candès (2021) proposent
+une adaptation de couverture en ligne. Aucun de ces résultats n'autorise à
+affirmer qu'une méthode connue résout notre cas financier dépendant et
+décisionnel.
+
+### Priorité scientifique proposée
+
+Le projet devrait d'abord étudier **la dégradation conditionnelle et son
+anticipation**, puis seulement demander si une incertitude ou une adaptation la
+réduit. Construire immédiatement un modèle adaptatif inverserait l'ordre de la
+preuve : on ne sait pas encore si la panne est détectable, anticipable, générale
+ou propre à un modèle.
+
+## 7. Littérature : établi, ouvert, potentiel
+
+Cette revue est ciblée, non systématique. « Non trouvé ici » ne signifie jamais
+« absent de la littérature ».
+
+### Ce que les sources examinées permettent d'établir
+
+- La volatilité est persistante, asymétrique et pertinente pour les décisions
+  financières ; des références simples et GARCH sont difficiles à battre de
+  manière uniforme (Engle & Patton, 2001 ; Hansen & Lunde, 2005).
+- Activité économique, incertitude, taux, levier et liquidité sont associés à
+  la volatilité, mais aucune explication simple ne domine et l'identification
+  causale est difficile (Schwert, 1989 ; Bloom, 2009 ; Brunnermeier & Pedersen,
+  2009 ; Adrian & Shin, 2010).
+- Les ruptures de performance prédictive et la dérive de concept sont des
+  problèmes anciens, distincts de la seule comparaison moyenne de modèles
+  (Widmer & Kubat, 1996 ; Giacomini & Rossi, 2009).
+- Les effets des ruptures sur les prévisions de second moment, les GARCH à
+  coefficients changeants et l'ajout de variables macrofinancières aux
+  prévisions de volatilité ont déjà été étudiés. La performance de ces ajouts
+  varie dans le temps et selon les actifs (Clements & Hendry, 2006 ; Frijns,
+  Lehnert & Zwinkels, 2011 ; Christiansen, Schmeling & Schrimpf, 2012).
+- Des travaux très récents conditionnent déjà la prévision du risque de queue
+  de portefeuille sur des probabilités d'états économiques futurs (Jiao & Zhou,
+  2026). « Ajouter le régime économique à la prévision » ne peut donc pas être
+  revendiqué comme contribution en soi.
+- Une incertitude bien calibrée en distribution d'entraînement peut se dégrader
+  sous changement de distribution ; adaptation conforme et prédiction sélective
+  sont déjà des champs actifs (Ovadia et al., 2019 ; Gibbs & Candès, 2021 ;
+  Bates et al., 2021).
+- L'utilité économique d'une prévision dépend de la décision, des coûts et des
+  préférences, pas seulement d'une perte statistique (Fleming, Kirby & Ostdiek,
+  2001 ; Moreira & Muir, 2017).
+
+### Questions encore ouvertes pour notre projet
+
+Nous ignorons encore :
+
+1. si la dégradation observée est autre chose qu'un effet mécanique de niveau,
+   de sauts rares ou d'un proxy bruité ;
+2. si un signal disponible avant réalisation de la cible contient une
+   information sur cette dégradation ;
+3. si cette information est commune à plusieurs modèles ou seulement la faiblesse
+   d'une règle trop lente ;
+4. si un avertissement fiable apporte plus à la décision qu'une légère
+   amélioration de prévision centrale ;
+5. si une méthode existante répond déjà à cette combinaison précise de
+   dépendance temporelle, transition économique et perte financière asymétrique.
+
+### Contribution potentielle, sous conditions
+
+Une contribution ne serait ni « utiliser le ML », ni « ajouter du conformal ».
+Elle pourrait être : une caractérisation temps réel, économiquement interprétée
+et décisionnellement évaluée des moments où une prévision de risque devient peu
+fiable, accompagnée d'un mécanisme d'avertissement dont la valeur incrémentale
+est démontrée face à des solutions simples.
+
+Cette formulation reste une **hypothèse de contribution**. Elle exige une revue
+bibliographique systématique dédiée aux ruptures de prévision de volatilité, à
+la calibration conditionnelle financière et aux décisions avec abstention avant
+toute revendication de nouveauté. La littérature déjà identifiée sur les
+modèles de volatilité à changement de régime rend la barre de nouveauté élevée :
+il faudra montrer que l'anticipation d'une *perte de fiabilité* apporte autre
+chose que modéliser directement un régime de volatilité ou conditionner la
+distribution future sur un état économique prévu.
+
+### Sources primaires examinées à ce stade
+
+- Schwert (1989), *Why Does Stock Market Volatility Change Over Time?*, DOI
+  https://doi.org/10.1111/j.1540-6261.1989.tb02647.x — texte intégral consulté.
+- Engle & Patton (2001), *What Good Is a Volatility Model?*, DOI
+  https://doi.org/10.1088/1469-7688/1/2/305 — texte intégral consulté.
+- Hansen & Lunde (2005), *Does Anything Beat a GARCH(1,1)?*, DOI
+  https://doi.org/10.1002/jae.800 — texte intégral consulté.
+- Patton (2011), *Volatility Forecast Comparison Using Imperfect Volatility
+  Proxies*, DOI https://doi.org/10.1016/j.jeconom.2010.03.034 — texte intégral
+  consulté.
+- Bloom (2009), *The Impact of Uncertainty Shocks*, Econometrica 77, 623–685 —
+  texte intégral identifié et résumé examiné.
+- Brunnermeier & Pedersen (2009), *Market Liquidity and Funding Liquidity*, DOI
+  https://doi.org/10.1093/rfs/hhn098 — article auteur et résumé examinés.
+- Adrian & Shin (2010), *Liquidity and Leverage*, DOI
+  https://doi.org/10.1016/j.jfi.2008.12.002 — version Federal Reserve examinée.
+- Giacomini & Rossi (2009), *Detecting and Predicting Forecast Breakdowns*, DOI
+  https://doi.org/10.1111/j.1467-937X.2009.00545.x — texte intégral consulté.
+- Clements & Hendry (2006), *Forecasting with Breaks*, Handbook of Economic
+  Forecasting, DOI https://doi.org/10.1016/S1574-0706(05)01012-8 — résumé
+  éditeur examiné ; texte intégral à lire avant choix d'une procédure de rupture.
+- Frijns, Lehnert & Zwinkels (2011), *Modeling Structural Changes in the
+  Volatility Process*, Journal of Empirical Finance 18, 522–532 — résumé
+  éditeur examiné ; texte intégral à lire avant toute revendication sur
+  l'adaptation de volatilité.
+- Christiansen, Schmeling & Schrimpf (2012), *A Comprehensive Look at Financial
+  Volatility Prediction by Economic Variables*, BIS Working Paper 374 — résumé
+  et version institutionnelle examinés ; publication finale à vérifier.
+- Jiao & Zhou (2026), *Economic Conditions and Portfolio Tail Risk: A
+  Probability-Weighted Simulation Approach*, Journal of Empirical Finance 87,
+  101715, DOI https://doi.org/10.1016/j.jempfin.2026.101715 — article ouvert et
+  résumé éditeur examinés ; lecture intégrale requise avant toute revendication
+  de contribution sur les états économiques.
+- Widmer & Kubat (1996), *Learning in the Presence of Concept Drift and Hidden
+  Contexts*, DOI https://doi.org/10.1007/BF00116900 — texte et résumé examinés.
+- Ovadia et al. (2019), *Can You Trust Your Model's Uncertainty?*, NeurIPS 32 —
+  article et résumé de conférence examinés.
+- Gibbs & Candès (2021), *Adaptive Conformal Inference Under Distribution
+  Shift*, NeurIPS 34 — article examiné.
+- Bates et al. (2021), *Distribution-Free, Risk-Controlling Prediction Sets*,
+  JACM 68(6) — texte auteur et résumé examinés ; application à notre dépendance
+  temporelle non établie.
+- Fleming, Kirby & Ostdiek (2001), *The Economic Value of Volatility Timing*,
+  Journal of Finance 56 — texte auteur identifié ; lecture détaillée à faire
+  avant de définir une fonction de valeur.
+- Moreira & Muir (2017), *Volatility-Managed Portfolios*, DOI
+  https://doi.org/10.1111/jofi.12513 — résumé éditeur examiné ; texte intégral à
+  lire avant toute expérience financière.
+
+## 8. Arbitrages méthodologiques rouverts
+
+| Choix | Pourquoi il peut être approprié | Alternatives réelles | Moment légitime de décision | Statut actuel |
+|---|---|---|---|---|
+| Variance future | additive, naturelle pour plusieurs modèles et certaines pertes robustes | volatilité, perte absolue, quantile, VaR/ES, distribution complète | après choix de l'utilisateur et de la décision | ouvert |
+| Volatilité future | unité lisible et directement liée à un budget de volatilité | variance ou risque de queue si la décision l'exige | avec la première expérience | recommandée provisoirement |
+| Horizon 5 séances | cohérent avec une révision hebdomadaire et le prototype | 1, 10, 20 jours selon décision et bruit | après validation du cas d'usage | ouvert, candidat 5 jours |
+| QLIKE primaire | classement robuste de prévisions de variance sous certaines conditions de proxy | MAE/RMSE, score probabiliste, perte asymétrique décisionnelle | seulement si la variance est l'estimand | non retenu à ce stade |
+| Réestimation annuelle | limite calcul et variations de protocole | fixe, quotidienne, mensuelle, déclenchée par alerte | après diagnostic de vitesse de dérive | non fixée |
+| Bootstrap 22 jours | respecte une partie de la dépendance locale | HAC, bootstrap stationnaire, blocs choisis par données/simulation, origines non chevauchantes | après observation de la dépendance et définition de l'estimand | non fixé |
+| Marché Developed ex US | teste une certaine transportabilité | futur US, autres indices, périodes historiques gelées | après définition de la population visée | reporté |
+| EWMA vs Boosting | audit utile du prototype | un seul instrument transparent, GARCH, aucune compétition | uniquement si la question devient comparative | décentré |
+| Variables économiques | permettent de confronter les mécanismes | événements datés, variables financières, analyse qualitative | après preuve qu'une transition statistique mérite explication | aucune intégration immédiate |
+
+Une décision méthodologique sera adoptée seulement si elle répond à : quelle
+question résout-elle, pourquoi maintenant, quelle solution plus simple existe,
+et que perd-on si on l'omet ?
+
+## 9. Protocole actif volontairement limité
+
+Le protocole actif ne contient qu'une expérience diagnostique. Il n'inclut ni
+catalogue de modèles, ni macroéconomie intégrée, ni calibration adaptative, ni
+validation internationale, ni backtest.
+
+Avant son exécution, trois éléments seulement devront être gelés :
+
+1. le cas d'usage financier et l'horizon correspondant ;
+2. un proxy positif du risque et une mesure signée de sous-prévision ;
+3. une prévision de référence transparente, utilisée comme instrument de
+   diagnostic et non comme adversaire à battre.
+
+Les règles universelles restent : information disponible à `t`, cible strictement
+future, séparation temporelle, conservation des prévisions individuelles,
+documentation des choix et qualification de 2020–août 2026 comme période déjà
+consultée. La procédure d'inférence sera choisie après avoir caractérisé le
+chevauchement et la dépendance ; aucun bloc de 22 jours n'est pré-désigné.
+
+## 10. Une seule première expérience
 
 ### Question
 
-**Le gain exploratoire du Gradient Boosting persiste-t-il lorsque l'EWMA est
-recalibré dans exactement le même protocole temporel ?**
+> Les sous-prévisions d'un modèle de risque transparent se concentrent-elles
+> parce que le niveau de risque est élevé, ou parce que le marché est en train
+> de passer rapidement d'un niveau à un autre ?
 
-### Hypothèse
+Cette expérience précède toute comparaison ML. Elle cherche à départager au
+moins deux explications :
 
-`H_E1` : le différentiel moyen
-`d_t = QLIKE(EWMA_calibré)_t - QLIKE(Boosting)_t` est strictement positif.
+- **explication de niveau :** les erreurs paraissent fortes parce que la cible
+  est plus grande, plus bruitée ou évaluée sur une échelle inadéquate ;
+- **explication de transition :** à niveau passé comparable, la direction et la
+  vitesse du changement contiennent une information supplémentaire sur la
+  sous-prévision.
 
-Cette hypothèse est réfutable : si l'IC à 95 % de `mean(d_t)` inclut zéro, nous
-conclurons « avantage non établi », et non « modèles équivalents ». Si l'IC est
-entièrement négatif, le résultat contredit directement l'hypothèse.
+Une troisième explication restera surveillée : quelques sauts extrêmes ou une
+asymétrie après rendements négatifs peuvent créer artificiellement un « effet de
+transition ».
 
-### Données
+### Objet concret proposé, encore soumis à accord
 
-Fama/French 3 Factors Daily, version figée, `r=Mkt-RF+RF` en décimal ; uniquement
-les rendements disponibles à `t`. La période exacte de développement sera gelée
-après audit de couverture. La période 2020–août 2026 sera exclue du test principal
-et réservée à une réplication explicitement contaminée.
+- Portefeuille de marché américain Fama–French, rendement total de recherche.
+- Risque observé : volatilité annualisée fondée sur les cinq rendements futurs
+  au carré, conservée comme **proxy**, non comme vérité latente.
+- Prévision : une seule règle de persistance transparente utilisant uniquement
+  les rendements passés. La forme exacte de lissage sera fixée avant lecture des
+  résultats conditionnels ; elle ne sera pas optimisée pour gagner.
+- Erreur principale de diagnostic : erreur signée et sans unité, par exemple
+  `log(risque observé / risque prévu)`, positive en cas de sous-prévision. Ce
+  choix évite qu'une différence en niveau soit automatiquement une différence
+  en erreur absolue, mais exige des quantités strictement positives.
+- État observable à `t` : séparer le **niveau passé** du risque de sa **variation
+  récente**. Les seuils seront fixés sans consulter les erreurs futures.
 
-### Méthode
+### Comparaison
 
-1. Auditer dates, doublons, valeurs manquantes, unités, reconstruction et cible.
-2. Vérifier la cible sur une mini-série calculée manuellement.
-3. Produire des prévisions quotidiennes avec paramètres réestimés annuellement.
-4. EWMA : paramètre de décroissance sélectionné dans une petite grille temporelle
-   interne et facteur d'échelle positif minimisant QLIKE sur l'apprentissage.
-5. Boosting : mêmes caractéristiques retardées, grille réduite, sélection
-   temporelle interne et aucun accès à la période évaluée.
-6. Sauvegarder les prévisions avant de calculer les agrégats.
-7. Comparer QLIKE apparié ; contrôles par MAE, blocs alternatifs et origines
-   non chevauchantes.
+Comparer les erreurs entre :
 
-### Critères de décision
+1. risque passé élevé et relativement stable ;
+2. risque passé de niveau comparable mais en hausse rapide.
 
-- **Soutien à H_E1 :** moyenne positive et borne basse de l'IC 95 % > 0, sans
-  inversion majeure dans les contrôles préspécifiés.
-- **Résultat fragile :** signe positif mais IC incluant 0, ou forte dépendance à
-  la longueur de bloc/période.
-- **Réfutation :** moyenne non positive ou IC entièrement négatif.
-- Dans tous les cas, rapporter la taille absolue du gain, pas seulement une
-  significativité.
+Une stratification ou un appariement sur le niveau passé est préférable à une
+simple comparaison de moyennes. Les observations successives partagent une
+cible ; l'incertitude statistique devra respecter cette dépendance, mais la
+méthode exacte n'est pas choisie avant diagnostic.
 
-Cette expérience ne testera pas encore les régimes, la calibration des
-intervalles ou la valeur financière. Son rôle est de déterminer si le premier
-constat motivant le projet survit à une comparaison minimale équitable.
+### Résultats possibles et conséquence scientifique
 
-## 11. Structure minimale proposée après validation
+| Résultat | Interprétation permise | Prochaine décision |
+|---|---|---|
+| effet de transition après contrôle du niveau | compatible avec un retard ou une instabilité ; ne prouve pas un changement économique | vérifier s'il est commun à une autre référence simple, puis chercher les mécanismes |
+| effet absorbé par le niveau | la thèse « transition » est affaiblie ; problème possible d'échelle ou de bruit | revoir la métrique/cible avant toute adaptation |
+| effet limité aux grands sauts négatifs | compatible avec asymétrie/jumps plutôt qu'un régime général | étudier ce mécanisme précis, pas ajouter un détecteur générique |
+| effet propre à une seule règle de persistance | faiblesse de modèle, non preuve d'instabilité générale | améliorer la référence la plus simple |
+| aucune concentration claire | prémisse empirique du programme affaiblie | ne pas construire de méthode adaptative sans autre preuve |
 
-Les seuls fichiers créés en Phase 0 sont ceux listés dans le README. Après
-validation, la Phase 1 ajouterait progressivement :
+### Ce qui invaliderait notre interprétation
 
-```text
-notebooks/
-  01_cible_donnees_et_alignement.ipynb
-  02_premiere_comparaison_equitable.ipynb   # seulement après succès du notebook 01
-data/
-  raw/                                     # source immuable, non versionnée si lourde
-  metadata/                                # provenance et checksums
-tests/
-  test_alignement_temporel.py              # si les contrôles sortent du notebook
-```
+- la variable de transition utilise directement ou indirectement `t+1:t+5` ;
+- les seuils ou la période sont choisis après observation des erreurs ;
+- l'effet disparaît dès que l'erreur est rendue sans unité ou le niveau apparié ;
+- il dépend uniquement de quelques observations dont le rôle n'est pas décrit ;
+- le proxy de risque ou le chevauchement suffit à reproduire le motif dans une
+  expérience placebo/simulée appropriée ;
+- nous qualifions la transition d'« économique » sans observation économique ;
+- nous généralisons d'une règle de prévision à tous les modèles.
 
-Le premier notebook répondra uniquement à E0. Le second ne sera créé que si les
-audits réussissent. Aucun package, dashboard, API, base de données ou catalogue
-de modèles n'est justifié à ce stade.
+### Ce que cette expérience ne dira pas
 
-## 12. Arbitrages à valider avant la Phase 1
+Elle ne permettra pas encore d'identifier lequel des trois mécanismes économiques
+agit, de démontrer une causalité, de choisir une méthode d'IA, ni d'établir une
+valeur financière. Elle décidera seulement si la distinction niveau/transition
+mérite la prochaine investigation.
 
-1. **Cible :** accepter `V_t^(5)` comme proxy de variance principal, QLIKE comme
-   perte primaire et sa racine annualisée comme présentation secondaire.
-2. **Horodatage :** accepter le cadre de recherche « après disponibilité du
-   rendement Fama/French daté t », sans prétention de négociabilité temps réel.
-3. **Indépendance :** réserver 2020–août 2026 au diagnostic et choisir avant
-   inspection entre un marché Developed ex US gelé et une accumulation future
-   comme confirmation principale.
-4. **Portée de E1 :** autoriser d'abord l'audit EWMA calibré contre Boosting,
-   sans revendication générale avant l'ajout de GARCH/GJR.
-5. **Prototype :** fournir si possible le `.ipynb` Colab original pour audit ;
-   à défaut, accepter une reconstruction indépendante sans prétendre reproduire
-   exactement les chiffres rapportés.
+## 11. Décisions réellement nécessaires avant implémentation
 
-**Arrêt de phase :** aucune Phase 1 ne commence avant validation explicite de
-ces arbitrages.
+1. **Cas d'usage :** valider ou remplacer le gestionnaire d'une exposition
+   actions diversifiée avec budget de risque comme utilisateur de référence.
+2. **Instrument initial :** accepter provisoirement la volatilité future à cinq
+   séances comme proxy de travail, sans la promouvoir en cible définitive du
+   programme.
+3. **Première question empirique :** valider le test « niveau élevé contre
+   transition montante à niveau comparable » avant toute compétition de modèles.
+4. **Matériel antérieur :** fournir si possible le notebook Colab pour auditer
+   les prévisions existantes ; sinon autoriser plus tard la reconstruction d'une
+   unique référence transparente.
+
+Les métriques finales, le calendrier de réentraînement, l'inférence, la méthode
+adaptative et la validation externe ne nécessitent pas encore de décision.
+
+**Arrêt de phase :** la Phase 0 demeure non validée. Aucun passage en Phase 1
+avant accord explicite sur ce cadrage révisé.
 

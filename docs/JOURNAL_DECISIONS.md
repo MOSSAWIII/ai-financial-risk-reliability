@@ -21,7 +21,10 @@ révision future ajoute une entrée datée et explique le motif.
 | D011 | Validé par le porteur | Versionner le projet dans un dépôt GitHub public | transparence, traçabilité et collaboration | ne pas publier secrets ni données brutes |
 | D012 | Ouvert | Aucune licence ajoutée pour l'instant | rendre public ne suffit pas à définir les droits de réutilisation | choisir ultérieurement MIT, Apache-2.0 ou une autre licence |
 
-## Questions ouvertes qui conditionnent la suite
+## Questions ouvertes de la version 1 (désormais supplantées)
+
+La liste ci-dessous est conservée comme trace historique. L'entrée de révision
+qui suit détermine les seuls blocages actuels.
 
 1. Validation ou modification de D001 à D005.
 2. Choix du holdout indépendant : marché externe préspécifié ou attente de
@@ -31,4 +34,47 @@ révision future ajoute une entrée datée et explique le motif.
    réplication et différence de protocole.
 4. Définition primaire d'une transition observable en temps réel et seuil de
    matérialité, à décider seulement après le socle E0–E2.
+
+## 15 octobre 2026 — rejet de la version 1 et réouverture du cadrage
+
+Le porteur du projet a explicitement refusé la Phase 0. Motif : cadrage devenu
+prématurément statistique, articulation économie–finance–IA insuffisante et
+choix méthodologiques trop tôt transformés en protocole directeur. Cette entrée
+ne remplace pas le tableau précédent ; elle en conserve la trace et modifie son
+statut à partir de cette date.
+
+| ID | Statut après critique | Révision |
+|---|---|---|
+| D001 | Rouvert | la variance à 5 séances redevient un instrument possible, non l'objet scientifique |
+| D002 | Rouvert | volatilité, variance, risque de queue ou distribution seront choisis selon la décision financière |
+| D003 | Retiré du protocole actif | QLIKE n'est pertinent que si la variance devient l'estimand ; aucune métrique primaire fixée |
+| D004 | Maintenu comme contrainte | 2020–août 2026 reste contaminée par consultation antérieure, sans préjuger du futur holdout |
+| D005 | Retiré du protocole actif | EWMA contre Boosting n'est plus la première question scientifique |
+| D006 | Retiré du protocole actif | aucune longueur de bloc ou méthode d'inférence fixée avant diagnostic de dépendance |
+| D007 | Révisé | aucune donnée macro immédiate, mais les mécanismes économiques structurent dès maintenant les hypothèses |
+| D008 | Maintenu et précisé | dates NBER = diagnostic ex post ; état financier, régime statistique et environnement économique restent distincts |
+| D011 | Maintenu | dépôt GitHub public et traçabilité de toutes les versions |
+| D012 | Ouvert | licence toujours non choisie |
+
+### Nouvelles propositions soumises à validation
+
+| ID | Statut | Proposition | Justification | Limite |
+|---|---|---|---|---|
+| D013 | Constat | Phase 0 version 1 refusée ; aucune Phase 1 autorisée | instruction explicite du porteur | — |
+| D014 | À valider | phénomène central = dégradation conditionnelle de fiabilité sous changement d'environnement | relie mécanismes, décision et confiance prédictive | formulation encore à challenger |
+| D015 | À valider | utilisateur de référence = gestionnaire d'une exposition actions diversifiée avec budget de risque | cohérent avec le portefeuille de marché et les pertes asymétriques | autre utilisateur impliquerait autre cible |
+| D016 | À valider | première expérience = niveau élevé contre hausse rapide à niveau comparable, avec une seule référence transparente | départage effet d'échelle et effet de transition | ne révèle pas encore le mécanisme économique |
+| D017 | Provisoire | volatilité future sur 5 séances comme proxy de travail de la première expérience | continuité avec le prototype et lecture financière | cible finale et horizon restent ouverts |
+
+### Décisions réellement bloquantes pour la prochaine implémentation
+
+1. D015 : utilisateur et décision financière de référence.
+2. D017 : proxy/horizon de la seule première expérience.
+3. D016 : question niveau contre transition.
+4. Accès éventuel au notebook Colab ; à défaut, accord futur pour reconstruire
+   une unique référence transparente.
+
+Toutes les anciennes recommandations relatives à QLIKE, au réentraînement
+annuel, au bootstrap de 22 jours, au marché Developed ex US et à la séquence
+E0–E6 sont explicitement non contraignantes.
 

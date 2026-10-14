@@ -11,14 +11,15 @@ choix d'une licence est une décision ouverte.
 
 ## État du projet
 
-**Phase 0 — cadrage scientifique : proposition terminée, en attente de
-validation humaine.** Aucune donnée n'a été téléchargée et aucun modèle n'a été
-entraîné.
+**Phase 0 — cadrage scientifique : non validée, version 2 soumise à examen
+critique.** Aucune donnée n'a été téléchargée et aucun modèle n'a été entraîné.
 
-Le périmètre initial recommandé est la prévision, après la date de marché `t`,
-d'un proxy de variance du portefeuille de marché américain sur les cinq séances
-`t+1, ..., t+5`. Le projet ne présume ni la supériorité du machine learning, ni
-une interprétation causale des changements de régime.
+Le phénomène central n'est plus formulé comme une compétition de prévision de
+variance. Le projet cherche à comprendre pourquoi une prévision du risque de
+marché cesse d'être fiable lorsque l'environnement change, si cette dégradation
+peut être signalée avant ses conséquences, et comment cette information devrait
+affecter une décision de gestion du risque. La cible exacte, la métrique et la
+méthode restent ouvertes tant qu'elles ne sont pas justifiées par cette décision.
 
 ## Documents actuels
 
