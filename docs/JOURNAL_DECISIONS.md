@@ -111,6 +111,27 @@ plus faible en 2019. La volatilité historique 20 sous-estime aussi la cible sur
 36,7 % des dates, contre 21,1 % pour la constante. Une erreur moyenne plus faible
 ne suffit donc pas à établir une meilleure maîtrise financière du risque.
 
+### 15 octobre 2026 — diagnostic des erreurs existantes autorisé
+
+Le porteur autorise l'examen des prévisions déjà calculées dans le notebook 03,
+sans nouvelle donnée, variable ou méthode prédictive. Les dix plus fortes
+sous-estimations et surestimations de la volatilité historique 20 sont décrites
+rétrospectivement à partir des rendements qui composent déjà la prévision et la
+cible.
+
+Parmi les dix dates de plus forte sous-estimation, la séance future dominante
+représente une part médiane de 55,5 % de la somme des cinq rendements futurs au
+carré. Parmi les dix plus fortes surestimations, le rapport médian entre l'énergie
+des cinq rendements futurs et celle des cinq rendements les plus anciens sur le
+point de sortir de la fenêtre vaut 0,28. Ces observations sont compatibles avec
+une réaction retardée aux mouvements soudains et avec une mémoire temporaire des
+mouvements passés, sans établir une cause ni un signal disponible à `t`.
+
+Les dates extrêmes se concentrent dans quelques épisodes et leurs cibles se
+chevauchent. Les dix lignes de chaque tableau ne sont donc pas dix événements
+indépendants ; leurs résumés ne doivent pas être interprétés comme une fréquence
+générale.
+
 ## Décisions en vigueur
 
 | ID | Statut | Décision | Conséquence |
@@ -127,6 +148,7 @@ ne suffit donc pas à établir une meilleure maîtrise financière du risque.
 | D023 | Constat | la cible est très dissymétrique, extrême par épisodes et fortement autocorrélée | le chevauchement explique mécaniquement une partie de la persistance de court terme ; aucune prévisibilité hors échantillon n'est encore établie |
 | D024 | Validé par le porteur | conserver localement le millésime brut immuable et vérifier son SHA-256 | les résultats restent reproductibles même si la source distante évolue ; le fichier brut demeure exclu de Git |
 | D025 | Constat exploratoire | sur 2016–2019, la volatilité historique 20 améliore en moyenne MAE et RMSE face à la constante 1990–2015 | résultat non uniforme selon l'année, sans test statistique ni confirmation indépendante ; aucune supériorité financière établie |
+| D026 | Constat descriptif | les plus fortes erreurs sont cohérentes avec le décalage entre la fenêtre passée et les cinq rendements futurs | sélection rétrospective et cibles chevauchantes ; aucune détection en temps réel ni explication causale établie |
 
 ## Prochaine décision nécessaire
 

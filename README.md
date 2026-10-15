@@ -44,7 +44,8 @@ explicite du porteur du projet.
   mesure du risque.
 - `notebooks/03_previsibilite_simple.ipynb` : comparaison exploratoire sur
   2016–2019 entre une constante apprise sur 1990–2015 et la volatilité historique
-  des 20 séances connues à `t`.
+  des 20 séances connues à `t`, suivie d'un diagnostic descriptif de ses plus
+  fortes sous-estimations et surestimations.
 
 Les notebooks constituent l'environnement principal de la Phase 1 ; des
 modules Python ne seront ajoutés que pour les fonctions réutilisées ou les tests
