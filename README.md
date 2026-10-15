@@ -11,9 +11,10 @@ choix d'une licence est une décision ouverte.
 
 ## État du projet
 
-**Phase 0 — cadrage scientifique : validée le 15 octobre 2026.** Les deux
-premières étapes limitées de la Phase 1 — audit puis compréhension descriptive
-de la cible — ont été exécutées. Aucun modèle n'a été entraîné.
+**Phase 0 — cadrage scientifique : validée le 15 octobre 2026.** Trois étapes
+limitées de la Phase 1 ont été exécutées : audit de la cible, compréhension
+descriptive, puis comparaison exploratoire de deux prévisions simples. Aucun
+modèle ML n'a été entraîné.
 
 Le projet cherche à comprendre comment les changements d'environnement
 économique affectent la fiabilité des prévisions du risque financier et dans
@@ -41,6 +42,9 @@ explicite du porteur du projet.
 - `notebooks/02_comprendre_volatilite_realisee.ipynb` : comportement historique,
   distribution, périodes extrêmes, persistance et limites de cette cible comme
   mesure du risque.
+- `notebooks/03_previsibilite_simple.ipynb` : comparaison exploratoire sur
+  2016–2019 entre une constante apprise sur 1990–2015 et la volatilité historique
+  des 20 séances connues à `t`.
 
 Les notebooks constituent l'environnement principal de la Phase 1 ; des
 modules Python ne seront ajoutés que pour les fonctions réutilisées ou les tests

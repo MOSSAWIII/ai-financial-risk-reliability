@@ -92,6 +92,25 @@ sans changement de méthode ni de résultat :
 - le README distingue la validation de la définition et de la construction
   technique de la cible de sa pertinence économique, qui reste à établir.
 
+### 15 octobre 2026 — troisième expérience simple autorisée et exécutée
+
+Le porteur autorise une seule comparaison : une prévision constante fondée sur
+la moyenne de `RV5` pendant l'apprentissage 1990–2015 contre la volatilité
+historique des 20 séances connues à `t`. La fenêtre de 20 séances est imposée,
+sans optimisation. L'évaluation 2016–2019 est explicitement exploratoire et les
+cibles sont purgées aux frontières pour rester entièrement dans leur période.
+
+Sur 1 001 dates d'évaluation, la volatilité historique 20 obtient une MAE de
+4,839 points de volatilité annualisée contre 7,054 pour la constante, soit une
+réduction descriptive de 31,40 %. Sa RMSE vaut 6,796 contre 8,129, soit une
+réduction de 16,41 %. Elle présente une surestimation moyenne de 0,873 point,
+contre 3,639 points pour la constante.
+
+Ce meilleur résultat moyen n'est pas uniforme : la constante obtient une RMSE
+plus faible en 2019. La volatilité historique 20 sous-estime aussi la cible sur
+36,7 % des dates, contre 21,1 % pour la constante. Une erreur moyenne plus faible
+ne suffit donc pas à établir une meilleure maîtrise financière du risque.
+
 ## Décisions en vigueur
 
 | ID | Statut | Décision | Conséquence |
@@ -107,9 +126,10 @@ sans changement de méthode ni de résultat :
 | D022 | Constat | la cible utilise exactement les séances `t+1` à `t+5` et les contrôles de construction passent | cela établit l'alignement de la cible, pas encore celui des variables d'un futur modèle |
 | D023 | Constat | la cible est très dissymétrique, extrême par épisodes et fortement autocorrélée | le chevauchement explique mécaniquement une partie de la persistance de court terme ; aucune prévisibilité hors échantillon n'est encore établie |
 | D024 | Validé par le porteur | conserver localement le millésime brut immuable et vérifier son SHA-256 | les résultats restent reproductibles même si la source distante évolue ; le fichier brut demeure exclu de Git |
+| D025 | Constat exploratoire | sur 2016–2019, la volatilité historique 20 améliore en moyenne MAE et RMSE face à la constante 1990–2015 | résultat non uniforme selon l'année, sans test statistique ni confirmation indépendante ; aucune supériorité financière établie |
 
 ## Prochaine décision nécessaire
 
-Examiner les résultats descriptifs puis définir explicitement la question
-minimale suivante. Les deux notebooks exécutés n'autorisent ni entraînement de
-modèle, ni expérience comparative, ni extension des données.
+Examiner les résultats de la troisième expérience puis définir explicitement la
+question minimale suivante. Aucun modèle, test supplémentaire ou extension des
+données n'est autorisé sans accord du porteur.
