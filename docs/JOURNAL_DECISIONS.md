@@ -159,6 +159,20 @@ L'exemple du 19 octobre 1987 montre qu'un seul rendement entre dans cinq cibles
 Il matérialise à la fois la dépendance mécanique due au chevauchement et le bruit
 d'une mesure construite sur cinq observations seulement.
 
+Un approfondissement ultérieur, autorisé dans le même notebook et sans nouvelle
+méthode prédictive, généralise ce diagnostic. Une seule séance représente plus de
+50 % de la somme des carrés dans 63,90 % des cibles `RV5`, et plus de 75 % dans
+17,00 % des cibles. Autour des 264 amplitudes dépassant le 99e centile global
+rétrospectif, l'amplitude médiane reste élevée avant et après la date centrale ;
+les trajectoires peuvent toutefois se chevaucher et ne sont pas des événements
+indépendants.
+
+Sur l'évaluation exploratoire 2016–2019 déjà examinée, les 10 % de dates ayant
+les plus fortes erreurs concentrent 62,61 % de l'erreur carrée totale. À niveau
+de `RV5` comparable, la concentration de la cible ne classe pas régulièrement la
+MAE : la difficulté ne se réduit donc pas à la domination d'une séance future.
+Ces constats sont descriptifs et ne constituent pas une confirmation indépendante.
+
 ## Décisions en vigueur
 
 | ID | Statut | Décision | Conséquence |
@@ -176,7 +190,7 @@ d'une mesure construite sur cinq observations seulement.
 | D024 | Validé par le porteur | conserver localement le millésime brut immuable et vérifier son SHA-256 | les résultats restent reproductibles même si la source distante évolue ; le fichier brut demeure exclu de Git |
 | D025 | Constat exploratoire | sur 2016–2019, la volatilité historique 20 améliore en moyenne MAE et RMSE face à la constante 1990–2015 | résultat non uniforme selon l'année, sans test statistique ni confirmation indépendante ; aucune supériorité financière établie |
 | D026 | Constat descriptif | les plus fortes erreurs sont cohérentes avec le décalage entre la fenêtre passée et les cinq rendements futurs | sélection rétrospective et cibles chevauchantes ; aucune détection en temps réel ni explication causale établie |
-| D027 | Validé et exécuté | réaliser une EDA limitée aux rendements de marché déjà utilisés | leurs queues épaisses, leur calendrier et la persistance de leur amplitude sont documentés sans étendre le périmètre scientifique |
+| D027 | Validé et exécuté | réaliser puis approfondir une EDA limitée aux rendements et prévisions déjà utilisés | composition de `RV5`, trajectoires extrêmes et concentration des erreurs sont documentées sans étendre le périmètre scientifique |
 
 ## Prochaine décision nécessaire
 

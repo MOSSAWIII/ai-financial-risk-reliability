@@ -49,8 +49,9 @@ explicite du porteur du projet.
   fortes sous-estimations et surestimations.
 - `EDA/01_nature_donnees_fama_french.ipynb` : provenance, qualité, calendrier,
   distribution et dépendance temporelle des seuls rendements de marché utilisés,
-  puis conséquences descriptives pour `RV5`. Cette EDA n'ajoute ni modèle, ni
-  cible, ni variable économique et n'analyse pas `SMB` ou `HML`.
+  composition de `RV5`, trajectoires autour des fortes amplitudes et concentration
+  des erreurs déjà calculées. Cette EDA n'ajoute ni modèle, ni cible, ni variable
+  économique et n'analyse pas `SMB` ou `HML`.
 
 Les notebooks constituent l'environnement principal de la Phase 1 ; des
 modules Python ne seront ajoutés que pour les fonctions réutilisées ou les tests
