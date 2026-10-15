@@ -132,6 +132,33 @@ chevauchent. Les dix lignes de chaque tableau ne sont donc pas dix événements
 indépendants ; leurs résumés ne doivent pas être interprétés comme une fréquence
 générale.
 
+### 15 octobre 2026 — EDA limitée des données brutes autorisée et exécutée
+
+Après correction d'une ambiguïté rédactionnelle, le porteur autorise un dossier
+`EDA` et un unique notebook consacré à la nature des rendements déjà utilisés.
+Sont explicitement exclus : nouveaux modèles ou nouvelles cibles, variables
+économiques, détection de crises ou de régimes, tests statistiques avancés,
+suppression automatique des extrêmes, analyse de `SMB` ou `HML` et répétition
+exhaustive des notebooks 01–03.
+
+L'exécution sur la copie locale immuable retrouve 26 317 séances du 1er juillet
+1926 au 31 août 2026, sans valeur manquante ni date dupliquée. Les 1 158 séances
+historiques du samedi sont conservées et aucune date n'est ajoutée. Le rendement
+de marché étudié reste exclusivement `(Mkt-RF + RF) / 100`.
+
+La distribution quotidienne présente un écart-type de 1,077 %, une asymétrie de
+-0,166 et une kurtosis excédentaire de 16,125. Ces valeurs décrivent des queues
+épaisses ; elles ne constituent pas un test statistique. L'autocorrélation au
+décalage d'une séance vaut 0,046 pour le rendement, contre 0,298 pour son
+amplitude et 0,259 pour son carré. Cette différence est compatible avec une
+faible dépendance linéaire du signe et une persistance de l'amplitude, sans
+établir une prévision exploitable ni une cause économique.
+
+L'exemple du 19 octobre 1987 montre qu'un seul rendement entre dans cinq cibles
+`RV5` successives et représente entre 72,75 % et 89,67 % de leur somme de carrés.
+Il matérialise à la fois la dépendance mécanique due au chevauchement et le bruit
+d'une mesure construite sur cinq observations seulement.
+
 ## Décisions en vigueur
 
 | ID | Statut | Décision | Conséquence |
@@ -149,9 +176,10 @@ générale.
 | D024 | Validé par le porteur | conserver localement le millésime brut immuable et vérifier son SHA-256 | les résultats restent reproductibles même si la source distante évolue ; le fichier brut demeure exclu de Git |
 | D025 | Constat exploratoire | sur 2016–2019, la volatilité historique 20 améliore en moyenne MAE et RMSE face à la constante 1990–2015 | résultat non uniforme selon l'année, sans test statistique ni confirmation indépendante ; aucune supériorité financière établie |
 | D026 | Constat descriptif | les plus fortes erreurs sont cohérentes avec le décalage entre la fenêtre passée et les cinq rendements futurs | sélection rétrospective et cibles chevauchantes ; aucune détection en temps réel ni explication causale établie |
+| D027 | Validé et exécuté | réaliser une EDA limitée aux rendements de marché déjà utilisés | leurs queues épaisses, leur calendrier et la persistance de leur amplitude sont documentés sans étendre le périmètre scientifique |
 
 ## Prochaine décision nécessaire
 
-Examiner les résultats de la troisième expérience puis définir explicitement la
-question minimale suivante. Aucun modèle, test supplémentaire ou extension des
-données n'est autorisé sans accord du porteur.
+Examiner les résultats de l'EDA et de la troisième expérience, puis définir
+explicitement la question minimale suivante. Aucun modèle, test supplémentaire
+ou extension des données n'est autorisé sans accord du porteur.

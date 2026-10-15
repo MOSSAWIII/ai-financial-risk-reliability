@@ -13,8 +13,9 @@ choix d'une licence est une décision ouverte.
 
 **Phase 0 — cadrage scientifique : validée le 15 octobre 2026.** Trois étapes
 limitées de la Phase 1 ont été exécutées : audit de la cible, compréhension
-descriptive, puis comparaison exploratoire de deux prévisions simples. Aucun
-modèle ML n'a été entraîné.
+descriptive, puis comparaison exploratoire de deux prévisions simples. Une EDA
+complémentaire des seuls rendements bruts documente désormais la nature des
+données utilisées. Aucun modèle ML n'a été entraîné.
 
 Le projet cherche à comprendre comment les changements d'environnement
 économique affectent la fiabilité des prévisions du risque financier et dans
@@ -46,6 +47,10 @@ explicite du porteur du projet.
   2016–2019 entre une constante apprise sur 1990–2015 et la volatilité historique
   des 20 séances connues à `t`, suivie d'un diagnostic descriptif de ses plus
   fortes sous-estimations et surestimations.
+- `EDA/01_nature_donnees_fama_french.ipynb` : provenance, qualité, calendrier,
+  distribution et dépendance temporelle des seuls rendements de marché utilisés,
+  puis conséquences descriptives pour `RV5`. Cette EDA n'ajoute ni modèle, ni
+  cible, ni variable économique et n'analyse pas `SMB` ou `HML`.
 
 Les notebooks constituent l'environnement principal de la Phase 1 ; des
 modules Python ne seront ajoutés que pour les fonctions réutilisées ou les tests
