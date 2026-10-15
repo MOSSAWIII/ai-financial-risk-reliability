@@ -22,12 +22,9 @@ proposée séparément et validée explicitement par le porteur du projet.
 | Faire du contraste « niveau élevé contre transition rapide » la première expérience | Cette question nouvelle remplaçait l'étape préalable de définition et d'audit de la cible | Expérience retirée du protocole actif et reportée |
 | Imposer une erreur logarithmique signée, un appariement sur le niveau et une règle de persistance | Ces moyens répondaient à l'expérience précédente, elle-même non validée | Choix retirés ; aucune méthode correspondante n'est retenue |
 | Décomposer immédiatement le projet en six objectifs d'IA et privilégier certains d'entre eux | La taxonomie était utile pour réfléchir, mais transformait une exploration en programme de recherche | Retour aux trois fonctions du mandat : reconnaître une limite, quantifier l'incertitude, maintenir ou retrouver une fiabilité acceptable |
-| Ouvrir simultanément la cible à la variance, à la volatilité, à la VaR/ES et à une distribution complète | Cette ouverture effaçait l'objet empirique initial déjà délimité par le document fondateur | Retour à la volatilité réalisée future à cinq séances comme objet initial ; seule sa définition exacte reste à valider |
-| Envisager dès maintenant un autre marché, de nombreuses variables économiques, plusieurs méthodes d'inférence et une suite d'expériences | Ces éléments anticipaient des problèmes non encore observés | Tous sont reportés hors du protocole actif |
-
-Les choix antérieurs de QLIKE primaire, réestimation annuelle, bootstrap de 22
-séances, validation hors États-Unis et comparaison centrale EWMA–Boosting
-restent également retirés. Ils ne sont ni nécessaires ni validés.
+Les autres choix techniques et extensions proposés dans les versions
+précédentes sont supprimés du cadrage courant. Ils ne constituent plus des
+options du projet.
 
 ## 2. Problématique retenue sans extension
 
@@ -63,9 +60,8 @@ d'une solution adaptative.
   L'utilisateur et la décision exacts restent à préciser avant toute évaluation
   décisionnelle.
 - **IA/statistique :** il faut d'abord mesurer loyalement la fiabilité dans le
-  temps. La détection, l'anticipation, la calibration et l'adaptation sont des
-  problèmes distincts ; aucun n'est promu au rang de contribution avant que le
-  problème empirique soit établi.
+  temps et représenter honnêtement l'incertitude. Aucun développement de méthode
+  n'est engagé avant que le problème empirique soit établi.
 
 ## 3. Fondement économique volontairement limité
 
@@ -74,7 +70,7 @@ justifient encore ni ajout de données ni revendication causale.
 
 | Mécanisme plausible | Transmission financière attendue | Pourquoi la prévisibilité pourrait changer | Ce qu'une analyse observationnelle ne prouverait pas |
 |---|---|---|---|
-| Révision des anticipations de croissance, d'inflation ou de taux | Révision des prix, primes et volatilité | Les sensibilités apprises dans un contexte peuvent ne plus être stables | Qu'une variable macroéconomique précise cause la panne |
+| Révision des anticipations de croissance, d'inflation ou de taux | Révision des prix, primes et volatilité | Les sensibilités apprises dans un contexte peuvent ne plus être stables | Qu'un indicateur économique précis cause la panne |
 | Hausse de l'incertitude et du désaccord | Dispersion des croyances, mouvements discontinus | Les situations comparables deviennent rares et l'incertitude passée moins informative | Que l'incertitude mesurée est exogène aux prix |
 | Contraintes de financement, levier et liquidité | Amplification des baisses et hausse conjointe du risque | Une dynamique non linéaire peut remplacer la persistance observée en temps normal | Le sens causal entre liquidité, levier et volatilité |
 
@@ -97,24 +93,21 @@ n'entre dans le protocole actuel.
   pas être supposée inchangée sous changement de distribution.
 
 Le socle bibliographique actif reste volontairement court : Engle et Patton
-(2001), Hansen et Lunde (2005), Corsi (2009), Patton (2011), Moreira et Muir
-(2017), ainsi que Gibbs et Candès (2021). Les références supplémentaires
-repérées dans la version 2 demeurent traçables dans Git, mais ne justifient
-aucune méthode active et ne fondent aucune revendication de nouveauté.
+(2001), Hansen et Lunde (2005), Corsi (2009), Patton (2011), ainsi que Moreira
+et Muir (2017). Les références supplémentaires repérées dans la version 2
+demeurent traçables dans Git, mais ne justifient aucune méthode active et ne
+fondent aucune revendication de nouveauté.
 
 ### Hypothèses ouvertes issues du document fondateur
 
 - **H1 :** les erreurs se dégradent davantage pendant certaines transitions
-  qu'en régime établi comparable.
+  que pendant des périodes stables comparables.
 - **H2 :** un gain statistique moyen n'implique pas nécessairement un gain
   financier.
-- **H3 :** des intervalles adaptatifs peuvent améliorer la calibration
-  conditionnelle lors de changements d'environnement.
 
-Ces hypothèses structurent l'ambition générale, mais ne sont pas toutes à
-tester maintenant. H1 n'autorise pas à imposer immédiatement une définition de
-« transition » ; H2 exige d'abord une décision financière explicite ; H3 exige
-qu'un problème de calibration soit préalablement constaté.
+Ces hypothèses structurent l'ambition générale, mais ne sont pas à tester
+maintenant. H1 n'autorise pas à imposer immédiatement une définition de
+« transition » ; H2 exige d'abord une décision financière explicite.
 
 ### Contribution potentielle, non revendiquée
 
@@ -134,10 +127,9 @@ séances futures. Une définition candidate est :
 RV_{5,t}=\sqrt{\frac{252}{5}\sum_{k=1}^{5}r_{t+k}^{2}},
 \]
 
-avec les rendements exprimés en décimal. Cette formule n'est pas encore une
-décision irréversible : son annualisation, son traitement des rendements moyens
-et son interprétation comme proxy d'une volatilité latente doivent être
-explicités avant calcul.
+avec les rendements exprimés en décimal. Son annualisation, son traitement des
+rendements moyens et son interprétation comme mesure approchée d'une volatilité
+latente doivent être explicités avant calcul.
 
 Les décisions indispensables à l'étape immédiate sont seulement :
 
@@ -146,11 +138,6 @@ Les décisions indispensables à l'étape immédiate sont seulement :
    `t+1` à `t+5` ;
 3. conserver MAE et RMSE comme mesures initiales prévues par le document
    fondateur, sans désigner encore une métrique unique comme vérité scientifique.
-
-QLIKE, une perte financière asymétrique, la fréquence de réentraînement, une
-procédure d'inférence, d'autres marchés et d'autres cibles ne sont pas requis
-pour cette étape. Ils sont reportés jusqu'à ce qu'une question observée les
-rende nécessaires et qu'ils soient validés.
 
 ## 6. Contraintes déjà indispensables
 
@@ -181,8 +168,7 @@ figée. Elle doit seulement produire, puis faire valider :
 4. un principe de découpage chronologique ;
 5. les critères minimaux qui rendront une future comparaison interprétable.
 
-Aucun modèle, seuil de régime, variable macroéconomique, méthode adaptative,
-bootstrap ou marché supplémentaire n'appartient au protocole actif.
+Aucun modèle ni ajout de données n'appartient au protocole actif.
 
 ## 8. Prochaine étape la plus simple
 
@@ -211,9 +197,8 @@ commencer. Cette étape n'est pas lancée par le présent document.
    notebook unique d'audit de la cible et des données.
 
 Le choix d'un utilisateur financier précis, d'une métrique primaire, d'une
-définition de transition, d'un modèle, d'une méthode d'incertitude ou d'un
-marché externe ne demande aucune décision maintenant, car aucun de ces éléments
-n'appartient à l'étape immédiate.
+définition de transition ou d'un modèle ne demande aucune décision maintenant,
+car aucun de ces éléments n'appartient à l'étape immédiate.
 
 **Arrêt de phase :** la Phase 0 demeure non validée. Aucun notebook, aucune
 donnée, aucune expérience et aucun passage en Phase 1 ne sont engagés sans

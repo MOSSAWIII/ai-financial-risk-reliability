@@ -1,8 +1,8 @@
-# Fiabilité des prévisions du risque financier sous changement de régime
+# Fiabilité des prévisions du risque financier sous changement d'environnement
 
 Ce dépôt porte sur la fiabilité conditionnelle des prévisions du risque de
-marché : précision, calibration, robustesse temporelle et, dans une phase
-ultérieure, utilité financière lorsque l'environnement change.
+marché : précision, incertitude, robustesse temporelle et utilité financière
+lorsque l'environnement change.
 
 Le développement est versionné publiquement sur GitHub afin que les décisions,
 protocoles et résultats — y compris négatifs — restent traçables. La présence
