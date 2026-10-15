@@ -200,6 +200,6 @@ Le choix d'un utilisateur financier précis, d'une métrique primaire, d'une
 définition de transition ou d'un modèle ne demande aucune décision maintenant,
 car aucun de ces éléments n'appartient à l'étape immédiate.
 
-**Clôture de phase :** la Phase 0 est validée. La Phase 1 n'est pas encore
-engagée. Sa première action proposée est le notebook unique d'audit décrit à la
-section 8 ; sa création reste soumise à une autorisation explicite distincte.
+**Clôture de phase :** la Phase 0 est validée. Le notebook unique d'audit décrit
+à la section 8 a ensuite été autorisé et exécuté le 15 octobre 2026. Cette
+autorisation ne s'étend à aucune autre expérience.

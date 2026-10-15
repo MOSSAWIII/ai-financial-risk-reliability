@@ -11,9 +11,9 @@ choix d'une licence est une décision ouverte.
 
 ## État du projet
 
-**Phase 0 — cadrage scientifique : validée le 15 octobre 2026.** La Phase 1
-n'est pas encore engagée. Aucune donnée n'a été téléchargée et aucun modèle n'a
-été entraîné.
+**Phase 0 — cadrage scientifique : validée le 15 octobre 2026.** La première
+étape limitée de la Phase 1, consacrée à l'audit de la cible, a été exécutée.
+Aucun modèle n'a été entraîné.
 
 Le projet cherche à comprendre comment les changements d'environnement
 économique affectent la fiabilité des prévisions du risque financier et dans
@@ -33,6 +33,9 @@ explicite du porteur du projet.
   hypothèses, objet empirique et protocole initial simplifié ;
 - `docs/JOURNAL_DECISIONS.md` : décisions, recommandations et points encore à
   valider.
+- `notebooks/01_audit_cible_fama_french.ipynb` : import officiel, contrôle des
+  unités et des dates, construction et audit temporel de la cible à cinq
+  séances.
 
 Les notebooks et le code de la Phase 1 ne seront créés qu'après validation du
 cadrage. Les notebooks seront alors l'environnement principal d'analyse ; des

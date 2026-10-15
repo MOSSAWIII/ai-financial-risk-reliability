@@ -40,6 +40,25 @@ cible initiale à cinq séances et les contraintes du protocole simplifié sont
 acceptées. Cette validation clôt le cadrage ; elle n'autorise pas implicitement
 l'ajout d'autres expériences ou méthodes.
 
+### 15 octobre 2026 — audit de la cible autorisé et exécuté
+
+Le porteur autorise explicitement les six opérations de l'audit initial :
+importation des rendements Fama–French, vérification des unités et des dates,
+construction de la cible à cinq séances, contrôles manuels, contrôle de fuite
+temporelle et documentation des valeurs manquantes.
+
+Le notebook exécuté lit 26 317 séances du 1er juillet 1926 au 31 août 2026. Il
+produit 26 312 cibles complètes. Les cinq seules cibles manquantes sont les cinq
+dernières, qui ne disposent pas de cinq séances futures. Les trois calculs
+manuels sont identiques au calcul automatisé et toutes les dates constitutives
+de la cible sont strictement postérieures à `t`. L'archive utilisée porte
+l'empreinte SHA-256
+`2f29e22546069914890a712680a6f81f3680ebc3543b52864484d209ca13a7db`.
+
+L'audit a également identifié 1 158 séances historiques un samedi. Elles sont
+conservées car elles appartiennent au calendrier de négociation de la source ;
+aucun calendrier moderne n'est imposé rétroactivement.
+
 ## Décisions en vigueur
 
 | ID | Statut | Décision | Conséquence |
@@ -50,11 +69,12 @@ l'ajout d'autres expériences ou méthodes.
 | D013 | Supplanté | la Phase 0 n'était pas validée avant le 15 octobre 2026 | remplacé par D021 |
 | D018 | Validé par le porteur | aucune extension scientifique sans demande ou validation explicite | toute nouvelle orientation doit être proposée avant intégration |
 | D019 | Validé par le porteur | privilégier la méthode la plus simple répondant à la question active | aucune complexité préventive |
-| D020 | Autorisation requise | réaliser un seul notebook d'audit de la cible à cinq séances | aucun modèle avant réussite de cet audit |
+| D020 | Validé et exécuté | réaliser un seul notebook d'audit de la cible à cinq séances | audit réussi ; aucun modèle n'a été entraîné |
 | D021 | Validé par le porteur | la Phase 0 est validée le 15 octobre 2026 | le cadrage est clos ; la prochaine action reste soumise à autorisation |
+| D022 | Constat | la cible utilise exactement les séances `t+1` à `t+5` et les contrôles de construction passent | cela établit l'alignement de la cible, pas encore celui des variables d'un futur modèle |
 
-## Prochaine autorisation nécessaire
+## Prochaine décision nécessaire
 
-Autoriser la création du notebook unique d'audit de la cible et de son
-alignement temporel. Cette autorisation ne couvrirait ni entraînement de modèle,
-ni expérience comparative, ni extension des données.
+Définir la question minimale du prochain notebook avant toute modélisation. La
+réussite de l'audit n'autorise ni entraînement de modèle, ni expérience
+comparative, ni extension des données.
