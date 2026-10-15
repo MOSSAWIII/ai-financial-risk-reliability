@@ -2,7 +2,7 @@
 
 **Version :** 3, 14 octobre 2026
 
-**Statut :** Phase 0 non validée ; aucune expérience autorisée
+**Statut :** Phase 0 validée par le porteur du projet le 15 octobre 2026
 
 **Référence supérieure :** `CADRAGE_PROJET_RECHERCHE_IA_FINANCE_CODEX.txt`
 
@@ -187,19 +187,19 @@ Le critère de réussite sera la reproductibilité exacte de la cible et l'absen
 de fuite temporelle. En cas d'ambiguïté ou d'échec, aucune modélisation ne devra
 commencer. Cette étape n'est pas lancée par le présent document.
 
-## 9. Décisions qui nécessitent réellement l'accord du porteur
+## 9. Décisions validées par le porteur
 
-1. Valider ou corriger la question centrale telle qu'elle est reprise du
-   document fondateur.
-2. Valider la définition exacte de la volatilité future à cinq séances, y
-   compris l'annualisation et les unités.
-3. Après validation complète de la Phase 0 seulement, autoriser la création du
-   notebook unique d'audit de la cible et des données.
+La validation de la Phase 0 confirme :
+
+1. la question centrale formulée dans ce document ;
+2. la volatilité réalisée annualisée des cinq séances futures comme cible
+   initiale, avec rendements en décimal et la formule présentée à la section 5 ;
+3. les contraintes de validité et le protocole initial limité décrits ci-dessus.
 
 Le choix d'un utilisateur financier précis, d'une métrique primaire, d'une
 définition de transition ou d'un modèle ne demande aucune décision maintenant,
 car aucun de ces éléments n'appartient à l'étape immédiate.
 
-**Arrêt de phase :** la Phase 0 demeure non validée. Aucun notebook, aucune
-donnée, aucune expérience et aucun passage en Phase 1 ne sont engagés sans
-accord explicite.
+**Clôture de phase :** la Phase 0 est validée. La Phase 1 n'est pas encore
+engagée. Sa première action proposée est le notebook unique d'audit décrit à la
+section 8 ; sa création reste soumise à une autorisation explicite distincte.

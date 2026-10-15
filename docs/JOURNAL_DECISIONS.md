@@ -33,6 +33,13 @@ ont été supprimées des documents courants. Elles ne sont plus reportées comm
 possibilités futures. Cette suppression ne modifie pas le fichier fondateur ;
 l'historique Git conserve les versions antérieures.
 
+### 15 octobre 2026 — validation de la Phase 0
+
+Le porteur du projet valide explicitement la Phase 0. La question centrale, la
+cible initiale à cinq séances et les contraintes du protocole simplifié sont
+acceptées. Cette validation clôt le cadrage ; elle n'autorise pas implicitement
+l'ajout d'autres expériences ou méthodes.
+
 ## Décisions en vigueur
 
 | ID | Statut | Décision | Conséquence |
@@ -40,15 +47,14 @@ l'historique Git conserve les versions antérieures.
 | D004 | Contrainte maintenue | la période 2020–août 2026 a déjà été consultée | elle ne peut pas être présentée comme une évaluation finale intacte |
 | D009 | Constat maintenu | le notebook exploratoire antérieur n'a pas été audité dans ce dépôt | ses résultats ne constituent pas une base validée |
 | D011 | Validé par le porteur | versionner le projet dans un dépôt GitHub public | préserver la traçabilité sans publier de secrets ni de données brutes |
-| D013 | Validé par le porteur | la Phase 0 n'est pas validée | aucune Phase 1 ni expérience n'est autorisée |
+| D013 | Supplanté | la Phase 0 n'était pas validée avant le 15 octobre 2026 | remplacé par D021 |
 | D018 | Validé par le porteur | aucune extension scientifique sans demande ou validation explicite | toute nouvelle orientation doit être proposée avant intégration |
 | D019 | Validé par le porteur | privilégier la méthode la plus simple répondant à la question active | aucune complexité préventive |
-| D020 | À valider | après validation de la Phase 0, réaliser un seul notebook d'audit de la cible à cinq séances | aucun modèle avant réussite de cet audit |
+| D020 | Autorisation requise | réaliser un seul notebook d'audit de la cible à cinq séances | aucun modèle avant réussite de cet audit |
+| D021 | Validé par le porteur | la Phase 0 est validée le 15 octobre 2026 | le cadrage est clos ; la prochaine action reste soumise à autorisation |
 
-## Accords actuellement nécessaires
+## Prochaine autorisation nécessaire
 
-1. Valider ou corriger la question centrale reprise du document fondateur.
-2. Valider la formule, l'annualisation et les unités de la volatilité réalisée
-   future à cinq séances.
-3. Valider la Phase 0 puis, séparément, autoriser le notebook unique d'audit de
-   la cible et de son alignement temporel.
+Autoriser la création du notebook unique d'audit de la cible et de son
+alignement temporel. Cette autorisation ne couvrirait ni entraînement de modèle,
+ni expérience comparative, ni extension des données.

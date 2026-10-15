@@ -11,9 +11,9 @@ choix d'une licence est une décision ouverte.
 
 ## État du projet
 
-**Phase 0 — cadrage scientifique : non validée, version 3 simplifiée soumise à
-examen critique.** Aucune donnée n'a été téléchargée et aucun modèle n'a été
-entraîné.
+**Phase 0 — cadrage scientifique : validée le 15 octobre 2026.** La Phase 1
+n'est pas encore engagée. Aucune donnée n'a été téléchargée et aucun modèle n'a
+été entraîné.
 
 Le projet cherche à comprendre comment les changements d'environnement
 économique affectent la fiabilité des prévisions du risque financier et dans
