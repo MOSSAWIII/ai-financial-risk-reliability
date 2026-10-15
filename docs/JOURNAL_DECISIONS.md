@@ -59,6 +59,24 @@ L'audit a également identifié 1 158 séances historiques un samedi. Elles sont
 conservées car elles appartiennent au calendrier de négociation de la source ;
 aucun calendrier moderne n'est imposé rétroactivement.
 
+### 15 octobre 2026 — description de la volatilité réalisée
+
+Le porteur autorise une étape descriptive limitée à la série déjà construite.
+Le notebook correspondant examine sa trajectoire historique, sa distribution,
+ses périodes extrêmes, son autocorrélation et ses limites comme mesure du
+risque, sans ajouter de modèle ni de données.
+
+Sur 26 312 observations, la volatilité annualisée à cinq séances présente une
+médiane de 10,61 %, une moyenne de 13,44 %, un 99e centile de 55,74 % et un
+maximum de 148,60 %. La distribution est fortement dissymétrique. Le seuil
+descriptif du 99e centile rassemble 264 observations en 48 séquences contiguës.
+
+L'autocorrélation vaut 0,938 au décalage d'une séance, où quatre des cinq
+rendements sont partagés par construction. Elle reste à 0,668 au décalage de
+cinq séances, où les fenêtres ne partagent plus directement de rendement. La
+persistance très courte ne doit donc pas être confondue avec une preuve de
+prévisibilité ; le chevauchement en explique nécessairement une partie.
+
 ## Décisions en vigueur
 
 | ID | Statut | Décision | Conséquence |
@@ -72,9 +90,10 @@ aucun calendrier moderne n'est imposé rétroactivement.
 | D020 | Validé et exécuté | réaliser un seul notebook d'audit de la cible à cinq séances | audit réussi ; aucun modèle n'a été entraîné |
 | D021 | Validé par le porteur | la Phase 0 est validée le 15 octobre 2026 | le cadrage est clos ; la prochaine action reste soumise à autorisation |
 | D022 | Constat | la cible utilise exactement les séances `t+1` à `t+5` et les contrôles de construction passent | cela établit l'alignement de la cible, pas encore celui des variables d'un futur modèle |
+| D023 | Constat | la cible est très dissymétrique, extrême par épisodes et fortement autocorrélée | le chevauchement explique mécaniquement une partie de la persistance de court terme ; aucune prévisibilité hors échantillon n'est encore établie |
 
 ## Prochaine décision nécessaire
 
-Définir la question minimale du prochain notebook avant toute modélisation. La
-réussite de l'audit n'autorise ni entraînement de modèle, ni expérience
-comparative, ni extension des données.
+Examiner les résultats descriptifs puis définir explicitement la question
+minimale suivante. Les deux notebooks exécutés n'autorisent ni entraînement de
+modèle, ni expérience comparative, ni extension des données.

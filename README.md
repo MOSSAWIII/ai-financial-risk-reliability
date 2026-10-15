@@ -11,9 +11,9 @@ choix d'une licence est une décision ouverte.
 
 ## État du projet
 
-**Phase 0 — cadrage scientifique : validée le 15 octobre 2026.** La première
-étape limitée de la Phase 1, consacrée à l'audit de la cible, a été exécutée.
-Aucun modèle n'a été entraîné.
+**Phase 0 — cadrage scientifique : validée le 15 octobre 2026.** Les deux
+premières étapes limitées de la Phase 1 — audit puis compréhension descriptive
+de la cible — ont été exécutées. Aucun modèle n'a été entraîné.
 
 Le projet cherche à comprendre comment les changements d'environnement
 économique affectent la fiabilité des prévisions du risque financier et dans
@@ -36,6 +36,9 @@ explicite du porteur du projet.
 - `notebooks/01_audit_cible_fama_french.ipynb` : import officiel, contrôle des
   unités et des dates, construction et audit temporel de la cible à cinq
   séances.
+- `notebooks/02_comprendre_volatilite_realisee.ipynb` : comportement historique,
+  distribution, périodes extrêmes, persistance et limites de cette cible comme
+  mesure du risque.
 
 Les notebooks et le code de la Phase 1 ne seront créés qu'après validation du
 cadrage. Les notebooks seront alors l'environnement principal d'analyse ; des
