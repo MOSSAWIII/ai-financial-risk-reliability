@@ -77,6 +77,21 @@ cinq séances, où les fenêtres ne partagent plus directement de rendement. La
 persistance très courte ne doit donc pas être confondue avec une preuve de
 prévisibilité ; le chevauchement en explique nécessairement une partie.
 
+### 15 octobre 2026 — corrections après revue des deux notebooks
+
+Le porteur valide globalement les deux notebooks et demande quatre corrections
+sans changement de méthode ni de résultat :
+
+- les dates des épisodes extrêmes sont explicitement des dates d'origine `t` ;
+  chaque valeur concerne les cinq séances futures, désormais affichées pour le
+  pic de chaque épisode ;
+- le seuil du 99e centile est qualifié de descriptif, rétrospectif et calculé
+  sur l'ensemble de l'échantillon ;
+- l'archive brute utilisée est conservée localement en lecture seule sous
+  `data/raw/`, exclue de Git et contrôlée par son empreinte SHA-256 ;
+- le README distingue la validation de la définition et de la construction
+  technique de la cible de sa pertinence économique, qui reste à établir.
+
 ## Décisions en vigueur
 
 | ID | Statut | Décision | Conséquence |
@@ -91,6 +106,7 @@ prévisibilité ; le chevauchement en explique nécessairement une partie.
 | D021 | Validé par le porteur | la Phase 0 est validée le 15 octobre 2026 | le cadrage est clos ; la prochaine action reste soumise à autorisation |
 | D022 | Constat | la cible utilise exactement les séances `t+1` à `t+5` et les contrôles de construction passent | cela établit l'alignement de la cible, pas encore celui des variables d'un futur modèle |
 | D023 | Constat | la cible est très dissymétrique, extrême par épisodes et fortement autocorrélée | le chevauchement explique mécaniquement une partie de la persistance de court terme ; aucune prévisibilité hors échantillon n'est encore établie |
+| D024 | Validé par le porteur | conserver localement le millésime brut immuable et vérifier son SHA-256 | les résultats restent reproductibles même si la source distante évolue ; le fichier brut demeure exclu de Git |
 
 ## Prochaine décision nécessaire
 

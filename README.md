@@ -20,7 +20,9 @@ Le projet cherche à comprendre comment les changements d'environnement
 quelle mesure les méthodes prédictives peuvent reconnaître leurs limites,
 quantifier leur incertitude et maintenir ou retrouver une fiabilité acceptable.
 L'objet empirique initial reste la volatilité réalisée future à cinq séances du
-marché américain Fama–French ; sa définition exacte doit encore être validée.
+marché américain Fama–French. Sa définition mathématique, ses unités et sa
+construction temporelle ont été validées et auditées. Sa pertinence économique
+comme mesure suffisante du risque n'est pas établie par cet audit technique.
 La priorité permanente est la solution la plus simple compatible avec la
 question active. Aucune extension scientifique ne sera intégrée sans validation
 explicite du porteur du projet.
@@ -40,12 +42,12 @@ explicite du porteur du projet.
   distribution, périodes extrêmes, persistance et limites de cette cible comme
   mesure du risque.
 
-Les notebooks et le code de la Phase 1 ne seront créés qu'après validation du
-cadrage. Les notebooks seront alors l'environnement principal d'analyse ; des
+Les notebooks constituent l'environnement principal de la Phase 1 ; des
 modules Python ne seront ajoutés que pour les fonctions réutilisées ou les tests
 qui protègent l'alignement temporel.
 
-Les données brutes, secrets et environnements locaux sont exclus de Git. Les
-métadonnées de provenance et checksums des données pourront en revanche être
-versionnés.
+Les données brutes, secrets et environnements locaux sont exclus de Git. Une
+copie brute immuable du millésime analysé est conservée localement sous
+`data/raw/` et vérifiée par SHA-256 par les notebooks ; elle n'est pas publiée.
+Les métadonnées de provenance et l'empreinte sont versionnées.
 
