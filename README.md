@@ -11,11 +11,11 @@ choix d'une licence est une décision ouverte.
 
 ## État du projet
 
-**Phase 0 — cadrage scientifique : validée le 15 octobre 2026.** Trois étapes
+**Phase 0 — cadrage scientifique : validée le 15 octobre 2026.** Quatre étapes
 limitées de la Phase 1 ont été exécutées : audit de la cible, compréhension
-descriptive, puis comparaison exploratoire de deux prévisions simples. Une EDA
-complémentaire des seuls rendements bruts documente désormais la nature des
-données utilisées. Aucun modèle ML n'a été entraîné.
+descriptive, comparaison exploratoire de deux prévisions simples, puis examen
+conditionnel de leurs erreurs. Une EDA complémentaire des seuls rendements bruts
+documente la nature des données utilisées. Aucun modèle ML n'a été entraîné.
 
 Le projet cherche à comprendre comment les changements d'environnement
 économique affectent la fiabilité des prévisions du risque financier et dans
@@ -47,6 +47,9 @@ explicite du porteur du projet.
   2016–2019 entre une constante apprise sur 1990–2015 et la volatilité historique
   des 20 séances connues à `t`, suivie d'un diagnostic descriptif de ses plus
   fortes sous-estimations et surestimations.
+- `notebooks/04_fiabilite_conditionnelle_simple.ipynb` : comparaison des mêmes
+  prévisions selon des niveaux de `RV5` définis sur 1990–2015, avec effectifs,
+  épisodes contigus et sensibilité aux cinq décalages non chevauchants.
 - `EDA/01_nature_donnees_fama_french.ipynb` : provenance, qualité, calendrier,
   distribution et dépendance temporelle des seuls rendements de marché utilisés,
   composition de `RV5`, trajectoires autour des fortes amplitudes et concentration

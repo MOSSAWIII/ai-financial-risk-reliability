@@ -173,6 +173,37 @@ de `RV5` comparable, la concentration de la cible ne classe pas régulièrement 
 MAE : la difficulté ne se réduit donc pas à la domination d'une séance future.
 Ces constats sont descriptifs et ne constituent pas une confirmation indépendante.
 
+### 18 octobre 2026 — fiabilité conditionnelle des deux prévisions simples
+
+Le porteur autorise une expérience limitée aux 1 001 prévisions existantes de
+2016–2019. Les niveaux conditionnels sont définis par les quintiles de `RV5`
+calculés exclusivement sur 1990–2015. Ce choix non paramétrique n'est pas optimisé
+sur l'évaluation et conserve des groupes suffisamment fournis. Le niveau supérieur
+`Q5` commence à 19,815 % annualisés ; il désigne une volatilité future élevée
+relativement à l'apprentissage, pas une crise, un régime ni une perte financière.
+
+Sur 2016–2019, `Q5` contient 131 dates réparties en 21 épisodes contigus. La
+volatilité historique 20 y obtient une MAE de 9,243 points contre 11,498 pour la
+constante, et une RMSE de 12,335 contre 12,869. Elle réduit la sous-estimation
+moyenne de 2,549 points, mais sous-estime encore 84,0 % des dates et sa pire
+sous-estimation atteint 33,904 points, contre 31,199 pour la constante.
+
+L'avantage conditionnel de MAE et de RMSE en `Q5` reste positif pour chacun des
+cinq décalages d'origines espacées de cinq séances. Les gains de MAE vont de
+2,047 à 2,479 points et ceux de RMSE de 0,143 à 0,931 point. Ces décalages sont
+des sensibilités descriptives, pas cinq réplications indépendantes.
+
+La décomposition nuance fortement le résultat global : `Q1`, le niveau de
+volatilité future le plus faible, contribue 2,180 points au gain global de MAE de
+2,215 points. L'historique 20 est meilleur en `Q1`, `Q2` et `Q5`, mais moins bon
+en `Q3` et `Q4`. Son avantage moyen vient donc principalement de la correction
+des fortes surestimations de la constante lorsque `RV5` est faible, même s'il
+apporte aussi une amélioration moyenne en `Q5`.
+
+Cette analyse est rétrospective : le niveau de `RV5` n'est connu qu'après `t`.
+Elle n'établit aucune capacité de détection en temps réel, aucune utilité
+financière et aucune généralisation hors de la période déjà explorée.
+
 ## Décisions en vigueur
 
 | ID | Statut | Décision | Conséquence |
@@ -191,9 +222,11 @@ Ces constats sont descriptifs et ne constituent pas une confirmation indépendan
 | D025 | Constat exploratoire | sur 2016–2019, la volatilité historique 20 améliore en moyenne MAE et RMSE face à la constante 1990–2015 | résultat non uniforme selon l'année, sans test statistique ni confirmation indépendante ; aucune supériorité financière établie |
 | D026 | Constat descriptif | les plus fortes erreurs sont cohérentes avec le décalage entre la fenêtre passée et les cinq rendements futurs | sélection rétrospective et cibles chevauchantes ; aucune détection en temps réel ni explication causale établie |
 | D027 | Validé et exécuté | réaliser puis approfondir une EDA limitée aux rendements et prévisions déjà utilisés | composition de `RV5`, trajectoires extrêmes et concentration des erreurs sont documentées sans étendre le périmètre scientifique |
+| D028 | Validé et exécuté | comparer conditionnellement les deux prévisions existantes selon des seuils fixés sur 1990–2015 | l'historique 20 s'améliore en `Q5`, mais son gain global provient surtout de `Q1` ; aucune détection à `t` n'est établie |
 
 ## Prochaine décision nécessaire
 
-Examiner les résultats de l'EDA et de la troisième expérience, puis définir
-explicitement la question minimale suivante. Aucun modèle, test supplémentaire
-ou extension des données n'est autorisé sans accord du porteur.
+Décider si la prochaine question doit examiner la possibilité de reconnaître,
+avec les seules informations disponibles à `t`, les futures sous-estimations
+importantes. Aucun modèle, test supplémentaire ou ajout de données n'est autorisé
+sans accord du porteur.
