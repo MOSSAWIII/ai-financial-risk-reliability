@@ -293,6 +293,58 @@ Ces constats sont exploratoires. Ils n'établissent aucune supériorité
 financière, stabilité hors de ces périodes, détection en temps réel ou relation
 causale.
 
+### 18 octobre 2026 — anatomie descriptive des défaillances communes
+
+Le porteur autorise un notebook diagnostique consacré aux sous-estimations
+fortes communes, sans nouveau modèle, réglage, test ou source. Les cinq
+prévisions initiales du notebook 05 sont reproduites exactement sur les mêmes
+1 001 dates. Une grande sous-estimation reste définie par une erreur signée
+`prévision − RV5` inférieure ou égale à −10,931 points, seuil égal au 90e
+centile de l'erreur absolue de la constante sur la validation 2010–2015. Une
+défaillance commune exige au moins quatre modèles sur cinq ; un épisode est une
+suite maximale d'origines consécutives qui satisfont ce critère.
+
+Le benchmark initial contient 44 origines communes regroupées en 13 épisodes ;
+les cinq modèles franchissent simultanément le seuil sur 33 dates. Les
+configurations étendues retrouvent les 44 dates initiales et ajoutent seulement
+le 5 février 2018, soit 45 dates, 13 épisodes et un indice de Jaccard de 97,8 %.
+Les hyperparamètres expliquent donc très peu la composition des défaillances
+communes.
+
+Le chevauchement amplifie fortement les effectifs : les 44 origines se ramènent
+à 13 séances futures dominantes distinctes. Une séance dominante représente une
+part médiane de 60,7 % de la somme des cinq rendements futurs au carré et peut
+entrer dans cinq cibles successives. Le constat ne disparaît toutefois pas dans
+les sous-échantillons espacés de cinq séances : chacun contient 7 à 10
+défaillances et représente 7 à 9 des épisodes historiques.
+
+Au début des 13 épisodes, aucun rendement courant ne dépasse le 95e centile de
+`|r_t|` calculé sur 1990–2015. `HV5` dépasse `HV20` dans 5 cas sur 13, une
+proportion proche de celle observée hors des dates communes. La dispersion
+médiane entre prévisions est légèrement plus faible aux débuts, tandis que les
+niveaux médians de `HV20` et `HV60` sont plus élevés. Ces éléments ne révèlent
+pas un signal simple et uniforme disponible à `t`.
+
+La séance future dominante peut apparaître à chacun des cinq décalages et n'est
+pas connue à l'origine. Elle dépasse le 99e centile historique de `|r|` dans
+seulement 2 épisodes sur 13. La prévision moyenne augmente du début à la fin
+dans 6 épisodes ; elle stagne ou diminue dans les autres. Une réaction tardive
+est donc compatible avec une partie des trajectoires, mais ne fournit pas une
+explication universelle.
+
+Les erreurs restent à la fois communes et spécifiques. L'EWMA et le Boosting
+franchissent le seuil lors des 44 dates communes, la Ridge lors de 43 et `HV20`
+lors de 42. Tous les modèles connaissent également quelques grandes
+sous-estimations hors de ce noyau. Les résultats sont compatibles avec une
+limite informationnelle partagée et une adaptation après observation de
+nouveaux rendements, sans démontrer qu'une autre information disponible à `t`
+n'aurait pas permis de prévoir les épisodes.
+
+Cette analyse est rétrospective et ne démontre ni détection en temps réel,
+imprévisibilité, cause économique ou coût financier. Les épisodes restent
+dépendants, 2016–2019 a déjà été examinée et une forte volatilité n'est pas
+automatiquement une perte.
+
 ## Décisions en vigueur
 
 | ID | Statut | Décision | Conséquence |
@@ -314,11 +366,13 @@ causale.
 | D028 | Validé et exécuté | comparer conditionnellement les deux prévisions existantes selon des seuils fixés sur 1990–2015 | l'historique 20 s'améliore en `Q5`, mais son gain global provient surtout de `Q1` ; aucune détection à `t` n'est établie |
 | D029 | Validé et exécuté | étendre le benchmark à EWMA, Ridge et Gradient Boosting avec validation chronologique et seuil absolu commun | aucun modèle ne domine tous les critères ; les grandes sous-estimations restent souvent communes et aucune supériorité financière n'est établie |
 | D030 | Validé et exécuté | approfondir dans le notebook 05 la sensibilité des hyperparamètres sans remplacer le benchmark initial | les minima de validation sont plats ou temporellement instables ; l'élargissement modifie peu les résultats exploratoires et les échecs communs persistent |
+| D031 | Validé et exécuté | analyser les épisodes de sous-estimation commune avec les seules données et prévisions existantes | le chevauchement amplifie les 44 origines, mais les défaillances persistent sans signal historique simple et uniforme ; aucune détection ni causalité n'est établie |
 
 ## Prochaine décision nécessaire
 
-Décider si la prochaine question doit examiner la possibilité de distinguer,
-avec les seules informations disponibles à `t`, les épisodes de grande
-sous-estimation communs aux modèles des erreurs propres à une méthode. Aucun
-modèle, test supplémentaire ou ajout de données n'est autorisé sans accord du
-porteur.
+Choisir, avant toute nouvelle expérience, entre trois questions distinctes :
+déterminer quelle part d'un épisode pourrait être signalée avant sa première
+défaillance ; examiner une information disponible à `t` mais absente des seuls
+rendements ; ou définir la décision financière donnant un coût explicite aux
+sous-estimations et surestimations. Aucun modèle, test supplémentaire ou ajout
+de données n'est autorisé sans accord du porteur.
