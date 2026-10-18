@@ -345,6 +345,43 @@ imprévisibilité, cause économique ou coût financier. Les épisodes restent
 dépendants, 2016–2019 a déjà été examinée et une forte volatilité n'est pas
 automatiquement une perte.
 
+### 18 octobre 2026 — reconnaissance exploratoire du risque de sous-estimation
+
+Le porteur valide les sept arbitrages du protocole de reconnaissance et corrige
+la séparation entre deux unités d'évaluation. Le rappel des débuts porte sur les
+13 premières dates des épisodes. La précision quotidienne porte sur les 44
+dates où `C(t)=1` : une alerte postérieure au début mais située sur l'une de ces
+dates est correcte au sens quotidien, tout en restant une alerte tardive. Les
+44 dates ne sont jamais traitées comme des événements indépendants.
+
+Le notebook 07 examine deux règles fixées sans apprentissage ni optimisation.
+La règle A se déclenche lorsque `HV20` dépasse son 90e centile historique sur
+1990–2015, soit 26,32 % annualisés. La règle B utilise le 90e centile du ratio
+`HV5/HV20`, soit 1,3561. Les deux signaux sont entièrement observables à la
+clôture de `t`. Les événements du notebook 06 sont repris sans réentraîner les
+cinq modèles, et leur concordance de 44 dates et 13 épisodes est vérifiée.
+
+La règle A produit 19 alertes consécutives, ne reconnaît aucun début et ne
+coïncide avec aucune date où `C(t)=1`. Elle génère donc 19 fausses alertes, soit
+1,90 pour 100 séances. La règle B produit 119 alertes, reconnaît 1 début sur 13
+et en manque 12. Cinq alertes seulement correspondent à `C(t)=1`, dont quatre
+sont tardives : sa précision quotidienne atteint 4,20 %, légèrement moins que
+la fréquence de base de 4,40 %. Ses 114 fausses alertes représentent 11,39 pour
+100 séances.
+
+Les cinq dates correctement signalées par la règle B appartiennent à cinq
+épisodes, mais ses défaillances communes signalées ne figurent que dans deux
+des cinq décalages non chevauchants. Les décalages ne constituent pas des
+validations indépendantes. Les deux règles échouent donc à reconnaître de façon
+satisfaisante les débuts d'épisodes sur cette période. Ce résultat négatif ne
+démontre ni l'imprévisibilité des épisodes ni l'inutilité de toute information
+disponible à `t`.
+
+L'expérience reste exploratoire parce que 2016–2019 a déjà orienté la question.
+Aucune fonction de coût financier n'est validée et aucune forte volatilité ne
+doit être assimilée automatiquement à une perte. Aucun seuil n'est modifié à la
+suite des résultats et aucun signal n'est combiné.
+
 ## Décisions en vigueur
 
 | ID | Statut | Décision | Conséquence |
@@ -367,12 +404,14 @@ automatiquement une perte.
 | D029 | Validé et exécuté | étendre le benchmark à EWMA, Ridge et Gradient Boosting avec validation chronologique et seuil absolu commun | aucun modèle ne domine tous les critères ; les grandes sous-estimations restent souvent communes et aucune supériorité financière n'est établie |
 | D030 | Validé et exécuté | approfondir dans le notebook 05 la sensibilité des hyperparamètres sans remplacer le benchmark initial | les minima de validation sont plats ou temporellement instables ; l'élargissement modifie peu les résultats exploratoires et les échecs communs persistent |
 | D031 | Validé et exécuté | analyser les épisodes de sous-estimation commune avec les seules données et prévisions existantes | le chevauchement amplifie les 44 origines, mais les défaillances persistent sans signal historique simple et uniforme ; aucune détection ni causalité n'est établie |
+| D032 | Validé et exécuté | évaluer séparément la reconnaissance des 13 débuts et la précision quotidienne de deux alertes fixées sur `HV20` et `HV5/HV20` | les règles reconnaissent respectivement 0 et 1 début ; leur précision quotidienne est de 0,00 % et 4,20 %, sans validation indépendante ni utilité financière démontrée |
 
 ## Prochaine décision nécessaire
 
-Choisir, avant toute nouvelle expérience, entre trois questions distinctes :
-déterminer quelle part d'un épisode pourrait être signalée avant sa première
-défaillance ; examiner une information disponible à `t` mais absente des seuls
-rendements ; ou définir la décision financière donnant un coût explicite aux
-sous-estimations et surestimations. Aucun modèle, test supplémentaire ou ajout
-de données n'est autorisé sans accord du porteur.
+Les deux signaux historiques simples ayant échoué, la prochaine décision
+scientifique est de déterminer si l'on cherche d'abord à expliquer cette absence
+de discrimination dans les seuls rendements, à examiner une information
+disponible à `t` mais absente de cette série, ou à définir la décision financière
+donnant un coût explicite aux alertes manquées et superflues. Une éventuelle
+validation prospective reste reportée. Aucun modèle, test supplémentaire,
+ajout de variable ou ajout de données n'est autorisé sans accord du porteur.

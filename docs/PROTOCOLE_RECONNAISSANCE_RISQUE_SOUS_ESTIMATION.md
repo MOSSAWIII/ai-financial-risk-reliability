@@ -1,6 +1,6 @@
-# Protocole proposé — Reconnaître le risque de forte sous-estimation
+# Protocole validé — Reconnaître le risque de forte sous-estimation
 
-**Statut : proposition méthodologique soumise à validation — aucune expérience engagée**
+**Statut : sept arbitrages validés le 18 octobre 2026 ; expérience exploratoire unique documentée dans le notebook 07**
 
 ## 1. Question scientifique retenue et justification
 
@@ -163,17 +163,19 @@ Pour une date d'origine `t` :
 4. attendre les cinq séances futures nécessaires au calcul de `RV5_t` ;
 5. déterminer alors, et seulement alors, si `C(t)=1` et si `t` constitue un début d'épisode.
 
-Cette séquence doit être démontrée explicitement dans le futur notebook. Les variables de signal ne peuvent contenir aucune observation postérieure à `t`.
+Cette séquence est démontrée explicitement dans le notebook 07. Les variables de signal ne contiennent aucune observation postérieure à `t`.
 
 ### 4.3 Unités d'analyse et chevauchement
 
-L'unité principale est le début des 13 épisodes. Une alerte est pertinente au sens principal uniquement si elle est active à la date d'origine du début d'épisode. Une alerte à une date ordinaire est une fausse alerte ; un début sans alerte est un épisode manqué.
+L'unité principale pour mesurer la reconnaissance du **début** est le début des 13 épisodes. Un début est reconnu uniquement si l'alerte est active à sa date d'origine ; un début sans alerte est un épisode manqué.
+
+L'évaluation quotidienne répond à une question différente. Une date d'alerte est correcte au sens quotidien dès lors que `C(t)=1`, y compris si elle se situe après la première date de l'épisode. Une fausse alerte quotidienne est une alerte telle que `C(t)=0`. Une alerte correcte située dans un épisode mais après son début est qualifiée d'**alerte tardive** : elle contribue à la précision quotidienne, mais pas au rappel des débuts.
 
 L'analyse quotidienne sur les 44 dates sera secondaire et clairement identifiée comme affectée par le chevauchement. Elle indiquera si une règle devient active après le début, sans transformer cette réaction tardive en anticipation réussie.
 
 La sensibilité aux cinq décalages d'observations espacées de cinq séances sera conservée. Elle ne servira pas à produire cinq confirmations : chaque décalage contient très peu d'événements. Elle vérifiera seulement que le résultat descriptif ne dépend pas entièrement d'un décalage particulier.
 
-Les alertes quotidiennes consécutives seront également regroupées en épisodes d'alerte pour rendre visible leur persistance. Toutefois, le calcul principal gardera chaque date d'alerte dans le dénominateur de la précision : répéter longtemps une alerte ne doit pas permettre de revendiquer plusieurs succès pour un seul épisode.
+Les alertes quotidiennes consécutives seront également regroupées en épisodes d'alerte pour rendre visible leur persistance. Le calcul de précision quotidienne gardera chaque date d'alerte dans son dénominateur. Les comptages quotidiens ne seront jamais interprétés comme des événements indépendants et ne remplaceront pas le rappel calculé sur les 13 débuts.
 
 ### 4.4 Références minimales
 
@@ -201,8 +203,9 @@ Le faible nombre d'épisodes impose des nombres bruts en plus des proportions.
 
 - **Épisodes reconnus / 13** : nombre et proportion de débuts d'épisodes portant une alerte. C'est le rappel au niveau des épisodes.
 - **Épisodes manqués / 13** : complément du précédent, financièrement important puisque chaque omission correspond à une défaillance commune non signalée.
-- **Alertes pertinentes / total des dates d'alerte** : précision de l'alerte. Elle mesure combien d'alertes quotidiennes correspondent réellement à un début d'épisode.
-- **Fausses alertes pour 100 séances** : mesure directe de la charge opérationnelle.
+- **Alertes sur une date où `C(t)=1` / total des dates d'alerte** : précision quotidienne. Une alerte tardive au sein d'un épisode est correcte selon cette mesure, même si elle ne reconnaît pas le début.
+- **Fausses alertes quotidiennes pour 100 séances** : nombre d'alertes telles que `C(t)=0`, rapporté aux 1 001 séances ; c'est une mesure directe de la charge opérationnelle.
+- **Alertes tardives** : nombre d'alertes telles que `C(t)=1` et `O(t)=0`, présenté séparément afin de ne pas les confondre avec les débuts reconnus.
 
 L'exactitude globale ne sera pas une mesure principale : avec 13 débuts sur 1 001 dates, une règle qui ne déclenche jamais d'alerte paraîtrait excellente tout en étant inutile pour la question étudiée.
 
@@ -212,7 +215,7 @@ L'exactitude globale ne sera pas une mesure principale : avec 13 débuts sur 1 0
 - nombre d'épisodes d'alerte distincts et durée de ces épisodes ;
 - résultat sur l'ensemble des 44 dates, séparé du résultat sur les 13 débuts ;
 - distribution descriptive des résultats dans les cinq décalages non chevauchants ;
-- chronologie montrant si une alerte apparaît au début, seulement après le début, ou jamais.
+- chronologie montrant si une alerte apparaît avant, au début, pendant ou après chaque épisode, sans attribuer à une alerte antérieure ou postérieure une capacité qu'elle ne démontre pas.
 
 Aucun test de significativité supplémentaire n'est nécessaire dans l'expérience minimale. Avec 13 événements et une période déjà explorée, une valeur-p ne transformerait pas l'analyse en preuve indépendante.
 
@@ -274,22 +277,22 @@ La règle serait davantage un indicateur de réaction ou de suivi qu'un signal d
 
 Même si une règle reconnaît plusieurs débuts avec peu de fausses alertes et reste cohérente entre décalages, la conclusion devra rester : « signal candidat observé sur une période déjà explorée ». La prochaine exigence scientifique serait une validation prospective, et non l'ajout immédiat d'un modèle plus complexe.
 
-## 8. Décisions nécessitant une validation avant exécution
+## 8. Décisions validées avant l'exécution
 
-1. **Objectif principal** : valider la reconnaissance, à la date `t`, du risque associé à la prévision émise à `t`, sans la présenter comme une anticipation à `t−1`.
-2. **Unité principale** : valider les 13 débuts d'épisodes comme unité de conclusion, les 44 dates restant un diagnostic secondaire.
+1. **Objectif principal** : reconnaissance, à la date `t`, du risque associé à la prévision émise à `t`, sans la présenter comme une anticipation à `t−1`.
+2. **Unité principale** : les 13 débuts d'épisodes constituent l'unité de conclusion sur la reconnaissance des débuts ; les 44 dates servent à mesurer séparément la précision quotidienne.
 3. **Définition de l'événement** : conserver le seuil absolu `10,931` et la règle d'au moins quatre modèles sur cinq du benchmark initial.
-4. **Signaux autorisés** : limiter l'expérience à `HV20_t` et au ratio `HV5_t/HV20_t`, sans combinaison ni apprentissage.
-5. **Seuil d'alerte** : valider le 90e centile de chaque signal sur 1990–2015, choisi pour limiter simplement la fréquence historique des alertes et non pour optimiser leur performance.
-6. **Statut de 2016–2019** : confirmer que le résultat sera exclusivement exploratoire, cette période ayant déjà été examinée.
-7. **Confirmation future** : décider ultérieurement si le protocole doit être gelé pour une évaluation prospective ; aucune collecte, actualisation ou extension n'est incluse dans la présente proposition.
+4. **Signaux autorisés** : l'expérience est limitée à `HV20_t` et au ratio `HV5_t/HV20_t`, sans combinaison ni apprentissage.
+5. **Seuil d'alerte** : le 90e centile de chaque signal sur 1990–2015 limite simplement la fréquence historique des alertes ; il ne résulte d'aucune optimisation de performance.
+6. **Statut de 2016–2019** : le résultat est exclusivement exploratoire, cette période ayant déjà été examinée.
+7. **Confirmation future** : toute décision sur une évaluation prospective est reportée ; aucune collecte, actualisation ou extension n'est incluse.
 
-## 9. Recommandation
+## 9. Expérience minimale exécutée
 
-La prochaine expérience minimale recommandée est une évaluation exploratoire, sur les 1 001 dates déjà communes de 2016–2019, de deux alertes entièrement prédéfinies : niveau élevé de `HV20` et accélération élevée de `HV5/HV20`, chacune au-dessus de son 90e centile calculé sur 1990–2015.
+L'expérience minimale exécutée est une évaluation exploratoire, sur les 1 001 dates déjà communes de 2016–2019, de deux alertes entièrement prédéfinies : niveau élevé de `HV20` et accélération élevée de `HV5/HV20`, chacune au-dessus de son 90e centile calculé sur 1990–2015.
 
-L'analyse doit prendre les 13 débuts d'épisodes comme unité principale, publier les effectifs bruts, le rappel, la précision et les fausses alertes pour 100 séances, puis montrer séparément les 44 dates chevauchantes et les cinq décalages non chevauchants. Elle ne doit entraîner aucun modèle, optimiser aucun seuil ni prétendre fournir une validation indépendante.
+L'analyse doit prendre les 13 débuts d'épisodes comme unité principale pour le rappel, puis mesurer séparément la précision quotidienne sur les 44 dates où `C(t)=1`. Elle doit publier les effectifs bruts, les débuts reconnus, les alertes tardives et les fausses alertes pour 100 séances, puis montrer les cinq décalages non chevauchants. Elle ne doit entraîner aucun modèle, optimiser aucun seuil ni prétendre fournir une validation indépendante.
 
 Ce protocole est volontairement falsifiable : il peut conclure que les informations historiques simples déjà disponibles ne reconnaissent pas suffisamment les défaillances. Un tel résultat serait scientifiquement utile, car il distinguerait l'absence de signal simple dans notre série de l'idée, non démontrée, qu'une sophistication algorithmique résoudrait nécessairement le problème.
 
-**Aucune exécution ne doit commencer avant validation explicite des sept décisions ci-dessus.**
+Cette expérience a été autorisée et exécutée une seule fois dans le notebook 07. Aucune expérience supplémentaire ne découle automatiquement de ce protocole.
