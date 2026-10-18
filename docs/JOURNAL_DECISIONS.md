@@ -204,6 +204,49 @@ Cette analyse est rétrospective : le niveau de `RV5` n'est connu qu'après `t`.
 Elle n'établit aucune capacité de détection en temps réel, aucune utilité
 financière et aucune généralisation hors de la période déjà explorée.
 
+### 18 octobre 2026 — benchmark exploratoire de cinq prévisions
+
+Le porteur autorise l'ajout d'une EWMA calibrée, d'une Ridge et d'un Gradient
+Boosting aux deux références existantes. L'estimation utilise 1990–2009, la
+validation 2010–2015 et la réestimation finale 1990–2015 ; chaque frontière est
+purgée pour que la cible à cinq séances reste entièrement dans sa période. Les
+1 001 dates de 2016–2019 demeurent une évaluation exploratoire déjà examinée.
+
+La RMSE de validation sélectionne `lambda=0,90` pour l'EWMA, `alpha=100` pour
+la Ridge et, pour le Boosting, une profondeur de 1 avec au moins 10 observations
+par feuille. Le facteur multiplicatif final de l'EWMA vaut 0,924348. Ridge et
+Boosting utilisent uniquement `HV5`, `HV20` et `HV60`; l'EWMA utilise sa
+pondération exponentielle des rendements. Aucune prévision ML négative n'a dû
+être ramenée à zéro pendant l'évaluation.
+
+Les références reproduisent exactement les résultats antérieurs. Sur 2016–2019,
+l'EWMA obtient la plus faible MAE (4,295 points), la Ridge la plus faible RMSE
+(6,089) et le Boosting la sous-estimation moyenne la plus faible (1,530), contre
+respectivement 4,839, 6,796 et 1,983 pour `HV20`. Aucun modèle ne domine donc
+tous les critères. Le Boosting n'améliore pas la MAE de l'EWMA ou de la Ridge et
+ne démontre pas ici la nécessité d'une relation non linéaire.
+
+Dans `Q5`, `HV20` conserve la plus faible MAE des quatre méthodes dynamiques
+(9,243), tandis que la Ridge et le Boosting obtiennent des RMSE légèrement plus
+faibles (12,069 et 12,056). Ils sous-estiment toutefois `RV5` sur 92,4 % et
+96,2 % des dates de `Q5`. La complexité supplémentaire n'élimine donc pas les
+erreurs dans les 131 observations de forte volatilité future.
+
+Le seuil absolu commun, fixé avant l'évaluation au 90e centile de l'erreur
+absolue de la constante sur 2010–2015, vaut 10,931 points. Au moins quatre des
+cinq modèles connaissent une grande sous-estimation sur 44 dates regroupées en
+13 épisodes ; les cinq sous-estiment fortement ensemble sur 33 dates et 11
+épisodes. Les grandes surestimations communes à au moins quatre modèles sont
+plus rares : 10 dates et 5 épisodes. Ces catégories sont rétrospectives et ne
+constituent pas un dispositif de détection en temps réel.
+
+Les cinq décalages sans chevauchement direct conservent les principaux écarts
+globaux, mais ne constituent pas cinq réplications indépendantes. La
+concentration des erreurs reste élevée : les 10 % plus grandes erreurs expliquent
+55,54 % à 66,34 % de l'erreur carrée des trois nouveaux modèles. Aucun résultat
+n'établit une utilité financière, une causalité, une généralisation ou une
+contribution scientifique originale.
+
 ## Décisions en vigueur
 
 | ID | Statut | Décision | Conséquence |
@@ -223,10 +266,12 @@ financière et aucune généralisation hors de la période déjà explorée.
 | D026 | Constat descriptif | les plus fortes erreurs sont cohérentes avec le décalage entre la fenêtre passée et les cinq rendements futurs | sélection rétrospective et cibles chevauchantes ; aucune détection en temps réel ni explication causale établie |
 | D027 | Validé et exécuté | réaliser puis approfondir une EDA limitée aux rendements et prévisions déjà utilisés | composition de `RV5`, trajectoires extrêmes et concentration des erreurs sont documentées sans étendre le périmètre scientifique |
 | D028 | Validé et exécuté | comparer conditionnellement les deux prévisions existantes selon des seuils fixés sur 1990–2015 | l'historique 20 s'améliore en `Q5`, mais son gain global provient surtout de `Q1` ; aucune détection à `t` n'est établie |
+| D029 | Validé et exécuté | étendre le benchmark à EWMA, Ridge et Gradient Boosting avec validation chronologique et seuil absolu commun | aucun modèle ne domine tous les critères ; les grandes sous-estimations restent souvent communes et aucune supériorité financière n'est établie |
 
 ## Prochaine décision nécessaire
 
-Décider si la prochaine question doit examiner la possibilité de reconnaître,
-avec les seules informations disponibles à `t`, les futures sous-estimations
-importantes. Aucun modèle, test supplémentaire ou ajout de données n'est autorisé
-sans accord du porteur.
+Décider si la prochaine question doit examiner la possibilité de distinguer,
+avec les seules informations disponibles à `t`, les épisodes de grande
+sous-estimation communs aux modèles des erreurs propres à une méthode. Aucun
+modèle, test supplémentaire ou ajout de données n'est autorisé sans accord du
+porteur.
