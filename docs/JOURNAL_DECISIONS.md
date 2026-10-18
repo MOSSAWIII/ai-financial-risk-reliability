@@ -247,6 +247,52 @@ concentration des erreurs reste élevée : les 10 % plus grandes erreurs expliqu
 n'établit une utilité financière, une causalité, une généralisation ou une
 contribution scientifique originale.
 
+### 18 octobre 2026 — sensibilité des hyperparamètres du benchmark
+
+Le porteur autorise un approfondissement dans le notebook 05 uniquement. Le
+benchmark initial est conservé. Huit valeurs de `lambda`, neuf valeurs de
+`alpha` et 39 configurations structurées du Boosting sont ajustées sur
+1990–2009 et comparées par RMSE sur 2010–2015. L'examen total de 56
+configurations sur un même bloc augmente le risque de surajustement à la
+validation ; les sélections étendues restent séparées des résultats initiaux.
+
+Pour l'EWMA, l'extension de `lambda` de 0,70 à 0,99 ne déplace pas le choix :
+`lambda=0,90`, dont la demi-vie théorique vaut 6,58 séances, reste le minimum de
+RMSE. Les valeurs plus faibles rendent la prévision plus variable et plus
+négativement biaisée ; les valeurs très élevées la lissent et ralentissent sa
+réaction. Le minimum varie toutefois selon la sous-période : 0,90 sur
+2010–2012 et 0,97 sur 2013–2015.
+
+Pour la Ridge, les prévisions sont presque identiques entre `alpha=0,0001` et
+10. Le minimum étendu se déplace de 100 à 1000, pour un gain de seulement 0,018
+point de RMSE de validation. Les prévisions à 100 et 1000 restent corrélées à
+0,9992 et diffèrent en moyenne de 0,353 point. `alpha=10000` détériore les
+erreurs d'estimation et de validation. Sur 2016–2019, le choix 1000 dégrade la
+MAE de 0,061 point et la RMSE de 0,009 par rapport au choix initial : le faible
+gain de validation ne se prolonge pas.
+
+Pour le Gradient Boosting, la grille distingue l'interaction entre taux
+d'apprentissage et nombre d'arbres de celle entre profondeur et taille des
+feuilles. Les meilleures configurations de validation utilisent des arbres de
+profondeur 1. Le choix étendu (`learning_rate=0,10`, 50 arbres) est très proche
+du choix initial (`0,05`, 100 arbres) et ne change presque pas l'évaluation :
+−0,0045 point de MAE et −0,0005 de RMSE. Une complexité accrue réduit l'erreur
+d'estimation sans améliorer systématiquement la validation. Les importances et
+coupures restent descriptives car `HV5`, `HV20` et `HV60` sont fortement liées.
+
+La fiabilité conditionnelle change peu. `HV20` conserve la plus faible MAE en
+`Q5` (9,243) et la plus faible fréquence de sous-estimation parmi les méthodes
+dynamiques. Les sélections étendues sous-estiment encore 91,6 % à 96,2 % des
+dates de `Q5`. Au seuil absolu inchangé de 10,931 points, au moins quatre modèles
+sous-estiment fortement ensemble sur 45 dates et 13 épisodes, contre 44 dates et
+13 épisodes initialement. Les cinq échouent ensemble sur 34 dates et 11
+épisodes, contre 33 dates et 11 épisodes. Les hyperparamètres affectent le
+lissage et le biais, mais expliquent peu les échecs communs.
+
+Ces constats sont exploratoires. Ils n'établissent aucune supériorité
+financière, stabilité hors de ces périodes, détection en temps réel ou relation
+causale.
+
 ## Décisions en vigueur
 
 | ID | Statut | Décision | Conséquence |
@@ -267,6 +313,7 @@ contribution scientifique originale.
 | D027 | Validé et exécuté | réaliser puis approfondir une EDA limitée aux rendements et prévisions déjà utilisés | composition de `RV5`, trajectoires extrêmes et concentration des erreurs sont documentées sans étendre le périmètre scientifique |
 | D028 | Validé et exécuté | comparer conditionnellement les deux prévisions existantes selon des seuils fixés sur 1990–2015 | l'historique 20 s'améliore en `Q5`, mais son gain global provient surtout de `Q1` ; aucune détection à `t` n'est établie |
 | D029 | Validé et exécuté | étendre le benchmark à EWMA, Ridge et Gradient Boosting avec validation chronologique et seuil absolu commun | aucun modèle ne domine tous les critères ; les grandes sous-estimations restent souvent communes et aucune supériorité financière n'est établie |
+| D030 | Validé et exécuté | approfondir dans le notebook 05 la sensibilité des hyperparamètres sans remplacer le benchmark initial | les minima de validation sont plats ou temporellement instables ; l'élargissement modifie peu les résultats exploratoires et les échecs communs persistent |
 
 ## Prochaine décision nécessaire
 

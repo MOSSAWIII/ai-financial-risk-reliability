@@ -14,10 +14,11 @@ choix d'une licence est une décision ouverte.
 **Phase 0 — cadrage scientifique : validée le 15 octobre 2026.** Cinq étapes
 limitées de la Phase 1 ont été exécutées : audit de la cible, compréhension
 descriptive, comparaison exploratoire de deux prévisions simples, puis examen
-conditionnel de leurs erreurs et benchmark exploratoire de cinq prévisions. Une
-EDA complémentaire des seuls rendements bruts documente la nature des données
-utilisées. Ridge et Gradient Boosting ont été entraînés dans ce benchmark limité ;
-aucune supériorité financière ou générale n'en est déduite.
+conditionnel de leurs erreurs, benchmark exploratoire de cinq prévisions et
+analyse de sensibilité de leurs hyperparamètres. Une EDA complémentaire des
+seuls rendements bruts documente la nature des données utilisées. Ridge et
+Gradient Boosting ont été entraînés dans ce benchmark limité ; aucune
+supériorité financière ou générale n'en est déduite.
 
 Le projet cherche à comprendre comment les changements d'environnement
 économique affectent la fiabilité des prévisions du risque financier et dans
@@ -55,7 +56,10 @@ explicite du porteur du projet.
 - `notebooks/05_benchmark_cinq_modeles.ipynb` : comparaison exploratoire sur
   les mêmes 1 001 dates entre constante, `HV20`, EWMA calibrée, Ridge et
   Gradient Boosting, avec sélection chronologique sur 2010–2015, diagnostics
-  conditionnels, erreurs communes et cinq sensibilités non chevauchantes.
+  conditionnels, erreurs communes et cinq sensibilités non chevauchantes. Une
+  extension dans le même notebook étudie la mémoire de l'EWMA, la régularisation
+  Ridge et les principaux paramètres du Boosting sans remplacer le benchmark
+  initial.
 - `EDA/01_nature_donnees_fama_french.ipynb` : provenance, qualité, calendrier,
   distribution et dépendance temporelle des seuls rendements de marché utilisés,
   composition de `RV5`, trajectoires autour des fortes amplitudes et concentration
