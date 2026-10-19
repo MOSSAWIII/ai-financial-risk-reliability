@@ -2,7 +2,7 @@
 
 ## Statut
 
-Ce dossier ouvre un axe de recherche autonome au sein de `ai-financial-risk-reliability`. Il contient un cadrage scientifique, une étude fondamentale sur la nature séquentielle d'une décision, une formalisation financière d'un mandat stylisé, un premier audit empirique des données candidates et un patrimoine local de données documentées. Aucun algorithme de Reinforcement Learning (RL), modèle prédictif, environnement de simulation, stratégie ou backtest n'a été créé.
+Ce dossier ouvre un axe de recherche autonome au sein de `ai-financial-risk-reliability`. Il contient un cadrage scientifique, une étude fondamentale sur la nature séquentielle d'une décision, une formalisation financière d'un mandat stylisé, un patrimoine local de données documentées et une première reconstruction auditée des rendements totaux à la NAV de SPY et BIL. Aucun algorithme de Reinforcement Learning (RL), modèle prédictif, environnement de simulation, stratégie ou backtest n'a été créé.
 
 La priorité active est désormais : **DATA FIRST — NO EXPERIMENT WITHOUT VERIFIED LOCAL DATA.** Les données brutes sont conservées localement sous `data/raw/`, exclues de GitHub et sauvegardées sur un disque physique distinct. Leur inventaire publiable se trouve dans [`data_manifest.json`](data_manifest.json), les contrôles reproductibles dans [`scripts/verify_local_data.py`](scripts/verify_local_data.py), et les résultats détaillés dans [`docs/AUDIT_DONNEES_ACADEMIQUES_LOCALES.md`](docs/AUDIT_DONNEES_ACADEMIQUES_LOCALES.md).
 
@@ -53,7 +53,8 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 - [x] Premier audit des instruments actions–monétaire, des sources publiques et de leur disponibilité temporelle.
 - [x] Acquisition et audit local de 19 fichiers académiques ou institutionnels, avec SHA-256 et statuts d'usage.
 - [x] Vérificateur hors ligne et sauvegarde contrôlée sur un disque physique distinct.
-- [ ] Choix des instruments et audit d'une source de rendements totaux suffisamment profonde.
+- [x] Reconstruction comptable et audit des rendements totaux quotidiens à la NAV de SPY et BIL.
+- [ ] Validation indépendante complète des rendements totaux et choix d'une convention de prix exécutable.
 - [ ] Validation des références classiques avant toute méthode RL.
 - [ ] Autorisation explicite d'une première expérience.
 
@@ -66,8 +67,8 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 5. Quelles règles simples doivent être difficiles à battre avant que le RL soit jugé utile ?
 6. Comment réserver une évaluation réellement non consultée alors que plusieurs périodes du projet principal ont déjà orienté la recherche ?
 
-Le document [docs/CADRAGE_SCIENTIFIQUE.md](docs/CADRAGE_SCIENTIFIQUE.md) développe ces questions, les données candidates, les alternatives et les références examinées. L'étude [docs/PROBLEME_DECISION_SEQUENTIELLE.md](docs/PROBLEME_DECISION_SEQUENTIELLE.md) démontre quand les décisions se séparent période par période, quels mécanismes financiers créent une interdépendance et pourquoi ce besoin de contrôle ne suffit pas à justifier le RL. La proposition [docs/FORMALISATION_MANDAT_FINANCIER.md](docs/FORMALISATION_MANDAT_FINANCIER.md) décrit un gestionnaire stylisé, les flux exacts d'un portefeuille actions–monétaire, un mandat initial à discuter et les arbitrages requis avant toute expérience. Le notebook exécuté [EDA/01_audit_univers_financier.ipynb](EDA/01_audit_univers_financier.ipynb) audite SPY, IVV, VTI, deux séries de taux et le VIX, puis distingue ce qui est reconstructible de ce qui manque encore. L'[audit du patrimoine local](docs/AUDIT_DONNEES_ACADEMIQUES_LOCALES.md) documente 19 fichiers, leurs contrôles, leurs limites et les données encore nécessaires à un portefeuille SPY–BIL cohérent.
+Le document [docs/CADRAGE_SCIENTIFIQUE.md](docs/CADRAGE_SCIENTIFIQUE.md) développe ces questions, les données candidates, les alternatives et les références examinées. L'étude [docs/PROBLEME_DECISION_SEQUENTIELLE.md](docs/PROBLEME_DECISION_SEQUENTIELLE.md) démontre quand les décisions se séparent période par période, quels mécanismes financiers créent une interdépendance et pourquoi ce besoin de contrôle ne suffit pas à justifier le RL. La proposition [docs/FORMALISATION_MANDAT_FINANCIER.md](docs/FORMALISATION_MANDAT_FINANCIER.md) décrit un gestionnaire stylisé, les flux exacts d'un portefeuille actions–monétaire, un mandat initial à discuter et les arbitrages requis avant toute expérience. Le notebook exécuté [EDA/01_reconstruction_rendements_totaux_SPY_BIL.ipynb](EDA/01_reconstruction_rendements_totaux_SPY_BIL.ipynb) reconstruit et contrôle les rendements totaux quotidiens à la NAV; le rapport [docs/VALIDATION_RENDEMENTS_TOTAUX_SPY_BIL.md](docs/VALIDATION_RENDEMENTS_TOTAUX_SPY_BIL.md) en précise les conventions, anomalies, validations et usages admissibles. L'[audit du patrimoine local](docs/AUDIT_DONNEES_ACADEMIQUES_LOCALES.md) conserve la traçabilité des 19 fichiers bruts et des limites identifiées avant cette reconstruction.
 
 ## Règle d'arrêt
 
-Aucun benchmark décisionnel, environnement, backtest ou choix d'algorithme ne découle automatiquement de ces audits. Une expérience est interdite tant que ses données précises ne sont pas présentes, vérifiées et validées pour l'usage concerné. La prochaine étape devra être validée explicitement.
+Aucun benchmark décisionnel, environnement, backtest ou choix d'algorithme ne découle automatiquement de ces audits. Les séries reconstruites restent `AUDITED` : elles décrivent une performance totale conventionnelle à la NAV, pas une transaction nette exécutable. Une expérience est interdite tant que ses données précises et sa convention d'exécution ne sont pas validées pour l'usage concerné. La prochaine étape devra être autorisée explicitement.

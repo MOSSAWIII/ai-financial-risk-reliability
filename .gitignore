@@ -16,6 +16,7 @@ __pycache__/
 # Données brutes ou volumineuses : conserver localement la provenance/checksum
 data/raw/
 data/interim/
+data/processed/
 
 # Artefacts locaux
 .DS_Store

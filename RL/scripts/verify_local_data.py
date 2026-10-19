@@ -362,7 +362,11 @@ def audit_ssga_distributions(path: Path, _: dict[str, Any]) -> dict[str, Any]:
     frame = pd.read_excel(path, sheet_name="dividend")
     subset = frame[frame["TICKER"].isin(["SPY", "BIL"])].copy()
     ex_dates = pd.to_datetime(subset["EX-DATE"], errors="raise")
+    record_dates = pd.to_datetime(subset["RECORD DATE"], errors="raise")
+    payable_dates = pd.to_datetime(subset["PAYABLE DATE"], errors="raise")
     dividends = pd.to_numeric(subset["DIVIDEND ($)"], errors="coerce")
+    short_gains = pd.to_numeric(subset["SHORT TERM CAPITAL GAIN ($)"], errors="coerce").fillna(0)
+    long_gains = pd.to_numeric(subset["LONG TERM CAPITAL GAIN ($)"], errors="coerce").fillna(0)
     by_ticker = {}
     for ticker in ["SPY", "BIL"]:
         mask = subset["TICKER"].eq(ticker)
@@ -374,6 +378,10 @@ def audit_ssga_distributions(path: Path, _: dict[str, Any]) -> dict[str, Any]:
             "duplicate_ex_dates": int(dates.duplicated().sum()),
             "missing_dividends": int(dividends[mask].isna().sum()),
             "negative_dividends": int((dividends[mask] < 0).sum()),
+            "nonzero_short_term_capital_gains": int((short_gains[mask] != 0).sum()),
+            "nonzero_long_term_capital_gains": int((long_gains[mask] != 0).sum()),
+            "record_before_ex_date": int((record_dates[mask] < dates).sum()),
+            "payment_before_ex_date": int((payable_dates[mask] < dates).sum()),
         }
     return {"rows_all_funds": len(frame), "rows_spy_bil": len(subset), "by_ticker": by_ticker}
 
@@ -442,6 +450,56 @@ def audit_workbook_structure(path: Path, _: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def audit_derived_total_returns(path: Path, _: dict[str, Any]) -> dict[str, Any]:
+    frame = pd.read_csv(
+        path,
+        parse_dates=["date", "distribution_record_date", "distribution_payable_date"],
+    )
+    required = [
+        "nav_usd",
+        "split_factor_current_per_previous",
+        "total_distribution_usd_per_current_share",
+        "total_return_nav",
+        "growth_factor",
+        "total_return_index_base_100",
+    ]
+    numeric = frame[required].apply(pd.to_numeric, errors="coerce")
+    returns = numeric["total_return_nav"]
+    growth_error = (numeric["growth_factor"] - (1 + returns)).abs().dropna()
+    index_ratio = numeric["total_return_index_base_100"] / numeric["total_return_index_base_100"].shift(1)
+    index_error = (index_ratio - numeric["growth_factor"]).abs().dropna()
+    split_dates = frame.loc[numeric["split_factor_current_per_previous"].ne(1), "date"]
+    event_flag = frame["distribution_event"].astype(str).str.lower().eq("true")
+    return {
+        "rows": len(frame),
+        "ticker_values": sorted(frame["ticker"].dropna().astype(str).unique().tolist()),
+        "start": frame["date"].min().date().isoformat(),
+        "end": frame["date"].max().date().isoformat(),
+        "duplicate_dates": int(frame["date"].duplicated().sum()),
+        "missing_nav": int(numeric["nav_usd"].isna().sum()),
+        "nonpositive_nav": int((numeric["nav_usd"] <= 0).sum()),
+        "missing_returns": int(returns.isna().sum()),
+        "infinite_values": int((numeric.notna() & ~numeric.map(math.isfinite)).sum().sum()),
+        "distribution_events": int(event_flag.sum()),
+        "split_dates": [date.date().isoformat() for date in split_dates],
+        "max_growth_identity_error": float(growth_error.max()) if len(growth_error) else 0.0,
+        "max_index_identity_error": float(index_error.max()) if len(index_error) else 0.0,
+        "initial_index": float(numeric["total_return_index_base_100"].iloc[0]),
+        "ending_index": float(numeric["total_return_index_base_100"].iloc[-1]),
+    }
+
+
+def audit_json_document(path: Path, params: dict[str, Any]) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    required = params.get("required_keys", [])
+    return {
+        "top_level_keys": sorted(payload.keys()),
+        "missing_required_keys": sorted(set(required) - set(payload)),
+        "status": payload.get("status", payload.get("series_status")),
+        "all_required_assertions_passed": payload.get("all_required_assertions_passed"),
+    }
+
+
 HANDLERS = {
     "ff_daily_zip": audit_ff_daily_zip,
     "nasdaq_json": audit_nasdaq_json,
@@ -457,6 +515,8 @@ HANDLERS = {
     "ofr_fsi_csv": audit_ofr_fsi,
     "nfci_csv": audit_nfci,
     "workbook_structure": audit_workbook_structure,
+    "derived_total_returns_csv": audit_derived_total_returns,
+    "json_document": audit_json_document,
 }
 
 
