@@ -2,7 +2,7 @@
 
 ## Statut
 
-Ce dossier ouvre un axe de recherche autonome au sein de `ai-financial-risk-reliability`. Il contient un cadrage scientifique, une étude fondamentale sur la nature séquentielle d'une décision et une formalisation financière d'un mandat stylisé. Aucun algorithme de Reinforcement Learning (RL), modèle, jeu de données, environnement de simulation ou notebook expérimental n'a encore été créé.
+Ce dossier ouvre un axe de recherche autonome au sein de `ai-financial-risk-reliability`. Il contient un cadrage scientifique, une étude fondamentale sur la nature séquentielle d'une décision, une formalisation financière d'un mandat stylisé et un premier audit empirique des données candidates. Aucun algorithme de Reinforcement Learning (RL), modèle prédictif, environnement de simulation, stratégie ou backtest n'a été créé.
 
 La question de départ est provisoire :
 
@@ -48,7 +48,8 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 - [x] Formalisation comptable d'un mandat actions–monétaire et proposition non validée d'un mécanisme intertemporel minimal.
 - [ ] Choix d'un problème financier précis.
 - [ ] Définition de l'utilisateur, de la décision, de l'horizon et des contraintes.
-- [ ] Audit des données nécessaires et de leur disponibilité à chaque date.
+- [x] Premier audit des instruments actions–monétaire, des sources publiques et de leur disponibilité temporelle.
+- [ ] Choix des instruments et audit d'une source de rendements totaux suffisamment profonde.
 - [ ] Validation des références classiques avant toute méthode RL.
 - [ ] Autorisation explicite d'une première expérience.
 
@@ -61,8 +62,8 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 5. Quelles règles simples doivent être difficiles à battre avant que le RL soit jugé utile ?
 6. Comment réserver une évaluation réellement non consultée alors que plusieurs périodes du projet principal ont déjà orienté la recherche ?
 
-Le document [docs/CADRAGE_SCIENTIFIQUE.md](docs/CADRAGE_SCIENTIFIQUE.md) développe ces questions, les données candidates, les alternatives et les références examinées. L'étude [docs/PROBLEME_DECISION_SEQUENTIELLE.md](docs/PROBLEME_DECISION_SEQUENTIELLE.md) démontre quand les décisions se séparent période par période, quels mécanismes financiers créent une interdépendance et pourquoi ce besoin de contrôle ne suffit pas à justifier le RL. La proposition [docs/FORMALISATION_MANDAT_FINANCIER.md](docs/FORMALISATION_MANDAT_FINANCIER.md) décrit un gestionnaire stylisé, les flux exacts d'un portefeuille actions–monétaire, un mandat initial à discuter et les arbitrages requis avant toute expérience.
+Le document [docs/CADRAGE_SCIENTIFIQUE.md](docs/CADRAGE_SCIENTIFIQUE.md) développe ces questions, les données candidates, les alternatives et les références examinées. L'étude [docs/PROBLEME_DECISION_SEQUENTIELLE.md](docs/PROBLEME_DECISION_SEQUENTIELLE.md) démontre quand les décisions se séparent période par période, quels mécanismes financiers créent une interdépendance et pourquoi ce besoin de contrôle ne suffit pas à justifier le RL. La proposition [docs/FORMALISATION_MANDAT_FINANCIER.md](docs/FORMALISATION_MANDAT_FINANCIER.md) décrit un gestionnaire stylisé, les flux exacts d'un portefeuille actions–monétaire, un mandat initial à discuter et les arbitrages requis avant toute expérience. Le notebook exécuté [EDA/01_audit_univers_financier.ipynb](EDA/01_audit_univers_financier.ipynb) audite SPY, IVV, VTI, deux séries de taux et le VIX, puis distingue ce qui est reconstructible de ce qui manque encore. Les copies brutes horodatées et hachées sont conservées localement sous `data/raw/` et exclues de GitHub.
 
 ## Règle d'arrêt
 
-Aucune expérience, collecte de données ou sélection d'algorithme ne découle automatiquement de ce cadrage. La prochaine étape devra être validée explicitement.
+Aucun benchmark décisionnel, environnement, backtest ou choix d'algorithme ne découle automatiquement de cet audit. La prochaine étape devra être validée explicitement.
