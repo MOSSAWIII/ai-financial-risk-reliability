@@ -2,7 +2,7 @@
 
 ## Statut
 
-Ce dossier ouvre un axe de recherche autonome au sein de `ai-financial-risk-reliability`. Il contient un cadrage scientifique, une étude fondamentale sur la nature séquentielle d'une décision, une formalisation financière d'un mandat stylisé, un patrimoine local de données documentées et une première reconstruction auditée des rendements totaux à la NAV de SPY et BIL. Aucun algorithme de Reinforcement Learning (RL), modèle prédictif, environnement de simulation, stratégie ou backtest n'a été créé.
+Ce dossier ouvre un axe de recherche autonome au sein de `ai-financial-risk-reliability`. Il contient un cadrage scientifique, une étude fondamentale sur la nature séquentielle d'une décision, une formalisation financière d'un mandat stylisé, un patrimoine local de données documentées et une première reconstruction auditée des rendements totaux à la NAV de SPY et BIL. La documentation officielle confirme désormais le fractionnement inversé BIL; BIL satisfait deux contrôles agrégés de performance, tandis que SPY échoue à la tolérance préenregistrée. Aucun algorithme de Reinforcement Learning (RL), modèle prédictif, environnement de simulation, stratégie ou backtest n'a été créé.
 
 La priorité active est désormais : **DATA FIRST — NO EXPERIMENT WITHOUT VERIFIED LOCAL DATA.** Les données brutes sont conservées localement sous `data/raw/`, exclues de GitHub et sauvegardées sur un disque physique distinct. Leur inventaire publiable se trouve dans [`data_manifest.json`](data_manifest.json), les contrôles reproductibles dans [`scripts/verify_local_data.py`](scripts/verify_local_data.py), et les résultats détaillés dans [`docs/AUDIT_DONNEES_ACADEMIQUES_LOCALES.md`](docs/AUDIT_DONNEES_ACADEMIQUES_LOCALES.md).
 
@@ -54,7 +54,8 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 - [x] Acquisition et audit local de 19 fichiers académiques ou institutionnels, avec SHA-256 et statuts d'usage.
 - [x] Vérificateur hors ligne et sauvegarde contrôlée sur un disque physique distinct.
 - [x] Reconstruction comptable et audit des rendements totaux quotidiens à la NAV de SPY et BIL.
-- [ ] Validation indépendante complète des rendements totaux et choix d'une convention de prix exécutable.
+- [x] Confirmation documentaire du fractionnement inversé BIL et contrôle contre quatre performances NAV officielles.
+- [ ] Explication de l'écart SPY, validation indépendante complète et choix d'une convention de prix exécutable.
 - [ ] Validation des références classiques avant toute méthode RL.
 - [ ] Autorisation explicite d'une première expérience.
 
@@ -71,4 +72,4 @@ Le document [docs/CADRAGE_SCIENTIFIQUE.md](docs/CADRAGE_SCIENTIFIQUE.md) dévelo
 
 ## Règle d'arrêt
 
-Aucun benchmark décisionnel, environnement, backtest ou choix d'algorithme ne découle automatiquement de ces audits. Les séries reconstruites restent `AUDITED` : elles décrivent une performance totale conventionnelle à la NAV, pas une transaction nette exécutable. Une expérience est interdite tant que ses données précises et sa convention d'exécution ne sont pas validées pour l'usage concerné. La prochaine étape devra être autorisée explicitement.
+Aucun benchmark décisionnel, environnement, backtest ou choix d'algorithme ne découle automatiquement de ces audits. BIL est `VALIDATED_FOR_USE` uniquement pour l'analyse de rendement total NAV hors exécution sous la convention documentée; SPY et la paire SPY–BIL restent `AUDITED`. Aucune série ne représente une transaction nette exécutable. Une expérience est interdite tant que ses données précises et sa convention d'exécution ne sont pas validées pour l'usage concerné. La prochaine étape devra être autorisée explicitement.

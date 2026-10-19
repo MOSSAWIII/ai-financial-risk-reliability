@@ -2,18 +2,13 @@
 
 **Millésime :** 19 octobre 2026
 
-**Statut final :** `AUDITED`
+**Statut final de la paire :** `AUDITED` — BIL est `VALIDATED_FOR_USE` pour l'usage NAV étroit décrit ci-dessous; SPY reste `AUDITED`.
 
 ## Conclusion
 
 Deux séries quotidiennes de rendement total à la NAV ont été reconstruites hors ligne à partir des NAV et distributions officielles State Street. Les identités comptables, l'alignement temporel, l'intégration unique des distributions et la reproductibilité binaire sont vérifiés. La période commune va du **30 mai 2007 au 15 octobre 2026** : 4 880 dates de NAV et 4 879 rendements pour chacun des deux instruments.
 
-Le statut reste `AUDITED`, et non `VALIDATED_FOR_USE`, pour deux raisons :
-
-1. le fractionnement inversé BIL du 30 novembre 2017 est fortement corroboré par les trois champs du fichier officiel, mais aucune seconde source locale ne le confirme explicitement;
-2. aucune référence indépendante locale de rendement total à la NAV, construite selon la même convention, n'est disponible.
-
-Ces réserves n'invalident pas les calculs. Elles limitent la force de la validation et interdisent de présenter les séries comme des rendements exécutables ou comme la base déjà autorisée d'un backtest.
+Les deux réserves documentaires antérieures ont été examinées. Le fractionnement inversé BIL est désormais confirmé par un dépôt SEC et, pour le ratio exact, par le formulaire fiscal officiel State Street. Les performances officielles State Street permettent quatre contrôles hors ligne. BIL satisfait les deux contrôles avec la tolérance préenregistrée de 0,01 point de pourcentage. SPY dépasse cette tolérance sur les deux fenêtres; sa série n'est donc pas promue. La paire reste `AUDITED` et n'est pas une base autorisée de backtest.
 
 ## Sources vérifiées avant transformation
 
@@ -24,6 +19,10 @@ Ces réserves n'invalident pas les calculs. Elles limitent la force de la valida
 | Distributions SPDR | SPY depuis 1993; BIL depuis 2007 | `6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320` |
 | Clôtures Nasdaq SPY, contrôle partiel | 2016-10-17–2026-10-16 | `79e03e22a87b3be3eb5f38ee7e47f6ef39cb268a1996ff94b115b2a846316ad5` |
 | Premium/discount SPY, contrôle partiel | 2025-01-02–2026-10-16 | `afac89e371da667234881bb5a7e6607c9105061540576e3667f91d2f63ba12a9` |
+| Dépôt SEC 497 BIL | déposé le 2017-11-28; opération du 2017-11-30 | `529262f6cf2a70f689fa87480285ceae6e16bd98a03d493584208621c236ec3e` |
+| Form 8937 State Street BIL | fractionnement du 2017-11-30 | `e1b28c61ea9e73051cd7f34a8b8d310cb37e6b54aaa2b5793805784c9308fb55` |
+| Factsheet SPY | performances au 2026-09-30 | `b4daa578ceb976dc6debab7e7b202ccf282f17d291fe31d9fe2240d4becbdcfa` |
+| Factsheet BIL | performances au 2026-09-30 | `78502b312a73942fcb24e412624c176e6e910165e24dec3d43c78d1bcca28d7c` |
 
 La procédure échoue avant tout calcul si un fichier, sa taille ou son empreinte diffère du manifeste. Aucun téléchargement, écrasement du brut ou remplissage de date n'est effectué.
 
@@ -83,7 +82,12 @@ Le 30 novembre 2017 présente simultanément :
 
 Cette combinaison est celle d'un fractionnement inversé 1-pour-2. La procédure fixe donc `q_t = 0,5` ce jour-là. Le rendement NAV brut proche de +100 % devient un rendement de prix ajusté proche de +0,0062 %. La règle est fondée sur un saut de NAV supérieur à 50 %, sa réciproque dans les parts à 2 % près et une variation d'actif net inférieure à 10 %. Elle ne s'active sur aucune autre date.
 
-Il s'agit d'une inférence interne très forte, pas d'une confirmation documentaire indépendante. L'absence d'autre événement détecté ne prouve pas l'absence historique de toute autre opération sur titres.
+La documentation clôt l'ambiguïté des unités :
+
+- le dépôt SEC 497 identifie le fonds BIL et un *reverse stock split* programmé le 30 novembre 2017;
+- le Form 8937 State Street indique `1:2 Reverse Share Split`, précise que deux anciennes parts deviennent automatiquement une nouvelle part et que la base par part double tandis que l'investissement total reste inchangé.
+
+Le ratio est donc **une nouvelle part pour deux anciennes parts**, soit `q_t = parts_courantes / parts_précédentes = 1/2 = 0,5`. Ce n'est ni une division du prix par deux ni une division de la valeur agrégée par deux. L'absence d'autre événement détecté ne prouve toutefois pas l'absence historique de toute autre opération sur titres.
 
 ## Anomalies conservées
 
@@ -112,7 +116,32 @@ Sur 2 512 rendements communs entre octobre 2016 et octobre 2026, la variation de
 
 Ce contrôle soutient la cohérence générale des variations de NAV, mais le maximum illustre précisément que NAV et dernier prix Nasdaq ne sont pas interchangeables. Sur les 448 dates également couvertes par le fichier premium/discount State Street, l'écart médian entre le ratio clôture Nasdaq/NAV et le champ officiel est de `0,00835` point de pourcentage; le maximum, `0,95361`, survient le 9 avril 2025. Les horaires et définitions du prix de marché peuvent différer.
 
-Cette confrontation n'est **pas** une validation externe du rendement total : elle compare un prix de marché à la NAV et réutilise les distributions State Street. Aucune référence indépendante comparable n'existe localement pour BIL.
+Cette confrontation n'est **pas** une validation externe du rendement total : elle compare un prix de marché à la NAV et réutilise les distributions State Street.
+
+### Contrôle par les performances officielles State Street
+
+La règle a été fixée avant le calcul : tolérance absolue de **0,01 point de pourcentage**, soit un point de base et le dernier chiffre affiché dans les factsheets. Les pages officielles fournissent en plus des valeurs non arrondies. Les fenêtres vont de la date anniversaire exacte au 30 septembre 2026; un an est un rendement cumulé et les horizons pluriannuels sont annualisés géométriquement. Le code ne cherche aucune fenêtre voisine et ne réajuste pas la tolérance après observation.
+
+| Instrument | Fenêtre | Performance NAV officielle | Reconstruction à l'ex-date | Écart absolu (point) | Verdict |
+|---|---:|---:|---:|---:|---|
+| SPY | 1 an | 15,5984 % | 15,6348 % | 0,0364 | échec |
+| SPY | 5 ans annualisé | 13,6521 % | 13,6866 % | 0,0345 | échec |
+| BIL | 1 an | 3,6619 % | 3,6635 % | 0,0016 | réussite |
+| BIL | 10 ans annualisé | 2,2932 % | 2,2945 % | 0,0013 | réussite |
+
+Les factsheets qualifient ces chiffres de rendements totaux NAV, nets de frais, avec dividendes et plus-values réinvestis; les périodes inférieures à un an ne sont pas annualisées. Ils distinguent explicitement NAV, valeur de marché et indice. Ils ne précisent cependant pas la date ni le prix exacts de réinvestissement. Notre série attribue les distributions à l'ex-date. Cette différence de convention est une explication plausible de l'écart SPY, mais elle n'est pas démontrée par les factsheets seules. Le pipeline et ses quatre sorties antérieures restent donc inchangés.
+
+Ce contrôle est officiel mais **pas indépendant de l'émetteur** : State Street fournit aussi les NAV et distributions sources. Il vérifie une concordance agrégée avec une publication distincte, pas l'exactitude par un second producteur de données.
+
+## Cinq niveaux de validation
+
+1. **Intégrité et provenance des sources — réussi.** Fichiers locaux, tailles, SHA-256, URLs et conditions d'usage sont documentés.
+2. **Cohérence comptable, temporelle et reproductibilité — réussi.** Les identités, calendriers et productions binaires sont contrôlés.
+3. **Opération sur titres BIL — réussi.** Fonds, date, ratio et unité sont confirmés par documentation officielle.
+4. **Concordance avec les performances officielles — partielle.** Deux fenêtres BIL réussissent; deux fenêtres SPY échouent au seuil préenregistré.
+5. **Adéquation à l'usage exact — non validée pour la paire.** BIL est validé pour des analyses de rendement total NAV hors exécution sous la convention documentée; SPY et donc la paire restent `AUDITED`.
+
+Cette graduation évite de transformer une provenance vérifiée ou une identité comptable correcte en validation générale de performance financière.
 
 ## Résultats dérivés locaux
 
@@ -124,19 +153,21 @@ Les fichiers restent exclus de GitHub sous `data/processed/rl/`.
 | `bil_nav_total_returns.csv` | 736 496 | `55d9f6ba856fb219e5be6b870f11c36a550a7f99def9bb3099ce0127979e8ad2` |
 | `validation_report.json` | 5 576 | `175fead1bd95d3e4f77cbe53515c3ab34484e5025eca98bb8f88e3c653a114ed` |
 | `reconstruction_metadata.json` | 3 799 | `15dd2c11f8d3574efab0dd94e71e17d723d3cda7ab713d7b5a1b039cac96932e` |
+| `official_performance_validation.json` | 4 832 | `3856d3623ebb81517d35fa1e2cbf6c7fc16be1d0d02969930c153b9495b4916d` |
 
-Les quatre résultats ont également été copiés sous `D:\ai-financial-risk-reliability-data-backup\2026-10-19\data\processed\rl\`, sur le disque physique distinct déjà audité. Les empreintes des quatre copies correspondent aux originaux : zéro discordance. Avec les 19 fichiers bruts, la sauvegarde contrôlée contient désormais 23 fichiers de données pour 66 577 864 octets.
+Les cinq résultats et les six nouvelles preuves brutes ont également été copiés sous `D:\ai-financial-risk-reliability-data-backup\2026-10-19\`, sur le disque physique distinct déjà audité. Les empreintes des onze copies de données ou d'artefacts documentaires, ainsi que celles des fichiers suivis sauvegardés, correspondent aux originaux : zéro discordance. Avec 25 fichiers bruts et 5 résultats dérivés, la sauvegarde contrôlée contient désormais 30 fichiers de données pour 70 147 710 octets.
 
 La commande de reproduction est :
 
 ```powershell
 python RL/scripts/reconstruct_total_returns.py
+python RL/scripts/validate_official_performance.py
 python RL/scripts/verify_local_data.py
 ```
 
 ## Usages autorisés et interdits
 
-Usage possible après acceptation explicite des réserves : analyses financières hors exécution et hors coûts externes, fondées sur des rendements totaux quotidiens à la NAV sous la convention documentée.
+Usage validé pour **BIL seulement** : analyses financières hors exécution et hors coûts externes, fondées sur le rendement total quotidien à la NAV sous la convention à l'ex-date documentée. SPY, et par conséquent la paire SPY–BIL, restent seulement `AUDITED` tant que l'écart aux performances officielles n'est pas expliqué ou résolu sans déplacer le seuil.
 
 Restent interdits sans étape scientifique supplémentaire :
 
@@ -145,6 +176,7 @@ Restent interdits sans étape scientifique supplémentaire :
 - simuler un portefeuille ou lancer un backtest;
 - ignorer le délai entre ex-date et paiement;
 - redistribuer les fichiers bruts ou dérivés sans clarification des droits;
-- qualifier les séries de validation externe complète.
+- qualifier les séries de validation indépendante complète;
+- utiliser le statut BIL pour promouvoir silencieusement SPY ou la paire.
 
-Pour passer à un portefeuille négociable, il manque encore une convention d'exécution, des prix exécutables horodatés, spreads, commissions et slippage, une comptabilité des distributions aux dates de paiement, ainsi qu'une validation explicite de l'opération sur titres BIL.
+Pour passer à un portefeuille négociable, il manque encore une convention d'exécution, des prix exécutables horodatés, spreads, commissions et slippage, ainsi qu'une comptabilité des distributions aux dates de paiement. La chronologie anormale de la distribution BIL du 3 mars 2008 et l'écart SPY doivent rester visibles; ni le formulaire de split ni les factsheets ne les résolvent.
