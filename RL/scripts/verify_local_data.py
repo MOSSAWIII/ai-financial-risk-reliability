@@ -115,6 +115,53 @@ def audit_nasdaq_json(path: Path, params: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def audit_yahoo_chart_json(path: Path, params: dict[str, Any]) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    chart = payload.get("chart") or {}
+    if chart.get("error") is not None or not chart.get("result"):
+        raise ValueError(f"réponse Yahoo invalide: {chart.get('error')}")
+    result = chart["result"][0]
+    meta = result.get("meta") or {}
+    timestamps = result.get("timestamp") or []
+    quote_groups = (result.get("indicators") or {}).get("quote") or []
+    if not timestamps or not quote_groups:
+        raise ValueError("timestamps ou bloc quote Yahoo absent")
+    frame = pd.DataFrame(quote_groups[0])
+    required = ["open", "high", "low", "close", "volume"]
+    if any(column not in frame for column in required):
+        raise ValueError("colonnes OHLCV Yahoo incomplètes")
+    if len(frame) != len(timestamps):
+        raise ValueError("longueurs timestamp et OHLCV différentes")
+    dates = pd.to_datetime(timestamps, unit="s", utc=True).tz_convert(
+        meta.get("exchangeTimezoneName", "America/New_York")
+    )
+    numeric = frame[required].apply(pd.to_numeric, errors="coerce")
+    valid = (
+        numeric[["open", "close"]].min(axis=1).ge(numeric["low"])
+        & numeric[["open", "close"]].max(axis=1).le(numeric["high"])
+        & numeric["low"].le(numeric["high"])
+    )
+    return {
+        "ticker": meta.get("symbol"),
+        "exchange_name": meta.get("exchangeName"),
+        "full_exchange_name": meta.get("fullExchangeName"),
+        "currency": meta.get("currency"),
+        "data_granularity": meta.get("dataGranularity"),
+        "rows": len(frame),
+        "start": dates.min().date().isoformat(),
+        "end": dates.max().date().isoformat(),
+        "duplicate_dates": int(pd.Index(dates.date).duplicated().sum()),
+        "weekend_dates": int(sum(day.weekday() >= 5 for day in dates.date)),
+        "missing_ohlcv": int(numeric.isna().sum().sum()),
+        "invalid_ohlc_rows": int((~valid).sum()),
+        "nonpositive_price_values": int((numeric[["open", "high", "low", "close"]] <= 0).sum().sum()),
+        "negative_volume_rows": int((numeric["volume"] < 0).sum()),
+        "zero_volume_rows": int((numeric["volume"] == 0).sum()),
+        "split_events": len((result.get("events") or {}).get("splits") or {}),
+        "dividend_events": len((result.get("events") or {}).get("dividends") or {}),
+    }
+
+
 def audit_fred_rates(path: Path, _: dict[str, Any]) -> dict[str, Any]:
     frame = pd.read_csv(path, na_values=["."])
     date_column = frame.columns[0]
@@ -548,7 +595,7 @@ def audit_json_document(path: Path, params: dict[str, Any]) -> dict[str, Any]:
     return {
         "top_level_keys": sorted(payload.keys()),
         "missing_required_keys": sorted(set(required) - set(payload)),
-        "status": payload.get("status", payload.get("series_status")),
+        "status": payload.get("status", payload.get("series_status", payload.get("scientific_status"))),
         "all_required_assertions_passed": payload.get("all_required_assertions_passed"),
     }
 
@@ -556,6 +603,7 @@ def audit_json_document(path: Path, params: dict[str, Any]) -> dict[str, Any]:
 HANDLERS = {
     "ff_daily_zip": audit_ff_daily_zip,
     "nasdaq_json": audit_nasdaq_json,
+    "yahoo_chart_json": audit_yahoo_chart_json,
     "fred_rates_csv": audit_fred_rates,
     "cboe_vix_csv": audit_cboe_vix,
     "goyal_vintages_zip": audit_goyal_vintages_zip,
