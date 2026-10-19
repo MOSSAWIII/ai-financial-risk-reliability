@@ -18,6 +18,7 @@ from synthetic_portfolio_ledger import (  # noqa: E402
     LedgerError,
     SyntheticPortfolioLedger,
     SyntheticSettlementCalendar,
+    SyntheticTradingCalendar,
     whole_share_quantity,
 )
 
@@ -465,3 +466,330 @@ def test_all_test_inputs_are_synthetic_and_module_needs_no_data_files(monkeypatc
         [request("SPY", 1, "10")], trade_date=TRADE, settlement_date=SETTLEMENT
     )
     assert ledger.wealth_market() == D("100")
+
+
+def strict_ledger(
+    cash: str = "1000",
+    *,
+    sessions: list[date] | None = None,
+    settlement_days: list[date] | None = None,
+    shortened: list[date] | None = None,
+) -> SyntheticPortfolioLedger:
+    sessions = sessions or [
+        date(2024, 1, 2),
+        date(2024, 1, 3),
+        date(2024, 1, 4),
+        date(2024, 1, 5),
+        date(2024, 1, 8),
+        date(2024, 1, 9),
+        date(2024, 1, 10),
+        date(2024, 1, 11),
+        date(2024, 1, 12),
+        date(2024, 1, 15),
+    ]
+    settlement_days = settlement_days or sessions
+    return SyntheticPortfolioLedger(
+        D(cash),
+        strict_temporal=True,
+        trading_calendar=SyntheticTradingCalendar(
+            sessions, shortened_sessions=shortened or []
+        ),
+        settlement_calendar=SyntheticSettlementCalendar(settlement_days),
+    )
+
+
+def strict_buy_and_settle(
+    ledger: SyntheticPortfolioLedger,
+    *,
+    symbol: str = "SPY",
+    quantity: int = 5,
+    price: str = "100",
+) -> None:
+    ledger.set_prices(
+        symbol, market_price=price, nav_price=price, price_date=date(2024, 1, 3)
+    )
+    ledger.execute_batch(
+        [request(symbol, quantity, price)],
+        trade_date=date(2024, 1, 3),
+    )
+    ledger.settle_through(date(2024, 1, 5))
+
+
+def test_strict_mode_requires_both_distinct_calendars() -> None:
+    with pytest.raises(LedgerError, match="de négociation et de règlement"):
+        SyntheticPortfolioLedger(D("100"), strict_temporal=True)
+
+
+def test_strict_settlement_is_derived_and_explicit_mismatch_is_atomic() -> None:
+    ledger = strict_ledger()
+    ledger.set_prices("SPY", market_price="100", price_date=date(2024, 1, 3))
+    before = ledger.accounting_snapshot()
+    with pytest.raises(LedgerError, match="ne correspond pas"):
+        ledger.execute_batch(
+            [request("SPY", 1, "100")],
+            trade_date=date(2024, 1, 3),
+            settlement_date=date(2024, 1, 4),
+        )
+    assert ledger.accounting_snapshot() == before
+    ids = ledger.execute_batch(
+        [request("SPY", 1, "100")], trade_date=date(2024, 1, 3)
+    )
+    assert ids == [1]
+    assert ledger.pending_settlements[0].settlement_date == date(2024, 1, 5)
+    assert ledger.wealth_market() == D("1000")
+
+
+def test_strict_calendar_transition_t2_and_t1_is_mandatory() -> None:
+    sessions = [date(2024, 5, 24), date(2024, 5, 28), date(2024, 5, 29)]
+    trading = SyntheticTradingCalendar(sessions)
+    settlement = SyntheticSettlementCalendar(sessions)
+    before = SyntheticPortfolioLedger(
+        D("100"), True, trading, settlement
+    )
+    before.set_prices("SPY", market_price="10", price_date=date(2024, 5, 24))
+    before.execute_batch(
+        [request("SPY", 1, "10", decision_date=date(2024, 5, 23))],
+        trade_date=date(2024, 5, 24),
+    )
+    assert before.pending_settlements[0].settlement_date == date(2024, 5, 29)
+
+    after = SyntheticPortfolioLedger(D("100"), True, trading, settlement)
+    after.set_prices("SPY", market_price="10", price_date=date(2024, 5, 28))
+    after.execute_batch(
+        [request("SPY", 1, "10", decision_date=date(2024, 5, 24))],
+        trade_date=date(2024, 5, 28),
+    )
+    assert after.pending_settlements[0].settlement_date == date(2024, 5, 29)
+
+
+def test_trading_day_may_be_absent_from_settlement_calendar() -> None:
+    trade_day = date(2024, 11, 11)
+    ledger = strict_ledger(
+        sessions=[trade_day, date(2024, 11, 12), date(2024, 11, 13)],
+        settlement_days=[date(2024, 11, 12), date(2024, 11, 13)],
+    )
+    ledger.set_prices("SPY", market_price="10", price_date=trade_day)
+    ledger.execute_batch(
+        [request("SPY", 1, "10", decision_date=date(2024, 11, 8))],
+        trade_date=trade_day,
+    )
+    assert ledger.pending_settlements[0].settlement_date == date(2024, 11, 12)
+
+
+def test_shortened_session_remains_a_valid_trade_date() -> None:
+    shortened = date(2024, 11, 29)
+    ledger = strict_ledger(
+        sessions=[shortened, date(2024, 12, 2)],
+        settlement_days=[shortened, date(2024, 12, 2)],
+        shortened=[shortened],
+    )
+    ledger.set_prices("SPY", market_price="10", price_date=shortened)
+    ledger.execute_batch(
+        [request("SPY", 1, "10", decision_date=date(2024, 11, 28))],
+        trade_date=shortened,
+    )
+    assert ledger.trading_calendar is not None
+    assert ledger.trading_calendar.is_shortened(shortened)
+
+
+def test_incomplete_and_incoherent_calendars_are_rejected() -> None:
+    with pytest.raises(LedgerError, match="week-end"):
+        SyntheticSettlementCalendar([date(2024, 1, 6)])
+    calendar = SyntheticSettlementCalendar([date(2024, 1, 3)])
+    with pytest.raises(LedgerError, match="insuffisant"):
+        calendar.settlement_date(date(2024, 1, 3))
+    with pytest.raises(LedgerError, match="écourtée"):
+        SyntheticTradingCalendar(
+            [date(2024, 1, 3)], shortened_sessions=[date(2024, 1, 4)]
+        )
+
+
+def test_strict_backdated_transaction_and_price_are_rejected_atomically() -> None:
+    ledger = strict_ledger()
+    strict_buy_and_settle(ledger)
+    before = ledger.accounting_snapshot()
+    with pytest.raises(LedgerError, match="antidaté"):
+        ledger.set_prices("SPY", market_price="101", price_date=date(2024, 1, 4))
+    assert ledger.accounting_snapshot() == before
+    assert ledger.market_prices["SPY"] == D("100")
+
+
+def test_future_announcement_has_no_accounting_effect_until_ex_date() -> None:
+    ledger = strict_ledger()
+    strict_buy_and_settle(ledger)
+    before = ledger.accounting_snapshot()
+    announcement_id = ledger.announce_distribution(
+        "SPY",
+        knowledge_date=date(2024, 1, 5),
+        ex_date=date(2024, 1, 8),
+        payment_date=date(2024, 1, 12),
+        amount_per_share="1",
+    )
+    assert ledger.accounting_snapshot() == before
+    claim_id = ledger.accrue_announced_distribution(
+        announcement_id, event_date=date(2024, 1, 8)
+    )
+    assert claim_id == 1
+    assert ledger.distribution_receivables == D("5")
+    assert ledger.wealth_market() == D("1005")
+
+
+def test_future_knowledge_date_advances_chronology_without_financial_effect() -> None:
+    ledger = strict_ledger()
+    strict_buy_and_settle(ledger)
+    before = ledger.accounting_snapshot()
+    ledger.announce_distribution(
+        "SPY",
+        knowledge_date=date(2024, 1, 8),
+        ex_date=date(2024, 1, 12),
+        payment_date=date(2024, 1, 15),
+        amount_per_share="1",
+    )
+    assert ledger.accounting_snapshot() == before
+    with pytest.raises(LedgerError, match="antidaté"):
+        ledger.set_prices("SPY", market_price="101", price_date=date(2024, 1, 5))
+    assert ledger.market_prices["SPY"] == D("100")
+
+
+def test_distribution_declared_after_ex_date_is_rejected() -> None:
+    ledger = strict_ledger()
+    strict_buy_and_settle(ledger)
+    ledger.set_prices("SPY", market_price="100", price_date=date(2024, 1, 8))
+    before = ledger.accounting_snapshot()
+    with pytest.raises(LedgerError, match="après son ex-date"):
+        ledger.announce_distribution(
+            "SPY",
+            knowledge_date=date(2024, 1, 8),
+            ex_date=date(2024, 1, 5),
+            payment_date=date(2024, 1, 12),
+            amount_per_share="1",
+        )
+    assert ledger.accounting_snapshot() == before
+
+
+def test_payment_before_entitlement_and_double_payment_are_rejected() -> None:
+    ledger = strict_ledger()
+    strict_buy_and_settle(ledger)
+    announcement_id = ledger.announce_distribution(
+        "SPY",
+        knowledge_date=date(2024, 1, 5),
+        ex_date=date(2024, 1, 8),
+        payment_date=date(2024, 1, 12),
+        amount_per_share="1",
+    )
+    with pytest.raises(LedgerError, match="aucune distribution exigible"):
+        ledger.pay_distributions_through(date(2024, 1, 5))
+    ledger.accrue_announced_distribution(announcement_id, event_date=date(2024, 1, 8))
+    before_payment = ledger.wealth_market()
+    ledger.pay_distributions_through(date(2024, 1, 12))
+    assert ledger.wealth_market() == before_payment
+    settled_cash = ledger.settled_cash
+    with pytest.raises(LedgerError, match="aucune distribution exigible"):
+        ledger.pay_distributions_through(date(2024, 1, 12))
+    assert ledger.settled_cash == settled_cash
+
+
+def test_premature_and_double_settlement_are_rejected() -> None:
+    ledger = strict_ledger()
+    ledger.set_prices("SPY", market_price="100", price_date=date(2024, 1, 3))
+    ledger.execute_batch([request("SPY", 1, "100")], trade_date=date(2024, 1, 3))
+    before = ledger.accounting_snapshot()
+    with pytest.raises(LedgerError, match="prématuré"):
+        ledger.settle_through(date(2024, 1, 4))
+    assert ledger.accounting_snapshot() == before
+    ledger.settle_through(date(2024, 1, 5))
+    after = ledger.accounting_snapshot()
+    with pytest.raises(LedgerError, match="aucun règlement exigible"):
+        ledger.settle_through(date(2024, 1, 5))
+    assert ledger.accounting_snapshot() == after
+
+
+def test_same_day_order_protects_entitlement_and_cash_availability() -> None:
+    ledger = strict_ledger("100")
+    strict_buy_and_settle(ledger, symbol="BIL", quantity=10, price="10")
+    announcement_id = ledger.announce_distribution(
+        "BIL",
+        knowledge_date=date(2024, 1, 5),
+        ex_date=date(2024, 1, 8),
+        payment_date=date(2024, 1, 8),
+        amount_per_share="1",
+    )
+    ledger.accrue_announced_distribution(announcement_id, event_date=date(2024, 1, 8))
+    ledger.pay_distributions_through(date(2024, 1, 8))
+    ledger.set_prices("SPY", market_price="10", price_date=date(2024, 1, 8))
+    ledger.execute_batch(
+        [request("SPY", 1, "10", decision_date=date(2024, 1, 5))],
+        trade_date=date(2024, 1, 8),
+    )
+    assert ledger.economic_positions == {"BIL": 10, "SPY": 1}
+    assert ledger.settled_cash == D("10")
+    assert ledger.purchase_payables == D("10")
+    assert ledger.distribution_receivables == 0
+    assert ledger.wealth_market() == D("110")
+    with pytest.raises(LedgerError, match="ordre intrajournalier"):
+        ledger.announce_distribution(
+            "BIL",
+            knowledge_date=date(2024, 1, 8),
+            ex_date=date(2024, 1, 8),
+            payment_date=date(2024, 1, 12),
+            amount_per_share="1",
+        )
+
+
+def test_same_day_split_precedes_distribution_entitlement() -> None:
+    ledger = strict_ledger("100")
+    strict_buy_and_settle(ledger, symbol="BIL", quantity=10, price="10")
+    announcement_id = ledger.announce_distribution(
+        "BIL",
+        knowledge_date=date(2024, 1, 5),
+        ex_date=date(2024, 1, 8),
+        payment_date=date(2024, 1, 12),
+        amount_per_share="1",
+    )
+    before = ledger.wealth_market()
+    ledger.apply_reverse_split(
+        "BIL", effective_date=date(2024, 1, 8), old_shares=2, new_shares=1
+    )
+    assert ledger.wealth_market() == before
+    ledger.accrue_announced_distribution(announcement_id, event_date=date(2024, 1, 8))
+    assert ledger.distribution_claims[-1].entitled_shares == 5
+    assert ledger.distribution_receivables == D("5")
+
+
+def test_multiple_settlements_and_h_fin_net_preserve_wealth() -> None:
+    ledger = strict_ledger("200")
+    ledger.set_prices("BIL", market_price="10", price_date=date(2024, 1, 3))
+    ledger.execute_batch([request("BIL", 10, "10")], trade_date=date(2024, 1, 3))
+    ledger.settle_through(date(2024, 1, 5))
+    ledger.set_prices("BIL", market_price="10", price_date=date(2024, 1, 8))
+    ledger.set_prices("SPY", market_price="20", price_date=date(2024, 1, 8))
+    before = ledger.wealth_market()
+    ledger.execute_batch(
+        [
+            request("BIL", -10, "10", decision_date=date(2024, 1, 5)),
+            request("SPY", 5, "20", decision_date=date(2024, 1, 5)),
+        ],
+        trade_date=date(2024, 1, 8),
+        funding=FundingConvention.H_FIN_NET,
+    )
+    assert ledger.sale_receivables == ledger.purchase_payables == D("100")
+    assert ledger.wealth_market() == before
+    ledger.settle_through(date(2024, 1, 10))
+    assert ledger.settled_cash == D("100")
+    assert ledger.wealth_market() == before
+
+
+def test_strict_rejection_of_oversale_is_atomic() -> None:
+    ledger = strict_ledger("100")
+    ledger.set_prices("SPY", market_price="10", price_date=date(2024, 1, 3))
+    ledger.execute_batch([request("SPY", 5, "10")], trade_date=date(2024, 1, 3))
+    ledger.set_prices("SPY", market_price="10", price_date=date(2024, 1, 4))
+    before = ledger.accounting_snapshot()
+    with pytest.raises(LedgerError, match="vente supérieure"):
+        ledger.execute_batch(
+            [request("SPY", -6, "10", decision_date=date(2024, 1, 3))],
+            trade_date=date(2024, 1, 4),
+        )
+    assert ledger.accounting_snapshot() == before
+    assert ledger.economic_positions == {"SPY": 5}
+    assert len(ledger.pending_settlements) == 1

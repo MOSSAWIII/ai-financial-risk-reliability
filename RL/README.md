@@ -10,7 +10,7 @@ Le rapport [`docs/MANDAT_OPERATIONNEL_ET_FAISABILITE_SPY_BIL.md`](docs/MANDAT_OP
 
 Le [`protocole d'exécution financière hypothétique v1`](docs/PROTOCOLE_EXECUTION_FINANCIERE_SPY_BIL_V1.md) recommande désormais une convention strictement conditionnelle : quantités entières dimensionnées au close déjà connu, valorisation hypothétique au Yahoo `Open` de la prochaine séance admissible et comptes de règlement séparés. La fenêtre candidate post-split commence le 2 janvier 2018 et contient 2 210 séances communes. Le champ `Open` n'est pas assimilé à un fill ou au prix officiel de l'enchère; le 20 avril 2026 reste non représentable pour une transaction v1 en raison d'une divergence SPY non résolue. Le script [`scripts/audit_spy_open_divergences.py`](scripts/audit_spy_open_divergences.py) reproduit les 17 alertes d'ouverture sans corriger les sources.
 
-Le [registre comptable synthétique](docs/VALIDATION_REGISTRE_COMPTABLE_SYNTHETIQUE.md) implémente désormais, sans aucune donnée historique, les positions économiques et réglées, cash, créances/dettes de règlement, distributions, frais et regroupements de parts. Ses 29 tests artificiels vérifient la conservation de richesse, l'atomicité des refus, T+2/T+1 sur calendriers fournis, le financement conservateur et l'hypothèse séparée `H-FIN-NET`. Ce composant n'est ni un simulateur de marché, ni un moteur de stratégie, ni une autorisation d'utiliser les historiques.
+Le [registre comptable synthétique](docs/VALIDATION_REGISTRE_COMPTABLE_SYNTHETIQUE.md) implémente, sans données historiques, les positions économiques et réglées, cash, créances/dettes de règlement, distributions, frais et regroupements de parts. Sa [validation temporelle renforcée](docs/VALIDATION_TEMPORELLE_REGISTRE_SPY_BIL.md) ajoute deux calendriers distincts, une chronologie monotone, un ordre journalier explicite, la séparation annonce/ex-date/paiement et le calcul obligatoire T+2/T+1. Les 29 tests initiaux sont conservés; **45 tests artificiels** passent désormais. Le contrôle documentaire retrouve exactement les 2 210 dates communes Yahoo sur 2018–2026, mais le calendrier de règlement officiel reste incomplet et interdit encore toute expérience historique.
 
 La question de départ est provisoire :
 
@@ -69,8 +69,9 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 - [x] Établissement d'une couverture commune auditée, sans la confondre avec une exécution garantie.
 - [x] Définition d'un protocole hypothétique v1 et investigation reproductible des divergences d'ouverture.
 - [x] Implémentation et validation sur cas artificiels d'un registre minimal trade date/settlement date.
+- [x] Durcissement temporel du registre, 45 tests artificiels et concordance documentaire des 2 210 dates de séance.
 - [ ] Approbation de Yahoo `Open` comme référence conventionnelle, sans le confondre avec une exécution garantie.
-- [ ] Acquisition d'un calendrier officiel versionné 2018–2026 et résolution du cas SPY du 20 avril 2026.
+- [ ] Complétion d'un calendrier officiel de règlement DTC/NSCC versionné 2018–2026 et résolution du cas SPY du 20 avril 2026.
 - [ ] Validation des références classiques avant toute méthode RL.
 - [ ] Autorisation explicite d'une première expérience.
 

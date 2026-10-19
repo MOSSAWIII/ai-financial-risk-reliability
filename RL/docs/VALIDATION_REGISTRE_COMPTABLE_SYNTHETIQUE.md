@@ -120,7 +120,7 @@ Le contrôle long-only s'applique à la position économique et à chaque date f
 
 ## 7. Règlement et calendrier artificiel
 
-`SyntheticSettlementCalendar` reçoit la liste exhaustive des dates ouvrées du scénario. Il n'invente ni week-end ni jour férié et refuse une trade date absente ou un calendrier trop court.
+`SyntheticSettlementCalendar` reçoit la liste exhaustive des dates ouvrées du scénario. Il n'invente ni week-end ni jour férié et refuse un calendrier trop court. Depuis le durcissement temporel ultérieur, la trade date peut être une séance de négociation absente du calendrier de règlement; seules les dates admissibles strictement postérieures sont comptées.
 
 La règle codée est :
 

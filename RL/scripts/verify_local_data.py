@@ -664,6 +664,41 @@ def verify(manifest_path: Path) -> dict[str, Any]:
             failures.append(f"{dataset['id']}: SHA-256 modifié")
         if actual_size != dataset["bytes"]:
             failures.append(f"{dataset['id']}: taille modifiée")
+        additional_records = []
+        for additional in dataset.get("additional_files", []):
+            additional_path = ROOT / additional["local_file"]
+            additional_record = {"path": additional["local_file"]}
+            if not additional_path.is_file():
+                additional_record["check"] = "MISSING"
+                failures.append(
+                    f"{dataset['id']}: fichier additionnel absent: "
+                    f"{additional['local_file']}"
+                )
+            else:
+                additional_sha = sha256_file(additional_path)
+                additional_size = additional_path.stat().st_size
+                additional_record.update(
+                    {"bytes": additional_size, "sha256": additional_sha}
+                )
+                if additional_sha != additional["sha256"]:
+                    failures.append(
+                        f"{dataset['id']}: SHA-256 additionnel modifié: "
+                        f"{additional['local_file']}"
+                    )
+                if additional_size != additional["bytes"]:
+                    failures.append(
+                        f"{dataset['id']}: taille additionnelle modifiée: "
+                        f"{additional['local_file']}"
+                    )
+                additional_record["check"] = (
+                    "OK"
+                    if additional_sha == additional["sha256"]
+                    and additional_size == additional["bytes"]
+                    else "FAILED"
+                )
+            additional_records.append(additional_record)
+        if additional_records:
+            record["additional_files"] = additional_records
         handler_name = dataset.get("audit", {}).get("handler")
         if handler_name:
             try:

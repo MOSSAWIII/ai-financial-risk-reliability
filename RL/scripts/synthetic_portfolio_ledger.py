@@ -29,6 +29,17 @@ class FundingConvention(str, Enum):
     H_FIN_NET = "H_FIN_NET"
 
 
+class EventPhase(int, Enum):
+    """Ordre comptable conventionnel lorsqu'une date seule est disponible."""
+
+    CORPORATE_ACTION = 10
+    DISTRIBUTION_ENTITLEMENT = 20
+    SETTLEMENT = 30
+    DISTRIBUTION_PAYMENT = 40
+    PRICE_MARK = 50
+    TRADE = 60
+
+
 def money(value: Any, *, label: str = "montant") -> Decimal:
     """Convertit une valeur explicite en Decimal fini."""
     if isinstance(value, bool):
@@ -98,6 +109,17 @@ class DistributionClaim:
     paid: bool = False
 
 
+@dataclass
+class DistributionAnnouncement:
+    announcement_id: int
+    symbol: str
+    knowledge_date: date
+    ex_date: date
+    payment_date: date
+    amount_per_share: Decimal
+    claim_id: int | None = None
+
+
 @dataclass(frozen=True)
 class JournalEntry:
     sequence: int
@@ -134,16 +156,15 @@ class SyntheticSettlementCalendar:
         dates = tuple(sorted(set(business_dates)))
         if not dates:
             raise LedgerError("le calendrier artificiel est vide")
+        if any(item.weekday() >= 5 for item in dates):
+            raise LedgerError("le calendrier de règlement contient un week-end")
         self.business_dates = dates
-        self._date_set = set(dates)
 
     @staticmethod
     def cycle_for(trade_date: date) -> int:
         return 1 if trade_date >= TRANSITION_T1 else 2
 
     def settlement_date(self, trade_date: date) -> date:
-        if trade_date not in self._date_set:
-            raise LedgerError("la trade date est absente du calendrier artificiel")
         lag = self.cycle_for(trade_date)
         index = bisect_right(self.business_dates, trade_date)
         target = index + lag - 1
@@ -152,9 +173,42 @@ class SyntheticSettlementCalendar:
         return self.business_dates[target]
 
 
+class SyntheticTradingCalendar:
+    """Séances négociables, distinctes des jours admissibles au règlement."""
+
+    def __init__(
+        self,
+        sessions: Iterable[date],
+        *,
+        shortened_sessions: Iterable[date] = (),
+    ) -> None:
+        dates = tuple(sorted(set(sessions)))
+        shortened = frozenset(shortened_sessions)
+        if not dates:
+            raise LedgerError("le calendrier de négociation est vide")
+        if any(item.weekday() >= 5 for item in dates):
+            raise LedgerError("le calendrier de négociation contient un week-end")
+        if not shortened.issubset(dates):
+            raise LedgerError("une séance écourtée est absente des séances négociables")
+        self.sessions = dates
+        self.shortened_sessions = shortened
+        self._date_set = set(dates)
+
+    def require_session(self, trading_date: date) -> None:
+        if trading_date not in self._date_set:
+            raise LedgerError("la trade date est absente du calendrier de négociation")
+
+    def is_shortened(self, trading_date: date) -> bool:
+        self.require_session(trading_date)
+        return trading_date in self.shortened_sessions
+
+
 @dataclass
 class SyntheticPortfolioLedger:
     initial_cash: Decimal
+    strict_temporal: bool = False
+    trading_calendar: SyntheticTradingCalendar | None = None
+    settlement_calendar: SyntheticSettlementCalendar | None = None
     settled_cash: Decimal = field(init=False)
     economic_positions: dict[str, int] = field(default_factory=dict, init=False)
     settled_positions: dict[str, int] = field(default_factory=dict, init=False)
@@ -162,6 +216,9 @@ class SyntheticPortfolioLedger:
     nav_prices: dict[str, Decimal] = field(default_factory=dict, init=False)
     pending_settlements: list[PendingSettlement] = field(default_factory=list, init=False)
     distribution_claims: list[DistributionClaim] = field(default_factory=list, init=False)
+    distribution_announcements: list[DistributionAnnouncement] = field(
+        default_factory=list, init=False
+    )
     fees_recognized: Decimal = field(default=ZERO, init=False)
     journal: list[JournalEntry] = field(default_factory=list, init=False)
     rejections: list[RejectionRecord] = field(default_factory=list, init=False)
@@ -170,12 +227,78 @@ class SyntheticPortfolioLedger:
     _sequence: int = field(default=0, init=False)
     _next_settlement_id: int = field(default=1, init=False)
     _next_claim_id: int = field(default=1, init=False)
+    _next_announcement_id: int = field(default=1, init=False)
+    _last_effective_date: date | None = field(default=None, init=False)
+    _last_phase: EventPhase | None = field(default=None, init=False)
+    _price_dates: dict[str, date] = field(default_factory=dict, init=False)
 
     def __post_init__(self) -> None:
         self.initial_cash = money(self.initial_cash, label="cash initial")
         if self.initial_cash < ZERO:
             raise LedgerError("le cash initial ne peut pas être négatif")
+        if self.strict_temporal and (
+            self.trading_calendar is None or self.settlement_calendar is None
+        ):
+            raise LedgerError(
+                "le mode temporel strict exige des calendriers de négociation et de règlement"
+            )
         self.settled_cash = self.initial_cash
+
+    def _validate_effect_time(
+        self,
+        event_date: date,
+        phase: EventPhase,
+        *,
+        operation: str,
+    ) -> None:
+        if not self.strict_temporal:
+            return
+        if self._last_effective_date is not None:
+            if event_date < self._last_effective_date:
+                raise LedgerError(
+                    f"{operation}: événement antidaté après clôture comptable du "
+                    f"{self._last_effective_date.isoformat()}"
+                )
+            if (
+                event_date == self._last_effective_date
+                and self._last_phase is not None
+                and phase.value < self._last_phase.value
+            ):
+                raise LedgerError(
+                    f"{operation}: ordre intrajournalier incompatible avec "
+                    f"{self._last_phase.name}"
+                )
+
+        if phase.value > EventPhase.DISTRIBUTION_ENTITLEMENT.value:
+            missed = [
+                item
+                for item in self.distribution_announcements
+                if item.claim_id is None and item.ex_date <= event_date
+            ]
+            if missed:
+                raise LedgerError("une ex-date annoncée doit être comptabilisée avant cet événement")
+        if phase.value > EventPhase.SETTLEMENT.value and any(
+            item.settlement_date <= event_date for item in self.pending_settlements
+        ):
+            raise LedgerError("un règlement échu doit être traité avant cet événement")
+        if phase.value > EventPhase.DISTRIBUTION_PAYMENT.value and any(
+            not claim.paid and claim.payment_date <= event_date
+            for claim in self.distribution_claims
+        ):
+            raise LedgerError("un paiement de distribution échu doit précéder cet événement")
+
+    def _commit_effect_time(self, event_date: date, phase: EventPhase) -> None:
+        if self.strict_temporal:
+            self._last_effective_date = event_date
+            self._last_phase = phase
+
+    def _commit_knowledge_time(self, knowledge_date: date) -> None:
+        """Avance la chronologie sans produire d'effet financier."""
+        if self.strict_temporal and (
+            self._last_effective_date is None or knowledge_date > self._last_effective_date
+        ):
+            self._last_effective_date = knowledge_date
+            self._last_phase = None
 
     def _next_sequence(self) -> int:
         self._sequence += 1
@@ -199,13 +322,26 @@ class SyntheticPortfolioLedger:
         price_date: date | None = None,
     ) -> None:
         symbol = self._valid_symbol(symbol)
-        market = positive_money(market_price, label="prix de marché")
-        nav = None if nav_price is None else positive_money(nav_price, label="NAV")
+        try:
+            market = positive_money(market_price, label="prix de marché")
+            nav = None if nav_price is None else positive_money(nav_price, label="NAV")
+            if self.strict_temporal:
+                if price_date is None:
+                    raise LedgerError("le mode temporel strict exige la date du prix")
+                assert self.trading_calendar is not None
+                self.trading_calendar.require_session(price_date)
+                self._validate_effect_time(
+                    price_date, EventPhase.PRICE_MARK, operation="PRICE_MARK"
+                )
+        except LedgerError as exc:
+            self._reject("PRICE_MARK", str(exc), price_date)
         self.market_prices[symbol] = market
         if nav is not None:
             self.nav_prices[symbol] = nav
         if price_date is not None:
+            self._price_dates[symbol] = price_date
             self._record(price_date, "PRICE_MARK", symbol=symbol, market_price=market, nav_price=nav)
+            self._commit_effect_time(price_date, EventPhase.PRICE_MARK)
 
     @staticmethod
     def _valid_symbol(symbol: str) -> str:
@@ -275,11 +411,28 @@ class SyntheticPortfolioLedger:
         requests: Sequence[ExecutionRequest],
         *,
         trade_date: date,
-        settlement_date: date,
+        settlement_date: date | None = None,
         funding: FundingConvention = FundingConvention.CONSERVATIVE,
     ) -> list[int]:
         """Comptabilise atomiquement des transactions au trade date."""
         try:
+            if self.strict_temporal:
+                assert self.trading_calendar is not None
+                assert self.settlement_calendar is not None
+                self.trading_calendar.require_session(trade_date)
+                expected = self.settlement_calendar.settlement_date(trade_date)
+                if settlement_date is not None and settlement_date != expected:
+                    raise LedgerError(
+                        "la settlement date explicite ne correspond pas au calendrier de règlement"
+                    )
+                settlement_date = expected
+                self._validate_effect_time(trade_date, EventPhase.TRADE, operation="TRADE")
+                symbols = {self._valid_symbol(item.order.symbol) for item in requests}
+                if any(self._price_dates.get(symbol) != trade_date for symbol in symbols):
+                    raise LedgerError("chaque prix d'exécution strict doit être daté de la trade date")
+            elif settlement_date is None:
+                raise LedgerError("la settlement date explicite est requise en mode historique")
+            assert settlement_date is not None
             normalized = self._validate_batch(requests, trade_date, settlement_date)
             candidate_positions = dict(self.economic_positions)
             net_quantities: dict[str, int] = {}
@@ -347,6 +500,7 @@ class SyntheticPortfolioLedger:
                 )
             )
         self.assert_invariants()
+        self._commit_effect_time(trade_date, EventPhase.TRADE)
         return [item.settlement_id for item in new_settlements]
 
     def _validate_batch(
@@ -429,6 +583,30 @@ class SyntheticPortfolioLedger:
 
     def settle_through(self, as_of_date: date) -> list[int]:
         """Règle atomiquement chaque groupe de flux arrivé à échéance."""
+        if self.strict_temporal:
+            try:
+                self._validate_effect_time(
+                    as_of_date, EventPhase.SETTLEMENT, operation="SETTLEMENT"
+                )
+                due_exact = [
+                    item
+                    for item in self.pending_settlements
+                    if item.settlement_date == as_of_date
+                ]
+                if not due_exact:
+                    if any(
+                        item.settlement_date > as_of_date
+                        for item in self.pending_settlements
+                    ):
+                        raise LedgerError("tentative de règlement prématuré")
+                    raise LedgerError("aucun règlement exigible à cette date")
+                if any(
+                    item.settlement_date < as_of_date
+                    for item in self.pending_settlements
+                ):
+                    raise LedgerError("un règlement antérieur est resté impayé")
+            except LedgerError as exc:
+                self._reject("SETTLEMENT", str(exc), as_of_date)
         due_dates = sorted(
             {item.settlement_date for item in self.pending_settlements if item.settlement_date <= as_of_date}
         )
@@ -465,7 +643,115 @@ class SyntheticPortfolioLedger:
                 cash_change=cash_change,
             )
         self.assert_invariants()
+        self._commit_effect_time(as_of_date, EventPhase.SETTLEMENT)
         return settled_ids
+
+    def announce_distribution(
+        self,
+        symbol: str,
+        *,
+        knowledge_date: date,
+        ex_date: date,
+        payment_date: date,
+        amount_per_share: Any,
+    ) -> int:
+        """Enregistre une information future sans créer de créance."""
+        symbol = self._valid_symbol(symbol)
+        try:
+            amount = money(amount_per_share, label="distribution par part")
+            if not self.strict_temporal:
+                raise LedgerError("les annonces séparées exigent le mode temporel strict")
+            if amount < ZERO:
+                raise LedgerError("la distribution ne peut pas être négative")
+            if self._last_effective_date is not None and knowledge_date < self._last_effective_date:
+                raise LedgerError("la date de connaissance est antidatée")
+            if ex_date < knowledge_date:
+                raise LedgerError("une distribution ne peut pas être annoncée après son ex-date")
+            if self._last_effective_date is not None and (
+                ex_date < self._last_effective_date
+                or (
+                    ex_date == self._last_effective_date
+                    and self._last_phase is not None
+                    and self._last_phase.value >= EventPhase.DISTRIBUTION_ENTITLEMENT.value
+                )
+            ):
+                raise LedgerError("l'ex-date est déjà clôturée dans l'ordre intrajournalier")
+            if payment_date < ex_date:
+                raise LedgerError("la payment date précède l'ex-date")
+        except LedgerError as exc:
+            self._reject("DISTRIBUTION_ANNOUNCEMENT", str(exc), knowledge_date)
+        announcement = DistributionAnnouncement(
+            self._next_announcement_id,
+            symbol,
+            knowledge_date,
+            ex_date,
+            payment_date,
+            amount,
+        )
+        self._next_announcement_id += 1
+        self.distribution_announcements.append(announcement)
+        self._record(
+            knowledge_date,
+            "DISTRIBUTION_ANNOUNCEMENT",
+            announcement_id=announcement.announcement_id,
+            symbol=symbol,
+            ex_date=ex_date,
+            payment_date=payment_date,
+            amount_per_share=amount,
+        )
+        self._commit_knowledge_time(knowledge_date)
+        return announcement.announcement_id
+
+    def accrue_announced_distribution(
+        self, announcement_id: int, *, event_date: date
+    ) -> int:
+        """Crée la créance uniquement à l'ex-date annoncée."""
+        try:
+            announcement = next(
+                item
+                for item in self.distribution_announcements
+                if item.announcement_id == announcement_id
+            )
+            if announcement.claim_id is not None:
+                raise LedgerError("cette distribution a déjà acquis son droit")
+            if event_date != announcement.ex_date:
+                raise LedgerError("le droit doit être acquis exactement à l'ex-date")
+            self._validate_effect_time(
+                event_date,
+                EventPhase.DISTRIBUTION_ENTITLEMENT,
+                operation="DISTRIBUTION_ENTITLEMENT",
+            )
+        except (LedgerError, StopIteration) as exc:
+            reason = str(exc) if isinstance(exc, LedgerError) else "annonce de distribution inconnue"
+            self._reject("DISTRIBUTION_ACCRUAL", reason, event_date)
+
+        shares = self.shares_for_entitlement(announcement.symbol, event_date)
+        claim = DistributionClaim(
+            claim_id=self._next_claim_id,
+            symbol=announcement.symbol,
+            ex_date=announcement.ex_date,
+            payment_date=announcement.payment_date,
+            entitled_shares=shares,
+            amount_per_share=announcement.amount_per_share,
+            amount=announcement.amount_per_share * shares,
+        )
+        self._next_claim_id += 1
+        self.distribution_claims.append(claim)
+        announcement.claim_id = claim.claim_id
+        self._record(
+            event_date,
+            "DISTRIBUTION_ACCRUAL",
+            announcement_id=announcement_id,
+            claim_id=claim.claim_id,
+            symbol=claim.symbol,
+            entitled_shares=shares,
+            amount_per_share=claim.amount_per_share,
+            amount=claim.amount,
+            payment_date=claim.payment_date,
+        )
+        self._commit_effect_time(event_date, EventPhase.DISTRIBUTION_ENTITLEMENT)
+        self.assert_invariants()
+        return claim.claim_id
 
     def accrue_distribution(
         self,
@@ -475,6 +761,12 @@ class SyntheticPortfolioLedger:
         payment_date: date,
         amount_per_share: Any,
     ) -> int:
+        if self.strict_temporal:
+            self._reject(
+                "DISTRIBUTION_ACCRUAL",
+                "le mode temporel strict exige une annonce puis une acquisition à l'ex-date",
+                ex_date,
+            )
         symbol = self._valid_symbol(symbol)
         amount = money(amount_per_share, label="distribution par part")
         if amount < ZERO:
@@ -507,6 +799,32 @@ class SyntheticPortfolioLedger:
         return claim.claim_id
 
     def pay_distributions_through(self, as_of_date: date) -> list[int]:
+        if self.strict_temporal:
+            try:
+                self._validate_effect_time(
+                    as_of_date,
+                    EventPhase.DISTRIBUTION_PAYMENT,
+                    operation="DISTRIBUTION_PAYMENT",
+                )
+                due_exact = [
+                    claim
+                    for claim in self.distribution_claims
+                    if not claim.paid and claim.payment_date == as_of_date
+                ]
+                if not due_exact:
+                    if any(
+                        not claim.paid and claim.payment_date > as_of_date
+                        for claim in self.distribution_claims
+                    ):
+                        raise LedgerError("tentative de paiement prématuré")
+                    raise LedgerError("aucune distribution exigible à cette date")
+                if any(
+                    not claim.paid and claim.payment_date < as_of_date
+                    for claim in self.distribution_claims
+                ):
+                    raise LedgerError("un paiement de distribution antérieur est resté impayé")
+            except LedgerError as exc:
+                self._reject("DISTRIBUTION_PAYMENT", str(exc), as_of_date)
         claims = [
             claim for claim in self.distribution_claims
             if not claim.paid and claim.payment_date <= as_of_date
@@ -527,16 +845,33 @@ class SyntheticPortfolioLedger:
                 amount=sum((claim.amount for claim in group), ZERO),
             )
         self.assert_invariants()
+        self._commit_effect_time(as_of_date, EventPhase.DISTRIBUTION_PAYMENT)
         return ids
 
     def shares_before(self, symbol: str, cutoff_date: date) -> int:
         """Position économique au début du jour, avant tout événement daté du jour."""
+        return self._replay_shares(symbol, cutoff_date, include_same_day_splits=False)
+
+    def shares_for_entitlement(self, symbol: str, ex_date: date) -> int:
+        """Position après corporate actions, mais avant les trades de l'ex-date."""
+        return self._replay_shares(symbol, ex_date, include_same_day_splits=True)
+
+    def _replay_shares(
+        self,
+        symbol: str,
+        cutoff_date: date,
+        *,
+        include_same_day_splits: bool,
+    ) -> int:
         symbol = self._valid_symbol(symbol)
         shares = 0
         for event_date, sequence, kind, value in sorted(
             self._position_events.get(symbol, []), key=lambda item: (item[0], item[1])
         ):
-            if event_date >= cutoff_date:
+            if event_date > cutoff_date or (
+                event_date == cutoff_date
+                and not (include_same_day_splits and kind == "SPLIT")
+            ):
                 break
             if kind == "TRADE":
                 shares += int(value)
@@ -559,6 +894,9 @@ class SyntheticPortfolioLedger:
         symbol = self._valid_symbol(symbol)
         key = (symbol, effective_date, new_shares, old_shares)
         try:
+            self._validate_effect_time(
+                effective_date, EventPhase.CORPORATE_ACTION, operation="REVERSE_SPLIT"
+            )
             if type(old_shares) is not int or type(new_shares) is not int:
                 raise LedgerError("le ratio de regroupement doit être entier")
             if old_shares <= 0 or new_shares <= 0 or new_shares >= old_shares:
@@ -599,6 +937,7 @@ class SyntheticPortfolioLedger:
             )
         )
         self.assert_invariants()
+        self._commit_effect_time(effective_date, EventPhase.CORPORATE_ACTION)
 
     def assert_invariants(self) -> None:
         if self.settled_cash < ZERO:
@@ -623,6 +962,8 @@ class SyntheticPortfolioLedger:
 __all__ = [
     "AccountingSnapshot",
     "DistributionClaim",
+    "DistributionAnnouncement",
+    "EventPhase",
     "ExecutionRequest",
     "FixedOrder",
     "FundingConvention",
@@ -631,6 +972,7 @@ __all__ = [
     "PendingSettlement",
     "SyntheticPortfolioLedger",
     "SyntheticSettlementCalendar",
+    "SyntheticTradingCalendar",
     "TRANSITION_T1",
     "whole_share_quantity",
 ]
