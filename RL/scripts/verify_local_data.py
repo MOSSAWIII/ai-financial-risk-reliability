@@ -570,6 +570,7 @@ HANDLERS = {
     "workbook_structure": audit_workbook_structure,
     "derived_total_returns_csv": audit_derived_total_returns,
     "spy_payment_holding_csv": audit_spy_payment_holding,
+    "payment_holding_csv": audit_spy_payment_holding,
     "json_document": audit_json_document,
 }
 
