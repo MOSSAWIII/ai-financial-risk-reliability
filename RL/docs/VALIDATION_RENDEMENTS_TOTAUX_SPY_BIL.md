@@ -2,13 +2,15 @@
 
 **Millésime :** 19 octobre 2026
 
-**Statut final de la paire :** `AUDITED` — BIL est `VALIDATED_FOR_USE` pour l'usage NAV étroit décrit ci-dessous; SPY reste `AUDITED`.
+**Statut final de la paire :** `AUDITED` — BIL est `VALIDATED_FOR_USE` sous la convention à l'ex-date; la nouvelle série SPY est `VALIDATED_FOR_USE` sous la convention de détention avec réinvestissement au paiement. La série SPY historique à l'ex-date reste `AUDITED`.
 
 ## Conclusion
 
 Deux séries quotidiennes de rendement total à la NAV ont été reconstruites hors ligne à partir des NAV et distributions officielles State Street. Les identités comptables, l'alignement temporel, l'intégration unique des distributions et la reproductibilité binaire sont vérifiés. La période commune va du **30 mai 2007 au 15 octobre 2026** : 4 880 dates de NAV et 4 879 rendements pour chacun des deux instruments.
 
-Les deux réserves documentaires antérieures ont été examinées. Le fractionnement inversé BIL est désormais confirmé par un dépôt SEC et, pour le ratio exact, par le formulaire fiscal officiel State Street. Les performances officielles State Street permettent quatre contrôles hors ligne. BIL satisfait les deux contrôles avec la tolérance préenregistrée de 0,01 point de pourcentage. SPY dépasse cette tolérance sur les deux fenêtres; sa série n'est donc pas promue. La paire reste `AUDITED` et n'est pas une base autorisée de backtest.
+Les réserves documentaires antérieures ont été examinées. Le fractionnement inversé BIL est confirmé par un dépôt SEC et, pour le ratio exact, par le formulaire fiscal officiel State Street. BIL satisfait ses deux contrôles officiels avec la tolérance préenregistrée de 0,01 point de pourcentage.
+
+Pour SPY, les dépôts réglementaires établissent que le détenteur acquiert le droit à distribution à l'ex-date, que la NAV retranche les dividendes payables et que les rendements réglementaires réinvestissent à la NAV des dates de paiement. Une nouvelle série, distincte de la reconstruction historique, suit donc `parts × NAV + cash + créances`. Elle satisfait les contrôles officiels à un et cinq ans sans changer les dates ni la tolérance. Cette validation est limitée à l'analyse de rendement total NAV selon cette convention; elle ne transforme pas la NAV en prix exécutable et ne valide pas encore une paire SPY–BIL aux conventions temporelles homogènes.
 
 ## Sources vérifiées avant transformation
 
@@ -23,6 +25,9 @@ Les deux réserves documentaires antérieures ont été examinées. Le fractionn
 | Form 8937 State Street BIL | fractionnement du 2017-11-30 | `e1b28c61ea9e73051cd7f34a8b8d310cb37e6b54aaa2b5793805784c9308fb55` |
 | Factsheet SPY | performances au 2026-09-30 | `b4daa578ceb976dc6debab7e7b202ccf282f17d291fe31d9fe2240d4becbdcfa` |
 | Factsheet BIL | performances au 2026-09-30 | `78502b312a73942fcb24e412624c176e6e910165e24dec3d43c78d1bcca28d7c` |
+| SEC SPY 485BPOS | déposé et effectif le 2026-01-26 | `864cfc2f626765959edc73738ef150655bb82dfa4f024a8aa013cb31218d9a94` |
+| SEC SPY 497 | déposé le 2025-01-28 | `52dc9a232dbdeb7fbb2c635032b5db65b34256cc93cc7b834d72e088d5bea68a` |
+| SEC SPY 485BPOS | déposé et effectif le 2025-01-27 | `fc3ecd1be6b9fa3ec5083edbeb84f81c381c6f55de6365207cca548709bdfb1b` |
 
 La procédure échoue avant tout calcul si un fichier, sa taille ou son empreinte diffère du manifeste. Aucun téléchargement, écrasement du brut ou remplissage de date n'est effectué.
 
@@ -45,6 +50,28 @@ R_t^{TR}=\frac{q_t(N_t+D_t)}{N_{t-1}}-1.
 Le facteur de croissance vaut `1 + R_t^{TR}` et l'indice commence à 100 à la première NAV. La première ligne ne possède donc pas de rendement; le premier rendement est défini à la NAV suivante.
 
 L'indice suppose le réinvestissement conventionnel de la distribution à la NAV de l'ex-date. Il mesure correctement la performance économique sous cette convention, mais ne simule pas la trésorerie d'un investisseur : le cash n'est réellement versé qu'à la date de paiement. Les frais internes déjà incorporés à la NAV ne sont pas déduits une seconde fois. Aucun spread, slippage, commission ou impôt n'est inclus.
+
+### Convention B — détention, créance et paiement
+
+Pour SPY, la variante sépare à chaque clôture :
+
+\[
+W_t = n_tN_t + C_t + A_t,
+\]
+
+où `n_t` est le nombre de parts, `N_t` la NAV, `C_t` le cash disponible et `A_t` les distributions acquises mais non encore payées.
+
+L'ordre des opérations est fixé avant comparaison :
+
+1. les parts déjà détenues à l'ex-date créent une créance `n × D`;
+2. cette créance reste distincte du cash et ne peut acheter aucune part;
+3. à la date de paiement, la créance correspondante devient du cash sans modifier la richesse;
+4. ce cash est immédiatement réinvesti à la NAV du paiement en fractions de part;
+5. la richesse finale inclut toute créance encore impayée.
+
+Une entrée à la NAV de la date initiale n'obtient aucune distribution détachée antérieurement, même si son paiement survient dans la fenêtre. Une distribution détachée pendant la fenêtre mais payée après la date finale reste en créance dans la richesse finale. Cette construction diffère donc d'un simple ratio d'un indice ancien lorsque celui-ci porte déjà une créance à la date initiale.
+
+Les tests synthétiques vérifient la conservation de richesse lors du détachement et du transfert créance → cash → parts, l'absence de cash fictif, l'extinction des créances, les fractions de part, plusieurs créances simultanées et l'exclusion d'un droit antérieur au départ. L'erreur maximale de transfert dans les données SPY est `2,27 × 10⁻¹³` USD; le bilan cumulé `créances créées = paiements réinvestis + créance finale` ferme à `3,06 × 10⁻¹⁴` USD.
 
 ## Résultats quantitatifs
 
@@ -118,28 +145,48 @@ Ce contrôle soutient la cohérence générale des variations de NAV, mais le ma
 
 Cette confrontation n'est **pas** une validation externe du rendement total : elle compare un prix de marché à la NAV et réutilise les distributions State Street.
 
-### Contrôle par les performances officielles State Street
+### Preuve documentaire SPY et portée
 
-La règle a été fixée avant le calcul : tolérance absolue de **0,01 point de pourcentage**, soit un point de base et le dernier chiffre affiché dans les factsheets. Les pages officielles fournissent en plus des valeurs non arrondies. Les fenêtres vont de la date anniversaire exacte au 30 septembre 2026; un an est un rendement cumulé et les horizons pluriannuels sont annualisés géométriquement. Le code ne cherche aucune fenêtre voisine et ne réajuste pas la tolérance après observation.
+Les trois soumissions SEC originales ont été conservées localement. Les passages contrôlés établissent que :
 
-| Instrument | Fenêtre | Performance NAV officielle | Reconstruction à l'ex-date | Écart absolu (point) | Verdict |
-|---|---:|---:|---:|---:|---|
-| SPY | 1 an | 15,5984 % | 15,6348 % | 0,0364 | échec |
-| SPY | 5 ans annualisé | 13,6521 % | 13,6866 % | 0,0345 | échec |
-| BIL | 1 an | 3,6619 % | 3,6635 % | 0,0016 | réussite |
-| BIL | 10 ans annualisé | 2,2932 % | 2,2945 % | 0,0013 | réussite |
+- le rendement total réglementaire achète à la NAV du premier jour, vend à la NAV du dernier jour et réinvestit les distributions à la NAV des dates de paiement;
+- le détenteur inscrit à l'ex-date, qui est aussi la record date dans la documentation récente, acquiert le droit à la distribution;
+- les dividendes payables sont des passifs retranchés dans la NAV;
+- le paiement régulier intervient le dernier jour ouvré du mois suivant l'ex-date;
+- pour la dernière distribution d'une année civile présentée, certains tableaux réglementaires utilisent exceptionnellement la NAV du 31 décembre au lieu de la NAV réelle de paiement de janvier. Cette exception n'est pas appliquée aux fenêtres terminées en septembre.
 
-Les factsheets qualifient ces chiffres de rendements totaux NAV, nets de frais, avec dividendes et plus-values réinvestis; les périodes inférieures à un an ne sont pas annualisées. Ils distinguent explicitement NAV, valeur de marché et indice. Ils ne précisent cependant pas la date ni le prix exacts de réinvestissement. Notre série attribue les distributions à l'ex-date. Cette différence de convention est une explication plausible de l'écart SPY, mais elle n'est pas démontrée par les factsheets seules. Le pipeline et ses quatre sorties antérieures restent donc inchangés.
+Ces textes documentent la méthode du **SPDR S&P 500 ETF Trust**. La factsheet de septembre 2026 affirme un rendement NAV net de frais avec réinvestissement, mais ne renvoie pas explicitement à l'algorithme de date de paiement. L'identité parfaite des méthodologies ne peut donc pas être prouvée par une phrase de la factsheet seule. La concordance empirique obtenue avec la convention réglementaire apporte une preuve convergente, sans transformer cette inférence en certitude documentaire absolue.
 
-Ce contrôle est officiel mais **pas indépendant de l'émetteur** : State Street fournit aussi les NAV et distributions sources. Il vérifie une concordance agrégée avec une publication distincte, pas l'exactitude par un second producteur de données.
+### Comparaison officielle des conventions A et B
+
+La règle a été fixée avant le calcul : tolérance absolue de **0,01 point de pourcentage**. Les fenêtres restent exactement du 30 septembre 2025 au 30 septembre 2026 et du 30 septembre 2021 au 30 septembre 2026. Un an est cumulé; cinq ans sont annualisés géométriquement.
+
+| Fenêtre SPY | Officiel NAV | A : ex-date | Écart A | B : paiement/créances | Écart B | Verdict B |
+|---|---:|---:|---:|---:|---:|---|
+| 1 an | 15,5984 % | 15,6348 % | +0,0364 pt | 15,5981 % | −0,0003 pt | réussite |
+| 5 ans annualisé | 13,6521 % | 13,6866 % | +0,0345 pt | 13,6574 % | +0,0053 pt | réussite |
+
+Quatre distributions sont acquises dans la fenêtre d'un an, dont trois payées avant la fin; sur cinq ans, vingt sont acquises, dont dix-neuf payées. Dans chaque fenêtre :
+
+- une distribution détachée avant le départ mais payée après celui-ci est exclue (`2025-09-19`, 1,831114 USD, ou `2021-09-17`, 1,428117 USD);
+- la distribution du 18 septembre 2026, payable le 30 octobre, reste une créance finale de 1,903857 USD sur un an et 2,012230 USD sur cinq ans, compte tenu des parts accumulées;
+- omettre cette créance réduirait la performance à 15,3124 % sur un an et 13,6012 % annualisé sur cinq ans : elle ne peut être ignorée;
+- le calendrier de réinvestissement des distributions déjà payées réduit A de 0,03659 point sur un an et de 0,02911 point annualisé sur cinq ans;
+- le non-réinvestissement immédiat de la créance finale explique encore −0,00010 et −0,00002 point.
+
+La convention B réduit l'écart absolu initial de **99,21 %** sur un an et **84,49 %** sur cinq ans. Elle ne reproduit pas artificiellement les valeurs officielles : des écarts résiduels de 0,0003 et 0,0053 point demeurent, mais ils respectent le seuil fixé.
+
+Un indice global de détenteur commencé en 2003 produit, par simple ratio aux frontières, 15,5909 % et 13,6525 %. Il diffère de la reconstruction d'un nouvel entrant de 0,0072 et 0,0049 point, car l'indice global possède déjà une créance issue d'une ex-date antérieure au début. Cette différence confirme pourquoi le contrôle officiel doit reconstruire chaque fenêtre plutôt que diviser silencieusement deux niveaux d'un indice ancien.
+
+Le pipeline A et ses quatre sorties antérieures restent inchangés. Le contrôle officiel est issu du même émetteur que les NAV et distributions : il est officiel, mais pas indépendant d'un second fournisseur.
 
 ## Cinq niveaux de validation
 
 1. **Intégrité et provenance des sources — réussi.** Fichiers locaux, tailles, SHA-256, URLs et conditions d'usage sont documentés.
 2. **Cohérence comptable, temporelle et reproductibilité — réussi.** Les identités, calendriers et productions binaires sont contrôlés.
 3. **Opération sur titres BIL — réussi.** Fonds, date, ratio et unité sont confirmés par documentation officielle.
-4. **Concordance avec les performances officielles — partielle.** Deux fenêtres BIL réussissent; deux fenêtres SPY échouent au seuil préenregistré.
-5. **Adéquation à l'usage exact — non validée pour la paire.** BIL est validé pour des analyses de rendement total NAV hors exécution sous la convention documentée; SPY et donc la paire restent `AUDITED`.
+4. **Concordance avec les performances officielles — réussie par série validée.** Les deux fenêtres BIL réussissent sous A; les deux fenêtres SPY réussissent sous B. La série SPY A échoue et conserve son statut propre.
+5. **Adéquation à l'usage exact — validée séparément, pas pour un portefeuille.** BIL-A et SPY-B sont utilisables pour leurs analyses NAV étroites. Leur association en portefeuille n'est pas validée : conventions temporelles différentes, absence de prix d'exécution et de coûts.
 
 Cette graduation évite de transformer une provenance vérifiée ou une identité comptable correcte en validation générale de performance financière.
 
@@ -154,29 +201,37 @@ Les fichiers restent exclus de GitHub sous `data/processed/rl/`.
 | `validation_report.json` | 5 576 | `175fead1bd95d3e4f77cbe53515c3ab34484e5025eca98bb8f88e3c653a114ed` |
 | `reconstruction_metadata.json` | 3 799 | `15dd2c11f8d3574efab0dd94e71e17d723d3cda7ab713d7b5a1b039cac96932e` |
 | `official_performance_validation.json` | 4 832 | `3856d3623ebb81517d35fa1e2cbf6c7fc16be1d0d02969930c153b9495b4916d` |
+| `spy_nav_total_returns_payment_date_v1.csv` | 613 077 | `d7bb1e838070256636eb73b02db9486bb4410ba580550ae50581d50f2fcfd001` |
+| `spy_payment_date_validation_v1.json` | 10 592 | `7b6b67cc15eeec3304733e39c12a15b42849cff70a325da7d7f257cfc2a97ad8` |
 
-Les cinq résultats et les six nouvelles preuves brutes ont également été copiés sous `D:\ai-financial-risk-reliability-data-backup\2026-10-19\`, sur le disque physique distinct déjà audité. Les empreintes des onze copies de données ou d'artefacts documentaires, ainsi que celles des fichiers suivis sauvegardés, correspondent aux originaux : zéro discordance. Avec 25 fichiers bruts et 5 résultats dérivés, la sauvegarde contrôlée contient désormais 30 fichiers de données pour 70 147 710 octets.
+Les sept résultats et les vingt-huit sources brutes ou documentaires ont également été copiés sous `D:\ai-financial-risk-reliability-data-backup\2026-10-19\`, sur le disque physique distinct déjà audité. Les empreintes des nouvelles copies et des fichiers suivis sauvegardés correspondent aux originaux : zéro discordance. La sauvegarde contrôlée contient désormais 35 fichiers de données référencés par le manifeste pour 75 361 820 octets.
 
 La commande de reproduction est :
 
 ```powershell
 python RL/scripts/reconstruct_total_returns.py
 python RL/scripts/validate_official_performance.py
+python RL/scripts/reconstruct_spy_payment_date_returns.py
 python RL/scripts/verify_local_data.py
 ```
 
 ## Usages autorisés et interdits
 
-Usage validé pour **BIL seulement** : analyses financières hors exécution et hors coûts externes, fondées sur le rendement total quotidien à la NAV sous la convention à l'ex-date documentée. SPY, et par conséquent la paire SPY–BIL, restent seulement `AUDITED` tant que l'écart aux performances officielles n'est pas expliqué ou résolu sans déplacer le seuil.
+Usages validés séparément :
+
+- **BIL-A** : analyses hors exécution du rendement total NAV sous la convention à l'ex-date;
+- **SPY-B** : analyses hors exécution du rendement total NAV sous la comptabilité de détention, créances et réinvestissement à la date de paiement.
+
+La série historique **SPY-A** reste `AUDITED`. Les statuts ne sont pas transférables d'une version à l'autre. La paire SPY–BIL reste `AUDITED` pour tout usage conjoint tant qu'une convention économiquement compatible n'est pas validée pour les deux jambes.
 
 Restent interdits sans étape scientifique supplémentaire :
 
 - traiter la NAV comme un prix auquel un ordre aurait été exécuté;
 - revendiquer une performance nette de transaction;
 - simuler un portefeuille ou lancer un backtest;
-- ignorer le délai entre ex-date et paiement;
+- ignorer le délai entre ex-date et paiement ou traiter une créance comme du cash;
 - redistribuer les fichiers bruts ou dérivés sans clarification des droits;
 - qualifier les séries de validation indépendante complète;
-- utiliser le statut BIL pour promouvoir silencieusement SPY ou la paire.
+- utiliser le statut d'une version pour promouvoir silencieusement une autre série ou la paire.
 
-Pour passer à un portefeuille négociable, il manque encore une convention d'exécution, des prix exécutables horodatés, spreads, commissions et slippage, ainsi qu'une comptabilité des distributions aux dates de paiement. La chronologie anormale de la distribution BIL du 3 mars 2008 et l'écart SPY doivent rester visibles; ni le formulaire de split ni les factsheets ne les résolvent.
+Pour passer à un portefeuille négociable, il manque encore une convention commune de détention et de distribution pour SPY et BIL, des prix exécutables horodatés, spreads, commissions, slippage et fiscalité. La chronologie anormale de la distribution BIL du 3 mars 2008 interdit actuellement de reconstruire BIL-B de manière documentaire; la validation NAV ne résout donc pas la compatibilité de portefeuille. Les différences NAV/prix de marché demeurent également pertinentes.

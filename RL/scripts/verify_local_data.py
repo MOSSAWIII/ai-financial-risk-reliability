@@ -489,6 +489,59 @@ def audit_derived_total_returns(path: Path, _: dict[str, Any]) -> dict[str, Any]
     }
 
 
+def audit_spy_payment_holding(path: Path, _: dict[str, Any]) -> dict[str, Any]:
+    frame = pd.read_csv(path, parse_dates=["date"])
+    required = [
+        "nav_usd",
+        "split_factor_current_per_previous",
+        "shares_held",
+        "cash_usd",
+        "distribution_receivable_usd",
+        "claim_created_usd",
+        "payment_received_usd",
+        "wealth_usd",
+        "total_return_payment_date",
+        "wealth_index_base_100",
+        "transfer_identity_error",
+    ]
+    numeric = frame[required].apply(pd.to_numeric, errors="coerce")
+    wealth_identity = (
+        numeric["wealth_usd"]
+        - numeric["shares_held"] * numeric["nav_usd"]
+        - numeric["cash_usd"]
+        - numeric["distribution_receivable_usd"]
+    ).abs()
+    returns = numeric["total_return_payment_date"]
+    return_identity = (numeric["wealth_usd"] / numeric["wealth_usd"].shift(1) - 1 - returns).abs().dropna()
+    index_identity = (
+        numeric["wealth_index_base_100"] / numeric["wealth_index_base_100"].shift(1)
+        - (1 + returns)
+    ).abs().dropna()
+    created = float(numeric["claim_created_usd"].sum())
+    paid = float(numeric["payment_received_usd"].sum())
+    ending_receivable = float(numeric["distribution_receivable_usd"].iloc[-1])
+    return {
+        "rows": len(frame),
+        "ticker_values": sorted(frame["ticker"].dropna().astype(str).unique().tolist()),
+        "start": frame["date"].min().date().isoformat(),
+        "end": frame["date"].max().date().isoformat(),
+        "duplicate_dates": int(frame["date"].duplicated().sum()),
+        "missing_required_values": int(numeric.drop(columns=["total_return_payment_date"]).isna().sum().sum()),
+        "missing_returns": int(returns.isna().sum()),
+        "nonpositive_nav": int((numeric["nav_usd"] <= 0).sum()),
+        "nonpositive_shares": int((numeric["shares_held"] <= 0).sum()),
+        "negative_cash": int((numeric["cash_usd"] < 0).sum()),
+        "negative_receivables": int((numeric["distribution_receivable_usd"] < 0).sum()),
+        "split_events": int(numeric["split_factor_current_per_previous"].ne(1.0).sum()),
+        "max_wealth_identity_error": float(wealth_identity.max()),
+        "max_return_identity_error": float(return_identity.max()) if len(return_identity) else 0.0,
+        "max_index_identity_error": float(index_identity.max()) if len(index_identity) else 0.0,
+        "max_transfer_identity_error": float(numeric["transfer_identity_error"].max()),
+        "claim_balance_identity_error": abs(created - paid - ending_receivable),
+        "initial_index": float(numeric["wealth_index_base_100"].iloc[0]),
+    }
+
+
 def audit_json_document(path: Path, params: dict[str, Any]) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     required = params.get("required_keys", [])
@@ -516,6 +569,7 @@ HANDLERS = {
     "nfci_csv": audit_nfci,
     "workbook_structure": audit_workbook_structure,
     "derived_total_returns_csv": audit_derived_total_returns,
+    "spy_payment_holding_csv": audit_spy_payment_holding,
     "json_document": audit_json_document,
 }
 
