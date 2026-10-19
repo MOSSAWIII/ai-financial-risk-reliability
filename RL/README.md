@@ -2,7 +2,7 @@
 
 ## Statut
 
-Ce dossier ouvre un axe de recherche autonome au sein de `ai-financial-risk-reliability`. Il contient un cadrage scientifique et une première étude fondamentale sur la nature séquentielle d'une décision d'exposition. Aucun algorithme de Reinforcement Learning (RL), modèle, jeu de données, environnement de simulation ou notebook expérimental n'a encore été créé.
+Ce dossier ouvre un axe de recherche autonome au sein de `ai-financial-risk-reliability`. Il contient un cadrage scientifique, une étude fondamentale sur la nature séquentielle d'une décision et une formalisation financière d'un mandat stylisé. Aucun algorithme de Reinforcement Learning (RL), modèle, jeu de données, environnement de simulation ou notebook expérimental n'a encore été créé.
 
 La question de départ est provisoire :
 
@@ -45,6 +45,7 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 - [x] Cartographie documentaire des grandes familles de données candidates.
 - [x] Identification des risques de recherche et d'une trajectoire progressive.
 - [x] Démonstration des conditions séparant décisions indépendantes et optimisation intertemporelle pour une exposition risquée.
+- [x] Formalisation comptable d'un mandat actions–monétaire et proposition non validée d'un mécanisme intertemporel minimal.
 - [ ] Choix d'un problème financier précis.
 - [ ] Définition de l'utilisateur, de la décision, de l'horizon et des contraintes.
 - [ ] Audit des données nécessaires et de leur disponibilité à chaque date.
@@ -60,7 +61,7 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 5. Quelles règles simples doivent être difficiles à battre avant que le RL soit jugé utile ?
 6. Comment réserver une évaluation réellement non consultée alors que plusieurs périodes du projet principal ont déjà orienté la recherche ?
 
-Le document [docs/CADRAGE_SCIENTIFIQUE.md](docs/CADRAGE_SCIENTIFIQUE.md) développe ces questions, les données candidates, les alternatives et les références examinées. L'étude [docs/PROBLEME_DECISION_SEQUENTIELLE.md](docs/PROBLEME_DECISION_SEQUENTIELLE.md) démontre quand les décisions se séparent période par période, quels mécanismes financiers créent une interdépendance et pourquoi ce besoin de contrôle ne suffit pas à justifier le RL.
+Le document [docs/CADRAGE_SCIENTIFIQUE.md](docs/CADRAGE_SCIENTIFIQUE.md) développe ces questions, les données candidates, les alternatives et les références examinées. L'étude [docs/PROBLEME_DECISION_SEQUENTIELLE.md](docs/PROBLEME_DECISION_SEQUENTIELLE.md) démontre quand les décisions se séparent période par période, quels mécanismes financiers créent une interdépendance et pourquoi ce besoin de contrôle ne suffit pas à justifier le RL. La proposition [docs/FORMALISATION_MANDAT_FINANCIER.md](docs/FORMALISATION_MANDAT_FINANCIER.md) décrit un gestionnaire stylisé, les flux exacts d'un portefeuille actions–monétaire, un mandat initial à discuter et les arbitrages requis avant toute expérience.
 
 ## Règle d'arrêt
 
