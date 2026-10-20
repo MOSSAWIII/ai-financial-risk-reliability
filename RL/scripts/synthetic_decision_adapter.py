@@ -10,12 +10,13 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass, field
-from datetime import date
+from dataclasses import dataclass, field, replace
+from datetime import date, datetime, time
 from decimal import Decimal
 from enum import Enum
 from types import MappingProxyType
 from typing import Any, Mapping, Protocol
+from zoneinfo import ZoneInfo
 
 from synthetic_portfolio_ledger import (
     AccountingSnapshot,
@@ -58,11 +59,40 @@ class FundingSource(str, Enum):
     UNSETTLED_SALE_PROCEEDS = "UNSETTLED_SALE_PROCEEDS"
 
 
+class SnapshotStatus(str, Enum):
+    READY = "READY"
+    NOT_EVALUABLE = "NOT_EVALUABLE"
+
+
 @dataclass(frozen=True)
 class DatedPrice:
     price_date: date
     value: Decimal | None
     status: PriceStatus = PriceStatus.AVAILABLE
+
+
+@dataclass(frozen=True)
+class DecisionSnapshot:
+    snapshot_id: str
+    decision_at: datetime
+    price_date: date
+    decision_closes: Mapping[str, Decimal]
+    economic_positions: Mapping[str, int]
+    settled_positions: Mapping[str, int]
+    settled_cash: Decimal
+    sale_receivables: Decimal
+    purchase_payables: Decimal
+    known_distribution_receivables: Decimal
+    economic_distribution_receivables: Decimal | None
+    unknown_distribution_claim_ids: tuple[int, ...]
+    cash_availability_unproven_claim_ids: tuple[int, ...]
+    economic_wealth: Decimal | None
+    admissible_wealth: Decimal | None
+    funding_resources: Decimal
+    ledger_sequence: int
+    status: SnapshotStatus
+    reason: str
+    provenance: Mapping[str, str]
 
 
 @dataclass(frozen=True)
@@ -76,6 +106,9 @@ class DecisionIntent:
     target_quantities: Mapping[str, int]
     decision_prices: Mapping[str, Decimal]
     orders: tuple[FixedOrder, ...]
+    decision_at: datetime | None = None
+    decision_snapshot_id: str | None = None
+    snapshot_ledger_sequence: int | None = None
 
 
 @dataclass(frozen=True)
@@ -119,7 +152,7 @@ def _decimal_text(value: Decimal) -> str:
 
 def intent_payload(intent: DecisionIntent) -> dict[str, Any]:
     """Retourne le contenu économique canonique, hors identifiant et empreinte."""
-    return {
+    payload = {
         "decision_date": intent.decision_date.isoformat(),
         "known_market_wealth": _decimal_text(intent.known_market_wealth),
         "target_weight_spy": _decimal_text(intent.target_weight_spy),
@@ -142,6 +175,13 @@ def intent_payload(intent: DecisionIntent) -> dict[str, Any]:
             for order in sorted(intent.orders, key=lambda item: item.symbol)
         ],
     }
+    if intent.decision_snapshot_id is not None:
+        payload["decision_at"] = (
+            None if intent.decision_at is None else intent.decision_at.isoformat()
+        )
+        payload["decision_snapshot_id"] = intent.decision_snapshot_id
+        payload["snapshot_ledger_sequence"] = intent.snapshot_ledger_sequence
+    return payload
 
 
 def canonical_json_bytes(value: Mapping[str, Any]) -> bytes:
@@ -150,8 +190,87 @@ def canonical_json_bytes(value: Mapping[str, Any]) -> bytes:
     ).encode("utf-8")
 
 
+def decision_snapshot_payload(snapshot: DecisionSnapshot) -> dict[str, Any]:
+    """Retourne tout le contenu scellé d'un instantané, hors identifiant."""
+    return {
+        "decision_at": snapshot.decision_at.isoformat(),
+        "price_date": snapshot.price_date.isoformat(),
+        "decision_closes": {
+            key: _decimal_text(value) for key, value in snapshot.decision_closes.items()
+        },
+        "economic_positions": dict(snapshot.economic_positions),
+        "settled_positions": dict(snapshot.settled_positions),
+        "settled_cash": _decimal_text(snapshot.settled_cash),
+        "sale_receivables": _decimal_text(snapshot.sale_receivables),
+        "purchase_payables": _decimal_text(snapshot.purchase_payables),
+        "known_distribution_receivables": _decimal_text(
+            snapshot.known_distribution_receivables
+        ),
+        "economic_distribution_receivables": (
+            None
+            if snapshot.economic_distribution_receivables is None
+            else _decimal_text(snapshot.economic_distribution_receivables)
+        ),
+        "unknown_distribution_claim_ids": list(
+            snapshot.unknown_distribution_claim_ids
+        ),
+        "cash_availability_unproven_claim_ids": list(
+            snapshot.cash_availability_unproven_claim_ids
+        ),
+        "economic_wealth": (
+            None
+            if snapshot.economic_wealth is None
+            else _decimal_text(snapshot.economic_wealth)
+        ),
+        "admissible_wealth": (
+            None
+            if snapshot.admissible_wealth is None
+            else _decimal_text(snapshot.admissible_wealth)
+        ),
+        "funding_resources": _decimal_text(snapshot.funding_resources),
+        "ledger_sequence": snapshot.ledger_sequence,
+        "status": snapshot.status.value,
+        "reason": snapshot.reason,
+        "provenance": dict(snapshot.provenance),
+    }
+
+
+def decision_snapshot_content_sha256(snapshot: DecisionSnapshot) -> str:
+    return hashlib.sha256(
+        canonical_json_bytes(decision_snapshot_payload(snapshot))
+    ).hexdigest()
+
+
 def intent_content_sha256(intent: DecisionIntent) -> str:
     return hashlib.sha256(canonical_json_bytes(intent_payload(intent))).hexdigest()
+
+
+def cost_scenario_fees(
+    intent: DecisionIntent,
+    execution_prices: Mapping[str, Any],
+    basis_points: Any,
+) -> Mapping[str, Decimal]:
+    """Calcule une friction unique sur chaque notionnel réellement négocié."""
+    try:
+        bps = money(basis_points, label="coût en points de base")
+    except LedgerError as exc:
+        raise AdapterError(str(exc)) from exc
+    if bps not in {ZERO, Decimal("1"), Decimal("5"), Decimal("10")}:
+        raise AdapterError("le scénario de coûts doit être S0, S1, S2 ou S3")
+    quantities = {order.symbol: abs(order.quantity) for order in intent.orders}
+    fees: dict[str, Decimal] = {}
+    for symbol in SYMBOLS:
+        if quantities.get(symbol, 0) == 0:
+            fees[symbol] = ZERO
+            continue
+        try:
+            price = positive_money(
+                execution_prices[symbol], label=f"open d'exécution {symbol}"
+            )
+        except (KeyError, LedgerError) as exc:
+            raise AdapterError(f"open indispensable absent ou invalide pour {symbol}") from exc
+        fees[symbol] = price * quantities[symbol] * bps / Decimal("10000")
+    return _frozen_mapping(fees)
 
 
 @dataclass
@@ -169,6 +288,243 @@ class SyntheticDecisionAdapter:
             raise AdapterError("l'adaptateur exige strict_temporal=True")
         if self.ledger.trading_calendar is None or self.ledger.settlement_calendar is None:
             raise AdapterError("l'adaptateur exige deux calendriers explicites")
+
+    def build_decision_snapshot(
+        self,
+        *,
+        decision_at: datetime,
+        decision_closes: Mapping[str, DatedPrice],
+        close_available_at: Mapping[str, datetime],
+        provenance: Mapping[str, str],
+    ) -> DecisionSnapshot:
+        """Construit une vue point-in-time distincte du registre économique."""
+        if not isinstance(decision_at, datetime) or decision_at.tzinfo is None:
+            raise AdapterError("instant de décision invalide")
+        local_decision = decision_at.astimezone(ZoneInfo("America/New_York"))
+        if local_decision.timetz().replace(tzinfo=None) != time(8, 0):
+            raise AdapterError("la décision synthétique doit intervenir à 08:00 ET")
+        decision_session = local_decision.date()
+        try:
+            self.ledger.trading_calendar.require_session(decision_session)
+        except LedgerError as exc:
+            raise AdapterError("la date de décision n'est pas une séance négociable") from exc
+        previous_sessions = [
+            item
+            for item in self.ledger.trading_calendar.sessions
+            if item < decision_session
+        ]
+        if not previous_sessions:
+            raise AdapterError("aucune clôture antérieure admissible")
+        price_date = previous_sessions[-1]
+        required_provenance = {
+            "SPY_close",
+            "BIL_close",
+            "trading_calendar",
+            "settlement_calendar",
+            "economic_positions",
+            "settled_positions",
+            "settled_cash",
+            "pending_settlements",
+            "distribution_claims",
+        }
+        if set(provenance) != required_provenance or any(
+            not isinstance(value, str) or not value.strip()
+            for value in provenance.values()
+        ):
+            raise AdapterError("provenance de l'instantané incomplète")
+
+        closes: dict[str, Decimal] = {}
+        reasons: list[str] = []
+        for symbol in SYMBOLS:
+            observation = decision_closes.get(symbol)
+            available_at = close_available_at.get(symbol)
+            if (
+                not isinstance(observation, DatedPrice)
+                or observation.status is not PriceStatus.AVAILABLE
+                or observation.value is None
+            ):
+                reasons.append(f"clôture non disponible pour {symbol}")
+                continue
+            if observation.price_date != price_date:
+                reasons.append(f"clôture {symbol} non datée de la dernière séance")
+                continue
+            if (
+                not isinstance(available_at, datetime)
+                or available_at.tzinfo is None
+                or available_at.date() < observation.price_date
+                or available_at > decision_at
+            ):
+                reasons.append(f"disponibilité point-in-time non prouvée pour {symbol}")
+                continue
+            try:
+                closes[symbol] = positive_money(
+                    observation.value, label=f"clôture de décision {symbol}"
+                )
+            except LedgerError as exc:
+                reasons.append(str(exc))
+
+        if any(entry.event_date > decision_session for entry in self.ledger.journal):
+            reasons.append("le registre contient un événement économique futur")
+        if any(
+            item.settlement_date <= decision_session
+            for item in self.ledger.pending_settlements
+        ):
+            reasons.append("un règlement échu doit précéder l'instantané")
+        if any(
+            not claim.paid and claim.payment_date <= decision_session
+            for claim in self.ledger.distribution_claims
+        ):
+            reasons.append("un paiement échu doit précéder l'instantané")
+        if any(
+            item.claim_id is None and item.ex_date <= decision_session
+            for item in self.ledger.distribution_announcements
+        ):
+            reasons.append("une ex-date annoncée doit précéder l'instantané")
+
+        announcements = {
+            item.claim_id: item
+            for item in self.ledger.distribution_announcements
+            if item.claim_id is not None
+        }
+        known_receivables = ZERO
+        unknown_claim_ids: list[int] = []
+        unproven_cash_ids: list[int] = []
+        for claim in self.ledger.distribution_claims:
+            if claim.paid:
+                if (
+                    claim.cash_available_at is None
+                    or claim.cash_available_at > decision_at
+                ):
+                    unproven_cash_ids.append(claim.claim_id)
+                continue
+            announcement = announcements.get(claim.claim_id)
+            known = False
+            if announcement is not None:
+                if announcement.knowledge_at is not None:
+                    known = announcement.knowledge_at <= decision_at
+                else:
+                    known = announcement.knowledge_date < decision_session
+            if known:
+                known_receivables += claim.amount
+            else:
+                unknown_claim_ids.append(claim.claim_id)
+
+        if unknown_claim_ids:
+            reasons.append("montant de créance non démontré comme connu")
+        if unproven_cash_ids:
+            reasons.append("disponibilité du cash de distribution non démontrée")
+
+        unproven_cash_amount = sum(
+            (
+                claim.amount
+                for claim in self.ledger.distribution_claims
+                if claim.claim_id in unproven_cash_ids
+            ),
+            ZERO,
+        )
+        known_settled_cash = self.ledger.settled_cash - unproven_cash_amount
+
+        positions = {
+            symbol: self.ledger.economic_positions.get(symbol, 0)
+            for symbol in SYMBOLS
+        }
+        settled_positions = {
+            symbol: self.ledger.settled_positions.get(symbol, 0)
+            for symbol in SYMBOLS
+        }
+        holdings = (
+            sum(closes[symbol] * positions[symbol] for symbol in SYMBOLS)
+            if set(closes) == set(SYMBOLS)
+            else None
+        )
+        economic_wealth = (
+            None
+            if holdings is None or unknown_claim_ids or unproven_cash_ids
+            else holdings
+            + self.ledger.settled_cash
+            + self.ledger.distribution_receivables
+            + self.ledger.sale_receivables
+            - self.ledger.purchase_payables
+        )
+        admissible_wealth = (
+            economic_wealth
+            if not reasons
+            and economic_wealth is not None
+            and known_receivables == self.ledger.distribution_receivables
+            else None
+        )
+        status = (
+            SnapshotStatus.READY
+            if admissible_wealth is not None
+            else SnapshotStatus.NOT_EVALUABLE
+        )
+        reason = "instantané décisionnel complet" if not reasons else "; ".join(reasons)
+        provisional = DecisionSnapshot(
+            "",
+            decision_at,
+            price_date,
+            _frozen_mapping(closes),
+            _frozen_mapping(positions),
+            _frozen_mapping(settled_positions),
+            known_settled_cash,
+            self.ledger.sale_receivables,
+            self.ledger.purchase_payables,
+            known_receivables,
+            (
+                None
+                if unknown_claim_ids
+                else self.ledger.distribution_receivables
+            ),
+            tuple(unknown_claim_ids),
+            tuple(unproven_cash_ids),
+            economic_wealth,
+            admissible_wealth,
+            max(
+                ZERO,
+                known_settled_cash - self.ledger.purchase_payables,
+            ),
+            self.ledger.event_sequence,
+            status,
+            reason,
+            _frozen_mapping(provenance),
+        )
+        return replace(
+            provisional,
+            snapshot_id="SNAPSHOT-" + decision_snapshot_content_sha256(provisional),
+        )
+
+    def prepare_intent_from_snapshot(
+        self,
+        snapshot: DecisionSnapshot,
+        *,
+        target_weight_spy: Any,
+    ) -> DecisionIntent:
+        """Scelle une intention uniquement depuis un instantané admissible."""
+        if not isinstance(snapshot, DecisionSnapshot):
+            raise AdapterError("instantané décisionnel invalide")
+        if snapshot.snapshot_id != (
+            "SNAPSHOT-" + decision_snapshot_content_sha256(snapshot)
+        ):
+            raise AdapterError("l'empreinte de l'instantané est invalide")
+        if snapshot.status is not SnapshotStatus.READY or snapshot.admissible_wealth is None:
+            raise AdapterError("instantané NOT_EVALUABLE: " + snapshot.reason)
+        if snapshot.ledger_sequence != self.ledger.event_sequence:
+            raise AdapterError("instantané périmé avant préparation")
+        if dict(snapshot.economic_positions) != {
+            symbol: self.ledger.economic_positions.get(symbol, 0)
+            for symbol in SYMBOLS
+        }:
+            raise AdapterError("positions de l'instantané périmées")
+        return self._seal_intent(
+            decision_date=snapshot.price_date,
+            known_market_wealth=snapshot.admissible_wealth,
+            inherited_positions=snapshot.economic_positions,
+            closes=snapshot.decision_closes,
+            target_weight_spy=target_weight_spy,
+            decision_at=snapshot.decision_at,
+            decision_snapshot_id=snapshot.snapshot_id,
+            snapshot_ledger_sequence=snapshot.ledger_sequence,
+        )
 
     def prepare_intent(
         self,
@@ -241,6 +597,34 @@ class SyntheticDecisionAdapter:
         if wealth != expected_wealth:
             raise AdapterError("la richesse connue ne correspond pas à l'état et aux clôtures fournis")
 
+        return self._seal_intent(
+            decision_date=decision_date,
+            known_market_wealth=wealth,
+            inherited_positions=positions,
+            closes=closes,
+            target_weight_spy=weight,
+        )
+
+    def _seal_intent(
+        self,
+        *,
+        decision_date: date,
+        known_market_wealth: Any,
+        inherited_positions: Mapping[str, int],
+        closes: Mapping[str, Decimal],
+        target_weight_spy: Any,
+        decision_at: datetime | None = None,
+        decision_snapshot_id: str | None = None,
+        snapshot_ledger_sequence: int | None = None,
+    ) -> DecisionIntent:
+        try:
+            wealth = money(known_market_wealth, label="richesse connue")
+            weight = money(target_weight_spy, label="poids cible SPY")
+        except LedgerError as exc:
+            raise AdapterError(str(exc)) from exc
+        positions = self._normalize_positions(inherited_positions)
+        if wealth < ZERO or not ZERO <= weight <= Decimal("1"):
+            raise AdapterError("paramètres économiques de l'intention invalides")
         target_weights = {"SPY": weight, "BIL": Decimal("1") - weight}
         targets = {
             symbol: whole_share_quantity(target_weights[symbol] * wealth, closes[symbol])
@@ -266,6 +650,9 @@ class SyntheticDecisionAdapter:
             target_quantities=_frozen_mapping(targets),
             decision_prices=_frozen_mapping(closes),
             orders=orders,
+            decision_at=decision_at,
+            decision_snapshot_id=decision_snapshot_id,
+            snapshot_ledger_sequence=snapshot_ledger_sequence,
         )
         digest = intent_content_sha256(provisional)
         intent = DecisionIntent(
@@ -278,6 +665,9 @@ class SyntheticDecisionAdapter:
             target_quantities=provisional.target_quantities,
             decision_prices=provisional.decision_prices,
             orders=provisional.orders,
+            decision_at=provisional.decision_at,
+            decision_snapshot_id=provisional.decision_snapshot_id,
+            snapshot_ledger_sequence=provisional.snapshot_ledger_sequence,
         )
         known = self._prepared_intents.get(intent.intent_id)
         if known is not None and known != digest:
@@ -327,6 +717,28 @@ class SyntheticDecisionAdapter:
                 execution_date,
                 before,
             )
+
+        if intent.decision_snapshot_id is not None:
+            if (
+                intent.decision_at is None
+                or intent.snapshot_ledger_sequence is None
+                or intent.decision_at.date() != execution_date
+            ):
+                return self._terminal(
+                    intent,
+                    ExecutionStatus.INVALID_INPUT,
+                    "l'instantané ne correspond pas à la séance d'exécution",
+                    execution_date,
+                    before,
+                )
+            if intent.snapshot_ledger_sequence != self.ledger.event_sequence:
+                return self._terminal(
+                    intent,
+                    ExecutionStatus.INVALID_INPUT,
+                    "l'instantané est périmé : l'état a changé avant l'open",
+                    execution_date,
+                    before,
+                )
 
         if intent.decision_date >= execution_date:
             return self._terminal(
@@ -495,10 +907,16 @@ class SyntheticDecisionAdapter:
         wealth_before = self.ledger.wealth_market()
         trade_before = self.ledger.accounting_snapshot()
         try:
+            if intent.decision_snapshot_id is not None:
+                self.ledger._authorize_snapshot_execution(
+                    intent.decision_snapshot_id,
+                    ledger_sequence=self.ledger.event_sequence,
+                )
             settlement_ids = self.ledger.execute_batch(
                 requests,
                 trade_date=execution_date,
                 funding=FundingConvention.H_FIN_NET,
+                decision_snapshot_id=intent.decision_snapshot_id,
             )
         except LedgerError as exc:
             return self._terminal(
@@ -719,14 +1137,19 @@ class SyntheticDecisionAdapter:
 __all__ = [
     "AdapterError",
     "DatedPrice",
+    "DecisionSnapshot",
     "DecisionIntent",
     "ExecutionOutcome",
     "ExecutionStatus",
     "FundingSource",
     "IntentPersistence",
     "PriceStatus",
+    "SnapshotStatus",
     "SyntheticDecisionAdapter",
     "canonical_json_bytes",
+    "cost_scenario_fees",
+    "decision_snapshot_content_sha256",
+    "decision_snapshot_payload",
     "intent_content_sha256",
     "intent_payload",
 ]

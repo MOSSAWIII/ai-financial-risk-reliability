@@ -10,10 +10,11 @@ from __future__ import annotations
 from bisect import bisect_right
 from copy import deepcopy
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal, InvalidOperation, ROUND_FLOOR
 from enum import Enum
 from typing import Any, Iterable, Mapping, Sequence
+from zoneinfo import ZoneInfo
 
 
 ZERO = Decimal("0")
@@ -107,6 +108,8 @@ class DistributionClaim:
     amount_per_share: Decimal
     amount: Decimal
     paid: bool = False
+    information_mode: str = "LEGACY"
+    cash_available_at: datetime | None = None
 
 
 @dataclass
@@ -118,6 +121,7 @@ class DistributionAnnouncement:
     payment_date: date
     amount_per_share: Decimal
     claim_id: int | None = None
+    knowledge_at: datetime | None = None
 
 
 @dataclass(frozen=True)
@@ -225,6 +229,7 @@ class SyntheticPortfolioLedger:
     _position_events: dict[str, list[tuple[date, int, str, Any]]] = field(default_factory=dict, init=False)
     _applied_splits: set[tuple[str, date, int, int]] = field(default_factory=set, init=False)
     _realized_distribution_event_ids: set[str] = field(default_factory=set, init=False)
+    _decision_authorizations: dict[str, int] = field(default_factory=dict, init=False)
     _sequence: int = field(default=0, init=False)
     _next_settlement_id: int = field(default=1, init=False)
     _next_claim_id: int = field(default=1, init=False)
@@ -364,6 +369,23 @@ class SyntheticPortfolioLedger:
         )
 
     @property
+    def event_sequence(self) -> int:
+        """Version monotone de l'état, utilisable pour sceller un instantané."""
+        return self._sequence
+
+    def _authorize_snapshot_execution(
+        self, snapshot_id: str, *, ledger_sequence: int
+    ) -> None:
+        """Autorise une seule exécution interne issue d'un instantané à jour."""
+        if (
+            not isinstance(snapshot_id, str)
+            or not snapshot_id.startswith("SNAPSHOT-")
+            or ledger_sequence != self._sequence
+        ):
+            raise LedgerError("autorisation d'instantané invalide ou périmée")
+        self._decision_authorizations[snapshot_id] = ledger_sequence
+
+    @property
     def sale_receivables(self) -> Decimal:
         return sum((item.cash_receivable for item in self.pending_settlements), ZERO)
 
@@ -414,10 +436,19 @@ class SyntheticPortfolioLedger:
         trade_date: date,
         settlement_date: date | None = None,
         funding: FundingConvention = FundingConvention.CONSERVATIVE,
+        decision_snapshot_id: str | None = None,
     ) -> list[int]:
         """Comptabilise atomiquement des transactions au trade date."""
         try:
-            if self._realized_distribution_event_ids:
+            authorized_sequence = (
+                None
+                if decision_snapshot_id is None
+                else self._decision_authorizations.pop(decision_snapshot_id, None)
+            )
+            if (
+                self._realized_distribution_event_ids
+                and authorized_sequence != self._sequence
+            ):
                 raise LedgerError(
                     "une comptabilité de distribution ex post interdit toute nouvelle transaction"
                 )
@@ -659,6 +690,7 @@ class SyntheticPortfolioLedger:
         ex_date: date,
         payment_date: date,
         amount_per_share: Any,
+        knowledge_at: datetime | None = None,
     ) -> int:
         """Enregistre une information future sans créer de créance."""
         symbol = self._valid_symbol(symbol)
@@ -672,6 +704,12 @@ class SyntheticPortfolioLedger:
                 raise LedgerError("la date de connaissance est antidatée")
             if ex_date < knowledge_date:
                 raise LedgerError("une distribution ne peut pas être annoncée après son ex-date")
+            if knowledge_at is not None and (
+                knowledge_at.tzinfo is None
+                or knowledge_at.astimezone(ZoneInfo("America/New_York")).date()
+                != knowledge_date
+            ):
+                raise LedgerError("instant de connaissance de distribution invalide")
             if self._last_effective_date is not None and (
                 ex_date < self._last_effective_date
                 or (
@@ -692,6 +730,7 @@ class SyntheticPortfolioLedger:
             ex_date,
             payment_date,
             amount,
+            knowledge_at=knowledge_at,
         )
         self._next_announcement_id += 1
         self.distribution_announcements.append(announcement)
@@ -703,6 +742,7 @@ class SyntheticPortfolioLedger:
             ex_date=ex_date,
             payment_date=payment_date,
             amount_per_share=amount,
+            knowledge_at=knowledge_at,
         )
         self._commit_knowledge_time(knowledge_date)
         return announcement.announcement_id
@@ -739,6 +779,7 @@ class SyntheticPortfolioLedger:
             entitled_shares=shares,
             amount_per_share=announcement.amount_per_share,
             amount=announcement.amount_per_share * shares,
+            information_mode="ANNOUNCED",
         )
         self._next_claim_id += 1
         self.distribution_claims.append(claim)
@@ -769,9 +810,10 @@ class SyntheticPortfolioLedger:
     ) -> int:
         """Comptabilise ex post un droit réalisé sans inventer une annonce.
 
-        Cette voie est réservée à l'évaluation rétrospective d'une politique dont
-        toutes les décisions sont déjà closes. L'événement n'est jamais enregistré
-        comme information historiquement connue et bloque toute décision ultérieure.
+        L'événement n'est jamais enregistré comme information historiquement connue.
+        Par défaut il bloque toute transaction ultérieure. La seule exception est une
+        autorisation interne à usage unique issue d'un instantané décisionnel strict
+        qui n'expose pas prématurément ce montant.
         """
         symbol = self._valid_symbol(symbol)
         try:
@@ -804,6 +846,7 @@ class SyntheticPortfolioLedger:
             entitled_shares=shares,
             amount_per_share=amount,
             amount=amount * shares,
+            information_mode="REALIZED_EX_POST",
         )
         self._next_claim_id += 1
         self.distribution_claims.append(claim)
@@ -869,7 +912,22 @@ class SyntheticPortfolioLedger:
         self.assert_invariants()
         return claim.claim_id
 
-    def pay_distributions_through(self, as_of_date: date) -> list[int]:
+    def pay_distributions_through(
+        self,
+        as_of_date: date,
+        *,
+        cash_available_at: datetime | None = None,
+    ) -> list[int]:
+        if cash_available_at is not None and (
+            cash_available_at.tzinfo is None
+            or cash_available_at.astimezone(ZoneInfo("America/New_York")).date()
+            != as_of_date
+        ):
+            self._reject(
+                "DISTRIBUTION_PAYMENT",
+                "instant de disponibilité du cash invalide",
+                as_of_date,
+            )
         if self.strict_temporal:
             try:
                 self._validate_effect_time(
@@ -906,6 +964,7 @@ class SyntheticPortfolioLedger:
         self.settled_cash += amount
         for claim in claims:
             claim.paid = True
+            claim.cash_available_at = cash_available_at
         ids = [claim.claim_id for claim in claims]
         for payment_date in sorted({claim.payment_date for claim in claims}):
             group = [claim for claim in claims if claim.payment_date == payment_date]
@@ -914,6 +973,7 @@ class SyntheticPortfolioLedger:
                 "DISTRIBUTION_PAYMENT",
                 claim_ids=tuple(claim.claim_id for claim in group),
                 amount=sum((claim.amount for claim in group), ZERO),
+                cash_available_at=cash_available_at,
             )
         self.assert_invariants()
         self._commit_effect_time(as_of_date, EventPhase.DISTRIBUTION_PAYMENT)
