@@ -8,12 +8,14 @@ figée, puis traite cette intention une seule fois sur des entrées datées.
 
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal
 from enum import Enum
 from types import MappingProxyType
-from typing import Any, Mapping
+from typing import Any, Mapping, Protocol
 
 from synthetic_portfolio_ledger import (
     AccountingSnapshot,
@@ -66,6 +68,7 @@ class DatedPrice:
 @dataclass(frozen=True)
 class DecisionIntent:
     intent_id: str
+    content_sha256: str
     decision_date: date
     known_market_wealth: Decimal
     target_weight_spy: Decimal
@@ -92,8 +95,63 @@ class ExecutionOutcome:
     settlement_ids: tuple[int, ...] = ()
 
 
+class IntentPersistence(Protocol):
+    """Interface minimale d'un journal persistant, sans restaurer le registre."""
+
+    def register_intent(self, intent: DecisionIntent) -> None: ...
+
+    def intent_sha256(self, intent_id: str) -> str | None: ...
+
+    def terminal_status(self, intent_id: str) -> str | None: ...
+
+    def record_terminal(self, outcome: ExecutionOutcome) -> None: ...
+
+
 def _frozen_mapping(values: Mapping[str, Any]) -> Mapping[str, Any]:
     return MappingProxyType(dict(values))
+
+
+def _decimal_text(value: Decimal) -> str:
+    if value == ZERO:
+        return "0"
+    return format(value.normalize(), "f")
+
+
+def intent_payload(intent: DecisionIntent) -> dict[str, Any]:
+    """Retourne le contenu économique canonique, hors identifiant et empreinte."""
+    return {
+        "decision_date": intent.decision_date.isoformat(),
+        "known_market_wealth": _decimal_text(intent.known_market_wealth),
+        "target_weight_spy": _decimal_text(intent.target_weight_spy),
+        "inherited_positions": {
+            symbol: intent.inherited_positions[symbol] for symbol in SYMBOLS
+        },
+        "target_quantities": {
+            symbol: intent.target_quantities[symbol] for symbol in SYMBOLS
+        },
+        "decision_prices": {
+            symbol: _decimal_text(intent.decision_prices[symbol]) for symbol in SYMBOLS
+        },
+        "orders": [
+            {
+                "symbol": order.symbol,
+                "quantity": order.quantity,
+                "decision_date": order.decision_date.isoformat(),
+                "decision_price": _decimal_text(order.decision_price),
+            }
+            for order in sorted(intent.orders, key=lambda item: item.symbol)
+        ],
+    }
+
+
+def canonical_json_bytes(value: Mapping[str, Any]) -> bytes:
+    return json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    ).encode("utf-8")
+
+
+def intent_content_sha256(intent: DecisionIntent) -> str:
+    return hashlib.sha256(canonical_json_bytes(intent_payload(intent))).hexdigest()
 
 
 @dataclass
@@ -101,8 +159,9 @@ class SyntheticDecisionAdapter:
     """Traite des intentions explicites avec un registre strict déjà fourni."""
 
     ledger: SyntheticPortfolioLedger
+    persistence: IntentPersistence | None = None
     outcomes: list[ExecutionOutcome] = field(default_factory=list, init=False)
-    _next_intent_number: int = field(default=1, init=False)
+    _prepared_intents: dict[str, str] = field(default_factory=dict, init=False)
     _processed_intents: set[str] = field(default_factory=set, init=False)
 
     def __post_init__(self) -> None:
@@ -190,8 +249,9 @@ class SyntheticDecisionAdapter:
             for symbol in SYMBOLS
             if targets[symbol] != positions[symbol]
         )
-        intent = DecisionIntent(
-            intent_id=f"INTENT-{self._next_intent_number:06d}",
+        provisional = DecisionIntent(
+            intent_id="",
+            content_sha256="",
             decision_date=decision_date,
             known_market_wealth=wealth,
             target_weight_spy=weight,
@@ -200,7 +260,24 @@ class SyntheticDecisionAdapter:
             decision_prices=_frozen_mapping(closes),
             orders=orders,
         )
-        self._next_intent_number += 1
+        digest = intent_content_sha256(provisional)
+        intent = DecisionIntent(
+            intent_id=f"INTENT-{digest}",
+            content_sha256=digest,
+            decision_date=provisional.decision_date,
+            known_market_wealth=provisional.known_market_wealth,
+            target_weight_spy=provisional.target_weight_spy,
+            inherited_positions=provisional.inherited_positions,
+            target_quantities=provisional.target_quantities,
+            decision_prices=provisional.decision_prices,
+            orders=provisional.orders,
+        )
+        known = self._prepared_intents.get(intent.intent_id)
+        if known is not None and known != digest:
+            raise AdapterError("identifiant d'intention réutilisé avec un contenu différent")
+        self._prepared_intents[intent.intent_id] = digest
+        if self.persistence is not None:
+            self.persistence.register_intent(intent)
         return intent
 
     def process_intent(
@@ -218,11 +295,28 @@ class SyntheticDecisionAdapter:
             raise AdapterError("intention invalide")
         if not isinstance(execution_date, date):
             raise AdapterError("date d'exécution invalide")
+        integrity_reason = self._intent_integrity_reason(intent)
+        if integrity_reason is not None:
+            return self._finish(
+                intent,
+                ExecutionStatus.INVALID_INPUT,
+                integrity_reason,
+                execution_date,
+                before,
+            )
         if intent.intent_id in self._processed_intents:
             return self._finish(
                 intent,
                 ExecutionStatus.INVALID_INPUT,
                 "cette intention a déjà été traitée",
+                execution_date,
+                before,
+            )
+        if self.persistence is not None and self.persistence.terminal_status(intent.intent_id):
+            return self._finish(
+                intent,
+                ExecutionStatus.INVALID_INPUT,
+                "cette intention possède déjà un résultat terminal persistant",
                 execution_date,
                 before,
             )
@@ -442,6 +536,67 @@ class SyntheticDecisionAdapter:
             raise AdapterError("les positions héritées doivent être des entiers non négatifs")
         return result
 
+    def _intent_integrity_reason(self, intent: DecisionIntent) -> str | None:
+        try:
+            digest = intent_content_sha256(intent)
+        except (KeyError, AttributeError, TypeError, ValueError):
+            return "contenu d'intention invalide"
+        if intent.content_sha256 != digest:
+            return "l'empreinte de l'intention ne correspond pas à son contenu"
+        if intent.intent_id != f"INTENT-{digest}":
+            return "l'identifiant de l'intention ne correspond pas à son contenu"
+        expected = self._prepared_intents.get(intent.intent_id)
+        if expected is None and self.persistence is not None:
+            expected = self.persistence.intent_sha256(intent.intent_id)
+        if expected is None:
+            return "l'intention n'a pas été préparée par cette frontière"
+        if expected != digest:
+            return "identifiant d'intention réutilisé avec un contenu différent"
+
+        try:
+            positions = self._normalize_positions(intent.inherited_positions)
+            targets = self._normalize_positions(intent.target_quantities)
+        except AdapterError as exc:
+            return str(exc)
+        if set(intent.decision_prices) != set(SYMBOLS):
+            return "prix de décision incomplets"
+        try:
+            prices = {
+                symbol: positive_money(
+                    intent.decision_prices[symbol], label=f"prix de décision {symbol}"
+                )
+                for symbol in SYMBOLS
+            }
+            wealth = money(intent.known_market_wealth, label="richesse connue")
+            weight = money(intent.target_weight_spy, label="poids cible SPY")
+        except (LedgerError, AdapterError) as exc:
+            return str(exc)
+        if wealth < ZERO or not ZERO <= weight <= Decimal("1"):
+            return "paramètres économiques de l'intention invalides"
+        expected_targets = {
+            "SPY": whole_share_quantity(weight * wealth, prices["SPY"]),
+            "BIL": whole_share_quantity(
+                (Decimal("1") - weight) * wealth, prices["BIL"]
+            ),
+        }
+        if targets != expected_targets:
+            return "quantités cibles incohérentes avec le poids et les prix de décision"
+        expected_orders = tuple(
+            FixedOrder(
+                symbol=symbol,
+                quantity=targets[symbol] - positions[symbol],
+                decision_date=intent.decision_date,
+                decision_price=prices[symbol],
+            )
+            for symbol in SYMBOLS
+            if targets[symbol] != positions[symbol]
+        )
+        if tuple(sorted(intent.orders, key=lambda item: item.symbol)) != tuple(
+            sorted(expected_orders, key=lambda item: item.symbol)
+        ):
+            return "ordres incohérents avec les positions et quantités cibles"
+        return None
+
     @staticmethod
     def _execution_prices(
         observations: Mapping[str, DatedPrice], execution_date: date
@@ -513,8 +668,11 @@ class SyntheticDecisionAdapter:
         before: AccountingSnapshot,
         **kwargs: Any,
     ) -> ExecutionOutcome:
+        outcome = self._finish(intent, status, reason, execution_date, before, **kwargs)
         self._processed_intents.add(intent.intent_id)
-        return self._finish(intent, status, reason, execution_date, before, **kwargs)
+        if self.persistence is not None:
+            self.persistence.record_terminal(outcome)
+        return outcome
 
     def _finish(
         self,
@@ -558,6 +716,10 @@ __all__ = [
     "ExecutionOutcome",
     "ExecutionStatus",
     "FundingSource",
+    "IntentPersistence",
     "PriceStatus",
     "SyntheticDecisionAdapter",
+    "canonical_json_bytes",
+    "intent_content_sha256",
+    "intent_payload",
 ]

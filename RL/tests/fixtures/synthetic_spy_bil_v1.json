@@ -1,0 +1,98 @@
+{
+  "schema_version": "synthetic_spy_bil_input/v1",
+  "scenario_id": "synthetic-spy-bil-sequence-v1",
+  "provenance": "SYNTHETIC",
+  "calendars": {
+    "trading": [
+      "2023-01-03",
+      "2023-01-04",
+      "2023-01-05",
+      "2023-01-06",
+      "2023-01-09",
+      "2023-01-10",
+      "2023-01-11",
+      "2023-01-12",
+      "2023-01-13"
+    ],
+    "settlement": [
+      "2023-01-03",
+      "2023-01-04",
+      "2023-01-05",
+      "2023-01-06",
+      "2023-01-09",
+      "2023-01-10",
+      "2023-01-11",
+      "2023-01-12",
+      "2023-01-13"
+    ]
+  },
+  "initial_state": {
+    "cash": "10000",
+    "positions": {
+      "SPY": 0,
+      "BIL": 0
+    }
+  },
+  "decisions": [
+    {
+      "decision_key": "D1_BUY_BIL",
+      "decision_date": "2023-01-03",
+      "known_market_wealth": "10000",
+      "decision_closes": {
+        "SPY": {"date": "2023-01-03", "value": "100", "status": "AVAILABLE"},
+        "BIL": {"date": "2023-01-03", "value": "100", "status": "AVAILABLE"}
+      },
+      "target_weight_spy": "0",
+      "execution_date": "2023-01-04",
+      "execution_opens": {
+        "SPY": {"date": "2023-01-04", "value": "101", "status": "AVAILABLE"},
+        "BIL": {"date": "2023-01-04", "value": "100", "status": "AVAILABLE"}
+      },
+      "fees": {"SPY": "0", "BIL": "0"},
+      "documentary_status": "CLEAR",
+      "anomalies": [],
+      "settle_after": ["2023-01-06"],
+      "expected_status": "EXECUTED_HYPOTHETICAL"
+    },
+    {
+      "decision_key": "D2_REBALANCE_HALF",
+      "decision_date": "2023-01-06",
+      "known_market_wealth": "10000",
+      "decision_closes": {
+        "SPY": {"date": "2023-01-06", "value": "100", "status": "AVAILABLE"},
+        "BIL": {"date": "2023-01-06", "value": "100", "status": "AVAILABLE"}
+      },
+      "target_weight_spy": "0.5",
+      "execution_date": "2023-01-09",
+      "execution_opens": {
+        "SPY": {"date": "2023-01-09", "value": "99", "status": "AVAILABLE"},
+        "BIL": {"date": "2023-01-09", "value": "100", "status": "AVAILABLE"}
+      },
+      "fees": {"SPY": "0", "BIL": "0"},
+      "documentary_status": "CLEAR",
+      "anomalies": [],
+      "settle_after": [],
+      "expected_status": "EXECUTED_HYPOTHETICAL"
+    },
+    {
+      "decision_key": "D3_PREMATURE_SPY_SALE",
+      "decision_date": "2023-01-09",
+      "known_market_wealth": "10050",
+      "decision_closes": {
+        "SPY": {"date": "2023-01-09", "value": "100", "status": "AVAILABLE"},
+        "BIL": {"date": "2023-01-09", "value": "100", "status": "AVAILABLE"}
+      },
+      "target_weight_spy": "0",
+      "execution_date": "2023-01-10",
+      "execution_opens": {
+        "SPY": {"date": "2023-01-10", "value": "102", "status": "AVAILABLE"},
+        "BIL": {"date": "2023-01-10", "value": "100", "status": "AVAILABLE"}
+      },
+      "fees": {"SPY": "0", "BIL": "0"},
+      "documentary_status": "CLEAR",
+      "anomalies": [],
+      "settle_after": ["2023-01-11"],
+      "expected_status": "ECONOMIC_ORDER_REJECTED"
+    }
+  ]
+}

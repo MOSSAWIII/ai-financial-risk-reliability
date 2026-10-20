@@ -18,6 +18,8 @@ La proposition [`MANDAT_EXPERIMENTAL_SPY_BIL_V1_PROPOSITION.md`](docs/MANDAT_EXP
 
 L'[`adaptateur synthétique de décision`](docs/VALIDATION_ADAPTATEUR_DECISION_SPY_BIL.md) implémente maintenant, sans donnée historique, la transformation d'un poids SPY fourni en quantités entières figées puis en lot hypothétique strict. Il limite `H_FIN_NET` aux ventes de parts déjà réglées, distingue cash réglé et produit de vente non réglé, bloque la revente avant paiement et sépare hold volontaire, rejet économique, défaut documentaire et entrée invalide. Les **69 tests artificiels** passent ; ils valident le mécanisme comptable et temporel, pas un courtier, un fill Yahoo ou une expérience financière.
 
+La [frontière d'ingestion synthétique](docs/VALIDATION_FRONTIERE_INGESTION_SPY_BIL.md) ajoute un contrat JSON v1 strict et reproductible, une empreinte exacte du fixture, des identifiants d'intention dérivés du contenu et un journal terminal minimal. Elle refuse les intentions altérées et les doubles traitements après rechargement, sans prétendre restaurer le registre après incident. Les **93 tests artificiels** passent. Cette validation n'utilise aucune donnée de marché et n'autorise toujours ni ingestion historique, ni portefeuille, ni backtest.
+
 La question de départ est provisoire :
 
 > Dans quelle mesure des politiques de décision financière apprises séquentiellement peuvent-elles améliorer la gestion du risque lorsque les prévisions sont imparfaites et que les conditions économiques et financières évoluent ?
@@ -79,6 +81,7 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 - [x] Matrice des décisions finales, contrat d'intégration stricte et délimitation documentaire du règlement DTC/NSCC.
 - [x] Proposition d'un mandat expérimental v1 et d'une convention de financement permettant les rééquilibrages sous conditions explicites.
 - [x] Adaptateur minimal décision–ordres–registre strict, avec 69 tests artificiels et traçabilité du financement.
+- [x] Frontière JSON synthétique v1, intentions liées à leur contenu, rejeu reproductible et refus persistant des doubles traitements, avec 93 tests artificiels.
 - [ ] Approbation de Yahoo `Open` comme référence conventionnelle, sans le confondre avec une exécution garantie.
 - [ ] Complétion d'un calendrier officiel de règlement DTC/NSCC versionné 2018–2026 et résolution du cas SPY du 20 avril 2026.
 - [ ] Validation des références classiques avant toute méthode RL.

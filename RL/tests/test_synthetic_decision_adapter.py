@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+from dataclasses import replace
 from datetime import date
 from decimal import Decimal
 from pathlib import Path
@@ -685,3 +686,103 @@ def test_documentary_issue_stops_before_price_or_financial_mutation() -> None:
     assert outcome.status is ExecutionStatus.NOT_EVALUABLE
     assert outcome.reason == "CALENDAR_UNVERIFIED"
     assert outcome.accounting_before == outcome.accounting_after == before
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        lambda intent: replace(
+            intent,
+            target_quantities={"SPY": 1, "BIL": 0},
+        ),
+        lambda intent: replace(
+            intent,
+            orders=(
+                FixedOrder("SPY", 1, intent.decision_date, D("100")),
+            ),
+        ),
+        lambda intent: replace(
+            intent,
+            decision_prices={"SPY": D("99"), "BIL": D("100")},
+        ),
+        lambda intent: replace(intent, target_weight_spy=D("0.5")),
+    ],
+)
+def test_modified_intention_is_rejected_before_any_mutation(mutation) -> None:
+    ledger = strict_ledger()
+    adapter = SyntheticDecisionAdapter(ledger)
+    intent = prepare_from_cash(adapter)
+    forged = mutation(intent)
+    before = ledger.accounting_snapshot()
+    journal_length = len(ledger.journal)
+    outcome = adapter.process_intent(
+        forged,
+        execution_date=date(2025, 1, 3),
+        execution_opens={
+            "SPY": observation("100", date(2025, 1, 3)),
+            "BIL": observation("100", date(2025, 1, 3)),
+        },
+    )
+    assert outcome.status is ExecutionStatus.INVALID_INPUT
+    assert "empreinte" in outcome.reason
+    assert outcome.accounting_before == outcome.accounting_after == before
+    assert len(ledger.journal) == journal_length
+
+
+def test_identifier_reused_for_different_intention_is_rejected() -> None:
+    ledger = strict_ledger()
+    adapter = SyntheticDecisionAdapter(ledger)
+    first = prepare_from_cash(adapter, target_weight="1")
+    second = prepare_from_cash(adapter, target_weight="0")
+    forged = replace(second, intent_id=first.intent_id)
+    before = ledger.accounting_snapshot()
+    outcome = adapter.process_intent(
+        forged,
+        execution_date=date(2025, 1, 3),
+        execution_opens={
+            "SPY": observation("100", date(2025, 1, 3)),
+            "BIL": observation("100", date(2025, 1, 3)),
+        },
+    )
+    assert outcome.status is ExecutionStatus.INVALID_INPUT
+    assert "identifiant" in outcome.reason or "empreinte" in outcome.reason
+    assert outcome.accounting_before == outcome.accounting_after == before
+
+
+def test_normal_settlement_between_decision_and_execution_is_allowed() -> None:
+    sessions = [
+        date(2023, 1, 2),
+        date(2023, 1, 3),
+        date(2023, 1, 4),
+        date(2023, 1, 5),
+        date(2023, 1, 6),
+        date(2023, 1, 9),
+    ]
+    ledger = strict_ledger("100", sessions=sessions)
+    ledger.set_prices("BIL", market_price="10", price_date=date(2023, 1, 2))
+    ledger.execute_batch(
+        [ExecutionRequest(FixedOrder("BIL", 10, date(2022, 12, 30), D("10")), D("10"))],
+        trade_date=date(2023, 1, 2),
+    )
+    adapter = SyntheticDecisionAdapter(ledger)
+    intent = adapter.prepare_intent(
+        decision_date=date(2023, 1, 3),
+        known_market_wealth="100",
+        inherited_positions={"SPY": 0, "BIL": 10},
+        decision_closes={
+            "SPY": observation("10", date(2023, 1, 3)),
+            "BIL": observation("10", date(2023, 1, 3)),
+        },
+        target_weight_spy="1",
+    )
+    ledger.settle_through(date(2023, 1, 4))
+    outcome = adapter.process_intent(
+        intent,
+        execution_date=date(2023, 1, 4),
+        execution_opens={
+            "SPY": observation("10", date(2023, 1, 4)),
+            "BIL": observation("10", date(2023, 1, 4)),
+        },
+    )
+    assert outcome.status is ExecutionStatus.EXECUTED_HYPOTHETICAL
+    assert ledger.economic_positions == {"BIL": 0, "SPY": 10}
