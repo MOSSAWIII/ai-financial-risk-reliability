@@ -20,6 +20,8 @@ L'[`adaptateur synthétique de décision`](docs/VALIDATION_ADAPTATEUR_DECISION_S
 
 La [frontière d'ingestion synthétique](docs/VALIDATION_FRONTIERE_INGESTION_SPY_BIL.md) ajoute un contrat JSON v1 strict et reproductible, une empreinte exacte du fixture, des identifiants d'intention dérivés du contenu et un journal terminal minimal. Elle refuse les intentions altérées et les doubles traitements après rechargement, sans prétendre restaurer le registre après incident. Les **93 tests artificiels** passent. Cette validation n'utilise aucune donnée de marché et n'autorise toujours ni ingestion historique, ni portefeuille, ni backtest.
 
+La [validation point-in-time SPY–BIL](docs/VALIDATION_POINT_IN_TIME_SPY_BIL.md) distingue maintenant date économique, observabilité, publication, acquisition et révision. Un contrôle en lecture seule de huit lignes Yahoo présélectionnées vérifie les empreintes, met en regard la transition T+2/T+1 documentée et retrouve l'anomalie SPY du 20 avril 2026, sans transaction ni performance. Les `Close`/`Open` actuels restent des `MARKET_OBSERVABLE_PROXY`, les annonces historiques de distributions et plusieurs calendriers restent insuffisamment prouvés, et le verdict est **`PARTIALLY_VERIFIED`**. Aucune intégration financière n'est autorisée.
+
 La question de départ est provisoire :
 
 > Dans quelle mesure des politiques de décision financière apprises séquentiellement peuvent-elles améliorer la gestion du risque lorsque les prévisions sont imparfaites et que les conditions économiques et financières évoluent ?
@@ -82,6 +84,7 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 - [x] Proposition d'un mandat expérimental v1 et d'une convention de financement permettant les rééquilibrages sous conditions explicites.
 - [x] Adaptateur minimal décision–ordres–registre strict, avec 69 tests artificiels et traçabilité du financement.
 - [x] Frontière JSON synthétique v1, intentions liées à leur contenu, rejeu reproductible et refus persistant des doubles traitements, avec 93 tests artificiels.
+- [x] Référentiel point-in-time, fiche candidate v1 et contrôle descriptif minimal de quelques observations réelles, verdict `PARTIALLY_VERIFIED`.
 - [ ] Approbation de Yahoo `Open` comme référence conventionnelle, sans le confondre avec une exécution garantie.
 - [ ] Complétion d'un calendrier officiel de règlement DTC/NSCC versionné 2018–2026 et résolution du cas SPY du 20 avril 2026.
 - [ ] Validation des références classiques avant toute méthode RL.
