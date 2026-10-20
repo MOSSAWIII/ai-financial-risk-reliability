@@ -32,6 +32,8 @@ La [validation de couverture et sensibilité aux coûts A/B/C1](docs/VALIDATION_
 
 La [validation synthétique du rééquilibrage C2](docs/VALIDATION_SYNTHETIQUE_REEQUILIBRAGE_C2.md) sépare maintenant état économique, information disponible à 08:00 ET et ressources de financement dans un `DecisionSnapshot` scellé. Sur données exclusivement artificielles, plusieurs décisions 50/50 héritent correctement des positions et flux, les ventes–achats respectent `H_FIN_NET`, les distributions non connues bloquent le dimensionnement, les paiements exigent une disponibilité prouvée, et S0–S3 s'appliquent une fois aux achats comme aux ventes. Les **136 tests** passent et le verdict est **`SYNTHETIC_C2_VALIDATED`**. Aucun C2 historique ni résultat C1–C2 n'est produit.
 
+La [grille documentaire hebdomadaire C2](docs/GRILLE_DOCUMENTAIRE_HEBDOMADAIRE_C2_2024_2025.md) recense désormais les 52 décisions candidates du 3 juin 2024 au 27 mai 2025 sans exécuter C2. Les closes et opens Yahoo sont tous présents mais restent des proxys non archivés point-in-time; les 52 dates T+1 candidates sont documentées, tandis que les annonces historiques des 16 distributions et l'heure de disponibilité du cash ne le sont pas. Le verdict est **`C2_PARTIALLY_DOCUMENTED`** et aucune décision n'est déclarée entièrement prête.
+
 La question de départ est provisoire :
 
 > Dans quelle mesure des politiques de décision financière apprises séquentiellement peuvent-elles améliorer la gestion du risque lorsque les prévisions sont imparfaites et que les conditions économiques et financières évoluent ?
@@ -100,6 +102,7 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 - [x] Première évaluation exploratoire appariée de A, B et C1 sur un épisode d'un an, avec distributions en cash et aucune décision après l'achat initial.
 - [x] Validation des 251 séances, des 16 distributions, des richesses terminales et de la sensibilité préspécifiée S0–S3, avec rejet atomique de B sous S3.
 - [x] Validation synthétique de décisions C2 successives via un instantané point-in-time, avec distributions, règlements, `H_FIN_NET`, rejets et coûts S0–S3.
+- [x] Grille documentaire exhaustive des 52 décisions hebdomadaires candidates C2, sans transaction ni performance historique C2.
 - [ ] Approbation de Yahoo `Open` comme référence conventionnelle, sans le confondre avec une exécution garantie.
 - [ ] Complétion d'un calendrier officiel de règlement DTC/NSCC versionné 2018–2026 et résolution du cas SPY du 20 avril 2026.
 - [ ] Validation des références classiques avant toute méthode RL.
