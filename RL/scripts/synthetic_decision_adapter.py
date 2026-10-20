@@ -64,6 +64,17 @@ class SnapshotStatus(str, Enum):
     NOT_EVALUABLE = "NOT_EVALUABLE"
 
 
+class ProtocolMode(str, Enum):
+    STRICT_POINT_IN_TIME = "STRICT_POINT_IN_TIME"
+    EXPLORATORY_CONDITIONAL = "EXPLORATORY_CONDITIONAL"
+
+
+class CashAvailabilityConvention(str, Enum):
+    PROVEN_AVAILABILITY = "PROVEN_AVAILABILITY"
+    D_PLUS_1 = "D_PLUS_1"
+    D_PLUS_2 = "D_PLUS_2"
+
+
 @dataclass(frozen=True)
 class DatedPrice:
     price_date: date
@@ -93,6 +104,18 @@ class DecisionSnapshot:
     status: SnapshotStatus
     reason: str
     provenance: Mapping[str, str]
+    decision_budget: Decimal | None = None
+    excluded_distribution_claim_ids: tuple[int, ...] = ()
+    excluded_distribution_claims: Decimal | None = None
+    embedded_ex_date_claim_ids: tuple[int, ...] = ()
+    unavailable_paid_cash: Decimal | None = None
+    financing_cash: Decimal | None = None
+    valuation_reference_at: datetime | None = None
+    information_cutoff: datetime | None = None
+    protocol_mode: ProtocolMode = ProtocolMode.STRICT_POINT_IN_TIME
+    cash_availability_convention: CashAvailabilityConvention = (
+        CashAvailabilityConvention.PROVEN_AVAILABILITY
+    )
 
 
 @dataclass(frozen=True)
@@ -109,6 +132,11 @@ class DecisionIntent:
     decision_at: datetime | None = None
     decision_snapshot_id: str | None = None
     snapshot_ledger_sequence: int | None = None
+    protocol_mode: ProtocolMode = ProtocolMode.STRICT_POINT_IN_TIME
+    financing_cash_limit: Decimal | None = None
+    cash_availability_convention: CashAvailabilityConvention = (
+        CashAvailabilityConvention.PROVEN_AVAILABILITY
+    )
 
 
 @dataclass(frozen=True)
@@ -181,6 +209,15 @@ def intent_payload(intent: DecisionIntent) -> dict[str, Any]:
         )
         payload["decision_snapshot_id"] = intent.decision_snapshot_id
         payload["snapshot_ledger_sequence"] = intent.snapshot_ledger_sequence
+    payload["protocol_mode"] = intent.protocol_mode.value
+    payload["financing_cash_limit"] = (
+        None
+        if intent.financing_cash_limit is None
+        else _decimal_text(intent.financing_cash_limit)
+    )
+    payload["cash_availability_convention"] = (
+        intent.cash_availability_convention.value
+    )
     return payload
 
 
@@ -232,6 +269,44 @@ def decision_snapshot_payload(snapshot: DecisionSnapshot) -> dict[str, Any]:
         "status": snapshot.status.value,
         "reason": snapshot.reason,
         "provenance": dict(snapshot.provenance),
+        "decision_budget": (
+            None
+            if snapshot.decision_budget is None
+            else _decimal_text(snapshot.decision_budget)
+        ),
+        "excluded_distribution_claim_ids": list(
+            snapshot.excluded_distribution_claim_ids
+        ),
+        "excluded_distribution_claims": (
+            None
+            if snapshot.excluded_distribution_claims is None
+            else _decimal_text(snapshot.excluded_distribution_claims)
+        ),
+        "embedded_ex_date_claim_ids": list(snapshot.embedded_ex_date_claim_ids),
+        "unavailable_paid_cash": (
+            None
+            if snapshot.unavailable_paid_cash is None
+            else _decimal_text(snapshot.unavailable_paid_cash)
+        ),
+        "financing_cash": (
+            None
+            if snapshot.financing_cash is None
+            else _decimal_text(snapshot.financing_cash)
+        ),
+        "valuation_reference_at": (
+            None
+            if snapshot.valuation_reference_at is None
+            else snapshot.valuation_reference_at.isoformat()
+        ),
+        "information_cutoff": (
+            None
+            if snapshot.information_cutoff is None
+            else snapshot.information_cutoff.isoformat()
+        ),
+        "protocol_mode": snapshot.protocol_mode.value,
+        "cash_availability_convention": (
+            snapshot.cash_availability_convention.value
+        ),
     }
 
 
@@ -493,6 +568,181 @@ class SyntheticDecisionAdapter:
             snapshot_id="SNAPSHOT-" + decision_snapshot_content_sha256(provisional),
         )
 
+    def build_conditional_decision_snapshot(
+        self,
+        *,
+        decision_at: datetime,
+        decision_closes: Mapping[str, DatedPrice],
+        close_available_at: Mapping[str, datetime],
+        provenance: Mapping[str, str],
+        protocol_mode: ProtocolMode,
+        cash_availability_convention: CashAvailabilityConvention,
+    ) -> DecisionSnapshot:
+        """Build an explicit E-B snapshot while leaving strict mode unchanged."""
+        if protocol_mode is not ProtocolMode.EXPLORATORY_CONDITIONAL:
+            raise AdapterError("le protocole E-B doit être activé explicitement")
+        if cash_availability_convention not in {
+            CashAvailabilityConvention.D_PLUS_1,
+            CashAvailabilityConvention.D_PLUS_2,
+        }:
+            raise AdapterError("E-B exige une convention de cash D+1 ou D+2")
+
+        strict = self.build_decision_snapshot(
+            decision_at=decision_at,
+            decision_closes=decision_closes,
+            close_available_at=close_available_at,
+            provenance=provenance,
+        )
+        decision_session = decision_at.astimezone(
+            ZoneInfo("America/New_York")
+        ).date()
+        delay = (
+            1
+            if cash_availability_convention is CashAvailabilityConvention.D_PLUS_1
+            else 2
+        )
+        assert self.ledger.settlement_calendar is not None
+
+        announcements = {
+            item.claim_id: item
+            for item in self.ledger.distribution_announcements
+            if item.claim_id is not None
+        }
+        known_unpaid = ZERO
+        unknown_ids: list[int] = []
+        excluded_unknown = ZERO
+        embedded_ids: list[int] = []
+        embedded_amount = ZERO
+        unavailable_paid_ids: list[int] = []
+        unavailable_paid_amount = ZERO
+        for claim in self.ledger.distribution_claims:
+            if claim.ex_date == decision_session:
+                embedded_ids.append(claim.claim_id)
+                embedded_amount += claim.amount
+            if claim.paid:
+                available_date = self.ledger.settlement_calendar.business_date_after(
+                    claim.payment_date, delay
+                )
+                available_at = datetime.combine(
+                    available_date, time(8), ZoneInfo("America/New_York")
+                )
+                if available_at > decision_at:
+                    unavailable_paid_ids.append(claim.claim_id)
+                    unavailable_paid_amount += claim.amount
+                continue
+
+            announcement = announcements.get(claim.claim_id)
+            known = False
+            if announcement is not None:
+                if announcement.knowledge_at is not None:
+                    known = announcement.knowledge_at <= decision_at
+                else:
+                    known = announcement.knowledge_date < decision_session
+            if known:
+                if claim.ex_date < decision_session:
+                    known_unpaid += claim.amount
+            else:
+                unknown_ids.append(claim.claim_id)
+                if claim.ex_date < decision_session:
+                    excluded_unknown += claim.amount
+
+        available_cash = self.ledger.settled_cash - unavailable_paid_amount
+        holdings = (
+            sum(
+                strict.decision_closes[symbol]
+                * strict.economic_positions[symbol]
+                for symbol in SYMBOLS
+            )
+            if set(strict.decision_closes) == set(SYMBOLS)
+            else None
+        )
+        economic_wealth = (
+            None
+            if holdings is None
+            else holdings
+            + self.ledger.settled_cash
+            + self.ledger.distribution_receivables
+            + self.ledger.sale_receivables
+            - self.ledger.purchase_payables
+            - embedded_amount
+        )
+        decision_budget = (
+            None
+            if holdings is None
+            else holdings
+            + available_cash
+            + known_unpaid
+            + self.ledger.sale_receivables
+            - self.ledger.purchase_payables
+        )
+        financing_cash = max(
+            ZERO, available_cash - self.ledger.purchase_payables
+        )
+
+        allowed_strict_reasons = {
+            "montant de créance non démontré comme connu",
+            "disponibilité du cash de distribution non démontrée",
+        }
+        strict_reasons = (
+            []
+            if strict.reason == "instantané décisionnel complet"
+            else strict.reason.split("; ")
+        )
+        reasons = [
+            reason for reason in strict_reasons if reason not in allowed_strict_reasons
+        ]
+        if available_cash < ZERO:
+            reasons.append("cash admissible négatif")
+        if decision_budget is not None and decision_budget < ZERO:
+            reasons.append("budget décisionnel négatif")
+        status = (
+            SnapshotStatus.READY
+            if not reasons and decision_budget is not None
+            else SnapshotStatus.NOT_EVALUABLE
+        )
+        reason = (
+            "instantané E-B conditionnel complet"
+            if status is SnapshotStatus.READY
+            else "; ".join(reasons)
+        )
+        conditional_provenance = {
+            **dict(strict.provenance),
+            "protocol_mode": ProtocolMode.EXPLORATORY_CONDITIONAL.value,
+            "cash_availability_convention": cash_availability_convention.value,
+        }
+        provisional = replace(
+            strict,
+            snapshot_id="",
+            settled_cash=available_cash,
+            known_distribution_receivables=known_unpaid,
+            economic_distribution_receivables=self.ledger.distribution_receivables,
+            unknown_distribution_claim_ids=tuple(unknown_ids),
+            cash_availability_unproven_claim_ids=tuple(unavailable_paid_ids),
+            economic_wealth=economic_wealth,
+            admissible_wealth=decision_budget,
+            funding_resources=financing_cash,
+            status=status,
+            reason=reason,
+            provenance=_frozen_mapping(conditional_provenance),
+            decision_budget=decision_budget,
+            excluded_distribution_claim_ids=tuple(unknown_ids),
+            excluded_distribution_claims=excluded_unknown,
+            embedded_ex_date_claim_ids=tuple(embedded_ids),
+            unavailable_paid_cash=unavailable_paid_amount,
+            financing_cash=financing_cash,
+            valuation_reference_at=datetime.combine(
+                strict.price_date, time(16), ZoneInfo("America/New_York")
+            ),
+            information_cutoff=decision_at,
+            protocol_mode=ProtocolMode.EXPLORATORY_CONDITIONAL,
+            cash_availability_convention=cash_availability_convention,
+        )
+        return replace(
+            provisional,
+            snapshot_id="SNAPSHOT-"
+            + decision_snapshot_content_sha256(provisional),
+        )
+
     def prepare_intent_from_snapshot(
         self,
         snapshot: DecisionSnapshot,
@@ -515,15 +765,31 @@ class SyntheticDecisionAdapter:
             for symbol in SYMBOLS
         }:
             raise AdapterError("positions de l'instantané périmées")
+        budget = (
+            snapshot.decision_budget
+            if snapshot.protocol_mode is ProtocolMode.EXPLORATORY_CONDITIONAL
+            else snapshot.admissible_wealth
+        )
+        if budget is None:
+            raise AdapterError("budget décisionnel absent de l'instantané")
+        if snapshot.protocol_mode is ProtocolMode.EXPLORATORY_CONDITIONAL and (
+            snapshot.provenance.get("protocol_mode")
+            != ProtocolMode.EXPLORATORY_CONDITIONAL.value
+            or snapshot.financing_cash is None
+        ):
+            raise AdapterError("provenance E-B ou financement conditionnel absent")
         return self._seal_intent(
             decision_date=snapshot.price_date,
-            known_market_wealth=snapshot.admissible_wealth,
+            known_market_wealth=budget,
             inherited_positions=snapshot.economic_positions,
             closes=snapshot.decision_closes,
             target_weight_spy=target_weight_spy,
             decision_at=snapshot.decision_at,
             decision_snapshot_id=snapshot.snapshot_id,
             snapshot_ledger_sequence=snapshot.ledger_sequence,
+            protocol_mode=snapshot.protocol_mode,
+            financing_cash_limit=snapshot.financing_cash,
+            cash_availability_convention=snapshot.cash_availability_convention,
         )
 
     def prepare_intent(
@@ -616,6 +882,11 @@ class SyntheticDecisionAdapter:
         decision_at: datetime | None = None,
         decision_snapshot_id: str | None = None,
         snapshot_ledger_sequence: int | None = None,
+        protocol_mode: ProtocolMode = ProtocolMode.STRICT_POINT_IN_TIME,
+        financing_cash_limit: Decimal | None = None,
+        cash_availability_convention: CashAvailabilityConvention = (
+            CashAvailabilityConvention.PROVEN_AVAILABILITY
+        ),
     ) -> DecisionIntent:
         try:
             wealth = money(known_market_wealth, label="richesse connue")
@@ -653,6 +924,9 @@ class SyntheticDecisionAdapter:
             decision_at=decision_at,
             decision_snapshot_id=decision_snapshot_id,
             snapshot_ledger_sequence=snapshot_ledger_sequence,
+            protocol_mode=protocol_mode,
+            financing_cash_limit=financing_cash_limit,
+            cash_availability_convention=cash_availability_convention,
         )
         digest = intent_content_sha256(provisional)
         intent = DecisionIntent(
@@ -668,6 +942,11 @@ class SyntheticDecisionAdapter:
             decision_at=provisional.decision_at,
             decision_snapshot_id=provisional.decision_snapshot_id,
             snapshot_ledger_sequence=provisional.snapshot_ledger_sequence,
+            protocol_mode=provisional.protocol_mode,
+            financing_cash_limit=provisional.financing_cash_limit,
+            cash_availability_convention=(
+                provisional.cash_availability_convention
+            ),
         )
         known = self._prepared_intents.get(intent.intent_id)
         if known is not None and known != digest:
@@ -876,7 +1155,36 @@ class SyntheticDecisionAdapter:
             for order in intent.orders
             if order.quantity > 0
         )
-        settled_capacity = self.ledger.settled_cash - self.ledger.purchase_payables
+        sale_capacity = sum(
+            price_values[order.symbol] * abs(order.quantity)
+            - fee_values[order.symbol]
+            for order in intent.orders
+            if order.quantity < 0
+        )
+        if (
+            intent.protocol_mode is ProtocolMode.EXPLORATORY_CONDITIONAL
+            and (
+                intent.financing_cash_limit is None
+                or purchase_need
+                > intent.financing_cash_limit + sale_capacity
+            )
+        ):
+            return self._terminal(
+                intent,
+                ExecutionStatus.ECONOMIC_ORDER_REJECTED,
+                "financement E-B insuffisant pour le lot figé",
+                execution_date,
+                before,
+                settlement_date=settlement_date,
+                execution_prices=price_values,
+                fees=fee_values,
+            )
+        settled_capacity = (
+            intent.financing_cash_limit
+            if intent.protocol_mode is ProtocolMode.EXPLORATORY_CONDITIONAL
+            else self.ledger.settled_cash - self.ledger.purchase_payables
+        )
+        assert settled_capacity is not None
         funding_source = (
             FundingSource.NONE
             if purchase_need == ZERO
@@ -998,6 +1306,21 @@ class SyntheticDecisionAdapter:
             return str(exc)
         if wealth < ZERO or not ZERO <= weight <= Decimal("1"):
             return "paramètres économiques de l'intention invalides"
+        if not isinstance(intent.protocol_mode, ProtocolMode) or not isinstance(
+            intent.cash_availability_convention, CashAvailabilityConvention
+        ):
+            return "mode de protocole ou convention de cash invalide"
+        if intent.protocol_mode is ProtocolMode.EXPLORATORY_CONDITIONAL:
+            if (
+                intent.financing_cash_limit is None
+                or intent.financing_cash_limit < ZERO
+                or intent.cash_availability_convention
+                not in {
+                    CashAvailabilityConvention.D_PLUS_1,
+                    CashAvailabilityConvention.D_PLUS_2,
+                }
+            ):
+                return "financement ou convention E-B invalide"
         expected_targets = {
             "SPY": whole_share_quantity(weight * wealth, prices["SPY"]),
             "BIL": whole_share_quantity(
@@ -1136,6 +1459,7 @@ class SyntheticDecisionAdapter:
 
 __all__ = [
     "AdapterError",
+    "CashAvailabilityConvention",
     "DatedPrice",
     "DecisionSnapshot",
     "DecisionIntent",
@@ -1144,6 +1468,7 @@ __all__ = [
     "FundingSource",
     "IntentPersistence",
     "PriceStatus",
+    "ProtocolMode",
     "SnapshotStatus",
     "SyntheticDecisionAdapter",
     "canonical_json_bytes",

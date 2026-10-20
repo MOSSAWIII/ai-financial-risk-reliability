@@ -176,6 +176,16 @@ class SyntheticSettlementCalendar:
             raise LedgerError("calendrier artificiel insuffisant pour calculer le règlement")
         return self.business_dates[target]
 
+    def business_date_after(self, reference_date: date, delay: int) -> date:
+        """Return the Nth supplied settlement business date after a date."""
+        if type(delay) is not int or delay < 1:
+            raise LedgerError("le délai doit être un nombre positif de jours ouvrés")
+        index = bisect_right(self.business_dates, reference_date)
+        target = index + delay - 1
+        if target >= len(self.business_dates):
+            raise LedgerError("calendrier artificiel insuffisant pour le délai de cash")
+        return self.business_dates[target]
+
 
 class SyntheticTradingCalendar:
     """Séances négociables, distinctes des jours admissibles au règlement."""
