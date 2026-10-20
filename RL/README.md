@@ -34,6 +34,8 @@ La [validation synthétique du rééquilibrage C2](docs/VALIDATION_SYNTHETIQUE_R
 
 La [grille documentaire hebdomadaire C2](docs/GRILLE_DOCUMENTAIRE_HEBDOMADAIRE_C2_2024_2025.md) recense désormais les 52 décisions candidates du 3 juin 2024 au 27 mai 2025 sans exécuter C2. Les closes et opens Yahoo sont tous présents mais restent des proxys non archivés point-in-time; les 52 dates T+1 candidates sont documentées, tandis que les annonces historiques des 16 distributions et l'heure de disponibilité du cash ne le sont pas. Le verdict est **`C2_PARTIALLY_DOCUMENTED`** et aucune décision n'est déclarée entièrement prête.
 
+L'[arbitrage méthodologique C2 point-in-time](docs/ARBITRAGE_METHODOLOGIQUE_C2_POINT_IN_TIME.md) maintient ce protocole strict et propose séparément un protocole exploratoire conditionnel à approuver. La convention principale exclut les créances non prouvées comme connues du budget de décision sans les supprimer de la richesse économique, évite d'ajouter un droit à un prix encore cum-distribution et rend le cash finançable à 08:00 le premier jour ouvré suivant le paiement, avec D+2 en sensibilité. Les 52 décisions deviennent potentiellement documentables sous ces hypothèses, sans être déclarées prêtes et sans exécution historique. Le verdict est **`CONDITIONAL_PROTOCOL_READY_FOR_APPROVAL`**.
+
 La question de départ est provisoire :
 
 > Dans quelle mesure des politiques de décision financière apprises séquentiellement peuvent-elles améliorer la gestion du risque lorsque les prévisions sont imparfaites et que les conditions économiques et financières évoluent ?
@@ -103,6 +105,7 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 - [x] Validation des 251 séances, des 16 distributions, des richesses terminales et de la sensibilité préspécifiée S0–S3, avec rejet atomique de B sous S3.
 - [x] Validation synthétique de décisions C2 successives via un instantané point-in-time, avec distributions, règlements, `H_FIN_NET`, rejets et coûts S0–S3.
 - [x] Grille documentaire exhaustive des 52 décisions hebdomadaires candidates C2, sans transaction ni performance historique C2.
+- [x] Arbitrage entre protocole strict et protocole exploratoire conditionnel, avec identité artificielle à l'ex-date et couverture dérivée des 52 décisions.
 - [ ] Approbation de Yahoo `Open` comme référence conventionnelle, sans le confondre avec une exécution garantie.
 - [ ] Complétion d'un calendrier officiel de règlement DTC/NSCC versionné 2018–2026 et résolution du cas SPY du 20 avril 2026.
 - [ ] Validation des références classiques avant toute méthode RL.
