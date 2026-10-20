@@ -30,6 +30,11 @@ from historical_spy_bil_single_cycle import (
     _load_manifest,
     _verify_source,
 )
+from audit_historical_calendars import (
+    EXCEPTIONAL_CLOSURES,
+    VERIFIED_EARLY_CLOSES,
+    expected_sessions,
+)
 from synthetic_decision_adapter import (
     AdapterError,
     DatedPrice,
@@ -63,11 +68,65 @@ class DocumentaryBlock(HistoricalBoundaryError):
     """Entrée commune indispensable absente ou contestée."""
 
 
+class ScenarioFundingRejection(HistoricalBoundaryError):
+    """Lot inchangé refusé par le contrôle de financement du scénario."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        quantities: Mapping[str, int],
+        initial_cost: Decimal,
+    ) -> None:
+        super().__init__(message)
+        self.quantities = dict(quantities)
+        self.initial_cost = initial_cost
+
+
 @dataclass(frozen=True)
 class PolicyDefinition:
     policy_id: str
     label: str
     target_weight_spy: Decimal
+
+
+@dataclass(frozen=True)
+class CostScenario:
+    scenario_id: str
+    basis_points: Decimal
+
+
+@dataclass(frozen=True)
+class SessionCoverage:
+    expected_sessions: tuple[date, ...]
+    common_sessions: tuple[date, ...]
+    missing_spy: tuple[date, ...]
+    missing_bil: tuple[date, ...]
+    missing_both: tuple[date, ...]
+    spy_only: tuple[date, ...]
+    bil_only: tuple[date, ...]
+    unexpected_spy: tuple[date, ...]
+    unexpected_bil: tuple[date, ...]
+    early_closes: tuple[date, ...]
+    exceptional_closures: tuple[date, ...]
+
+    def to_record(self) -> dict[str, Any]:
+        return {
+            key: [item.isoformat() for item in value]
+            for key, value in {
+                "expected_sessions": self.expected_sessions,
+                "common_sessions": self.common_sessions,
+                "missing_spy": self.missing_spy,
+                "missing_bil": self.missing_bil,
+                "missing_both": self.missing_both,
+                "spy_only": self.spy_only,
+                "bil_only": self.bil_only,
+                "unexpected_spy": self.unexpected_spy,
+                "unexpected_bil": self.unexpected_bil,
+                "early_closes": self.early_closes,
+                "exceptional_closures": self.exceptional_closures,
+            }.items()
+        }
 
 
 @dataclass(frozen=True)
@@ -81,6 +140,7 @@ class EpisodeContract:
     anniversary_date: date
     initial_cash: Decimal
     policies: tuple[PolicyDefinition, ...]
+    cost_scenarios: tuple[CostScenario, ...]
     source_ids: Mapping[str, str]
     volatility_factor: int
     annualized_return_day_count: int
@@ -105,6 +165,7 @@ class EpisodeData:
     closing_prices: Mapping[date, Mapping[str, Decimal]]
     distributions: tuple[DistributionEvent, ...]
     sources: Mapping[str, VerifiedSource]
+    session_coverage: SessionCoverage | None = None
 
 
 @dataclass(frozen=True)
@@ -156,7 +217,12 @@ class PolicyResult:
     terminal_drawdown_open: bool
     mean_net_cash: Decimal
     terminal_cash: Decimal
+    initial_cost: Decimal
+    residual_cash_before_cost: Decimal
+    residual_cash_after_cost: Decimal
     distribution_contributions: Mapping[str, Decimal]
+    distribution_accounting: tuple[Mapping[str, Any], ...]
+    independent_reconciliation: Mapping[str, Decimal]
     distribution_event_count: int
     positive_distribution_entitlements: int
     economic_rejections: int
@@ -196,11 +262,21 @@ class PolicyResult:
             "terminal_drawdown_open": self.terminal_drawdown_open,
             "mean_net_cash": decimal_text(self.mean_net_cash),
             "terminal_cash": decimal_text(self.terminal_cash),
+            "initial_cost": decimal_text(self.initial_cost),
+            "residual_cash_before_cost": decimal_text(
+                self.residual_cash_before_cost
+            ),
+            "residual_cash_after_cost": decimal_text(self.residual_cash_after_cost),
             "distribution_contributions": {
                 key: decimal_text(value)
                 for key, value in self.distribution_contributions.items()
             },
             "distribution_event_count": self.distribution_event_count,
+            "distribution_accounting": [dict(item) for item in self.distribution_accounting],
+            "independent_reconciliation": {
+                key: decimal_text(value)
+                for key, value in self.independent_reconciliation.items()
+            },
             "positive_distribution_entitlements": (
                 self.positive_distribution_entitlements
             ),
@@ -223,6 +299,7 @@ class EvaluationResult:
     source_hashes: Mapping[str, str] | None = None
     market_summary: Mapping[str, Any] | None = None
     policies: tuple[PolicyResult, ...] = ()
+    cost_sensitivity: tuple[Mapping[str, Any], ...] = ()
     trace: tuple[str, ...] = ()
 
     def to_record(self, *, include_trajectories: bool = False) -> dict[str, Any]:
@@ -241,6 +318,7 @@ class EvaluationResult:
                 item.to_record(include_trajectory=include_trajectories)
                 for item in self.policies
             ],
+            "cost_sensitivity": [dict(item) for item in self.cost_sensitivity],
         }
 
 
@@ -302,6 +380,7 @@ def load_contract(config_path: str | Path) -> EpisodeContract:
             "dates",
             "account",
             "policies",
+            "cost_scenarios",
             "prices",
             "distributions",
             "metrics",
@@ -379,6 +458,21 @@ def load_contract(config_path: str | Path) -> EpisodeContract:
     ) != (Decimal("1"), Decimal("0"), Decimal("0.5")):
         raise HistoricalBoundaryError("politiques ou poids modifiés")
 
+    scenarios_raw = root["cost_scenarios"]
+    if not isinstance(scenarios_raw, list) or len(scenarios_raw) != 4:
+        raise HistoricalBoundaryError("quatre scénarios de coûts sont requis")
+    cost_scenarios = tuple(
+        CostScenario(str(item["id"]), _decimal(item["basis_points"], "coût en pb"))
+        for item in scenarios_raw
+    )
+    if tuple((item.scenario_id, item.basis_points) for item in cost_scenarios) != (
+        ("S0", Decimal("0")),
+        ("S1", Decimal("1")),
+        ("S2", Decimal("5")),
+        ("S3", Decimal("10")),
+    ):
+        raise HistoricalBoundaryError("scénarios de coûts modifiés")
+
     prices = _mapping(root["prices"], "prices")
     if prices != {
         "decision_field": "close",
@@ -419,6 +513,7 @@ def load_contract(config_path: str | Path) -> EpisodeContract:
         "distributions",
         "settlement_rule",
         "settlement_calendar",
+        "trading_calendar",
     } or any(not isinstance(value, str) for value in sources.values()):
         raise HistoricalBoundaryError("références de sources invalides")
     return EpisodeContract(
@@ -431,6 +526,7 @@ def load_contract(config_path: str | Path) -> EpisodeContract:
         anniversary_date,
         Decimal("100000"),
         policies,
+        cost_scenarios,
         dict(sources),
         252,
         365,
@@ -581,6 +677,74 @@ def _load_distributions(
     return tuple(events)
 
 
+def validate_distribution_events(
+    events: Sequence[DistributionEvent],
+    *,
+    expected_ids: set[str] | None = None,
+) -> None:
+    identifiers = [item.event_id for item in events]
+    if len(identifiers) != len(set(identifiers)):
+        raise DocumentaryBlock("distribution State Street dupliquée")
+    if expected_ids is not None and set(identifiers) != expected_ids:
+        raise DocumentaryBlock("inventaire de distributions incomplet ou inattendu")
+    for item in events:
+        if (
+            item.symbol not in SYMBOLS
+            or item.amount_per_share <= 0
+            or item.record_date < item.ex_date
+            or item.payment_date < item.ex_date
+        ):
+            raise DocumentaryBlock("distribution State Street incohérente")
+
+
+def audit_session_coverage(
+    expected: Sequence[date],
+    spy_dates: set[date],
+    bil_dates: set[date],
+) -> SessionCoverage:
+    expected_set = set(expected)
+    if not expected_set:
+        raise DocumentaryBlock("calendrier attendu vide")
+    scope_start, scope_end = min(expected_set), max(expected_set)
+    spy_expected = spy_dates & expected_set
+    bil_expected = bil_dates & expected_set
+    missing_spy = expected_set - spy_dates
+    missing_bil = expected_set - bil_dates
+    coverage = SessionCoverage(
+        tuple(sorted(expected_set)),
+        tuple(sorted(spy_expected & bil_expected)),
+        tuple(sorted(missing_spy)),
+        tuple(sorted(missing_bil)),
+        tuple(sorted(missing_spy & missing_bil)),
+        tuple(sorted(spy_expected - bil_expected)),
+        tuple(sorted(bil_expected - spy_expected)),
+        tuple(sorted(spy_dates - expected_set)),
+        tuple(sorted(bil_dates - expected_set)),
+        tuple(sorted(expected_set & VERIFIED_EARLY_CLOSES)),
+        tuple(
+            sorted(
+                item
+                for item in EXCEPTIONAL_CLOSURES
+                if scope_start <= item <= scope_end and item not in expected_set
+            )
+        ),
+    )
+    if coverage.missing_spy or coverage.missing_bil:
+        details = []
+        if coverage.missing_spy:
+            details.append(
+                "SPY=" + ",".join(item.isoformat() for item in coverage.missing_spy)
+            )
+        if coverage.missing_bil:
+            details.append(
+                "BIL=" + ",".join(item.isoformat() for item in coverage.missing_bil)
+            )
+        raise DocumentaryBlock("séance attendue absente: " + "; ".join(details))
+    if coverage.unexpected_spy or coverage.unexpected_bil:
+        raise DocumentaryBlock("date Yahoo incompatible avec le calendrier NYSE")
+    return coverage
+
+
 def prepare_episode_data(
     contract: EpisodeContract, *, repo_root: str | Path
 ) -> EpisodeData:
@@ -603,27 +767,36 @@ def prepare_episode_data(
         raise DocumentaryBlock("règle T+1 non validée")
     if sources["settlement_calendar"].record.get("status") != "VALIDATED_FOR_USE":
         raise DocumentaryBlock("règlement initial non documenté")
+    if sources["trading_calendar"].record.get("status") != "AUDITED":
+        raise DocumentaryBlock("calendrier de négociation non audité")
     documents = {
         symbol: _load_json_decimal(sources[symbol].path) for symbol in SYMBOLS
     }
     prices = {
         symbol: _yahoo_prices(documents[symbol], symbol) for symbol in SYMBOLS
     }
-    common = tuple(
-        sorted(
-            current
-            for current in set(prices["SPY"]).intersection(prices["BIL"])
-            if contract.decision_date <= current <= contract.anniversary_date
-        )
-    )
-    if not common or common[0] != contract.decision_date:
+    if contract.decision_date not in prices["SPY"] or contract.decision_date not in prices["BIL"]:
         raise DocumentaryBlock("close de décision absent du calendrier commun")
-    if contract.execution_date not in common:
-        raise DocumentaryBlock("date d'exécution absente du calendrier commun")
-    terminal = max(current for current in common if current <= contract.anniversary_date)
-    valuation_sessions = tuple(
-        current for current in common if contract.execution_date <= current <= terminal
+    expected = tuple(
+        current
+        for current in sorted(expected_sessions())
+        if contract.execution_date <= current <= contract.anniversary_date
     )
+    spy_window = {
+        current
+        for current in prices["SPY"]
+        if contract.execution_date <= current <= contract.anniversary_date
+    }
+    bil_window = {
+        current
+        for current in prices["BIL"]
+        if contract.execution_date <= current <= contract.anniversary_date
+    }
+    session_coverage = audit_session_coverage(expected, spy_window, bil_window)
+    valuation_sessions = session_coverage.common_sessions
+    if len(valuation_sessions) != 251:
+        raise DocumentaryBlock("le calendrier attendu ne contient pas 251 séances")
+    terminal = valuation_sessions[-1]
     if terminal != contract.anniversary_date:
         raise DocumentaryBlock("la date terminale commune ne peut pas être établie")
 
@@ -646,6 +819,7 @@ def prepare_episode_data(
     distributions = _load_distributions(
         sources["distributions"].path, contract.execution_date, terminal
     )
+    validate_distribution_events(distributions)
     for symbol in SYMBOLS:
         yahoo_dividends, yahoo_splits = _yahoo_events(documents[symbol])
         split_hits = [
@@ -682,6 +856,7 @@ def prepare_episode_data(
         },
         distributions,
         sources,
+        session_coverage,
     )
 
 
@@ -768,7 +943,11 @@ def evaluate_policy(
     contract: EpisodeContract,
     data: EpisodeData,
     policy: PolicyDefinition,
+    *,
+    cost_scenario: CostScenario | None = None,
+    expected_quantities: Mapping[str, int] | None = None,
 ) -> PolicyResult:
+    scenario = cost_scenario or CostScenario("S0", ZERO)
     trading_dates = (contract.decision_date, *data.common_sessions)
     ledger = SyntheticPortfolioLedger(
         contract.initial_cash,
@@ -794,6 +973,14 @@ def evaluate_policy(
         target_weight_spy=policy.target_weight_spy,
     )
     quantities = dict(intent.target_quantities)
+    if expected_quantities is not None and quantities != dict(expected_quantities):
+        raise HistoricalBoundaryError("quantités initiales différentes de S0")
+    fee_rate = scenario.basis_points / Decimal("10000")
+    fees = {
+        symbol: data.execution_opens[symbol] * quantities[symbol] * fee_rate
+        for symbol in SYMBOLS
+    }
+    initial_cost = sum(fees.values(), ZERO)
     outcome = adapter.process_intent(
         intent,
         execution_date=contract.execution_date,
@@ -805,11 +992,14 @@ def evaluate_policy(
             )
             for symbol in SYMBOLS
         },
-        fees={symbol: ZERO for symbol in SYMBOLS},
+        fees=fees,
     )
     if outcome.status is not ExecutionStatus.EXECUTED_HYPOTHETICAL:
-        raise HistoricalBoundaryError(
-            f"{policy.policy_id}: achat initial non exécuté ({outcome.status.value})"
+        raise ScenarioFundingRejection(
+            f"{scenario.scenario_id}/{policy.policy_id}: achat initial non exécuté "
+            f"({outcome.status.value}): {outcome.reason}",
+            quantities=quantities,
+            initial_cost=initial_cost,
         )
     if dict(intent.target_quantities) != quantities:
         raise HistoricalBoundaryError("quantités modifiées après l'open")
@@ -834,17 +1024,17 @@ def evaluate_policy(
         payment_dates.add(event.payment_date)
     contributions = {symbol: ZERO for symbol in SYMBOLS}
     settled_ids: tuple[int, ...] = ()
+    claim_by_event: dict[str, int] = {}
+    timeline = sorted(
+        set(data.common_sessions)
+        | set(ex_events)
+        | payment_dates
+        | {contract.settlement_date}
+    )
 
-    for current in data.common_sessions:
-        if current == contract.execution_date:
-            trajectory.append(
-                _valuation_row(
-                    "COMMON_CLOSE", current, ledger, data.closing_prices[current]
-                )
-            )
-            continue
+    for current in timeline:
         for event in ex_events.get(current, []):
-            ledger.accrue_realized_distribution(
+            claim_by_event[event.event_id] = ledger.accrue_realized_distribution(
                 event.symbol,
                 event_id=event.event_id,
                 ex_date=event.ex_date,
@@ -858,6 +1048,16 @@ def evaluate_policy(
             settled_ids = tuple(ledger.settle_through(current))
         if current in payment_dates:
             ledger.pay_distributions_through(current)
+        if current not in data.closing_prices:
+            ledger.assert_invariants()
+            continue
+        if current == contract.execution_date:
+            trajectory.append(
+                _valuation_row(
+                    "COMMON_CLOSE", current, ledger, data.closing_prices[current]
+                )
+            )
+            continue
         for symbol in SYMBOLS:
             ledger.set_prices(
                 symbol,
@@ -877,7 +1077,7 @@ def evaluate_policy(
 
     if ledger.pending_settlements or ledger.distribution_receivables != 0:
         raise HistoricalBoundaryError("flux non dénoué au terminal")
-    if ledger.fees_recognized != 0 or ledger.settled_cash < 0:
+    if ledger.fees_recognized != initial_cost or ledger.settled_cash < 0:
         raise HistoricalBoundaryError("frais ou cash terminal incohérent")
     trade_entries = [entry for entry in ledger.journal if entry.kind == "TRADE"]
     if len(trade_entries) != len(intent.orders):
@@ -892,6 +1092,52 @@ def evaluate_policy(
     mean_spy = sum((item.spy_weight for item in closes), ZERO) / len(closes)
     mean_cash = sum((item.net_cash for item in trajectory), ZERO) / len(trajectory)
     terminal = trajectory[-1]
+    gross_notional = sum(
+        data.execution_opens[symbol] * quantities[symbol] for symbol in SYMBOLS
+    )
+    residual_before_cost = contract.initial_cash - gross_notional
+    residual_after_cost = residual_before_cost - initial_cost
+    terminal_position_value = sum(
+        data.closing_prices[data.terminal_date][symbol] * quantities[symbol]
+        for symbol in SYMBOLS
+    )
+    acquired_distributions = sum(contributions.values(), ZERO)
+    reconstructed = (
+        terminal_position_value
+        + residual_before_cost
+        + acquired_distributions
+        - initial_cost
+    )
+    reconciliation = {
+        "terminal_position_value": terminal_position_value,
+        "initial_residual_cash_before_cost": residual_before_cost,
+        "distributions_acquired": acquired_distributions,
+        "applicable_costs": initial_cost,
+        "reconstructed_terminal_wealth": reconstructed,
+        "ledger_terminal_wealth": terminal.wealth,
+        "difference": reconstructed - terminal.wealth,
+    }
+    if reconciliation["difference"] != ZERO:
+        raise HistoricalBoundaryError("réconciliation indépendante de richesse divergente")
+    claims = {claim.claim_id: claim for claim in ledger.distribution_claims}
+    distribution_accounting = tuple(
+        {
+            "event_id": event.event_id,
+            "symbol": event.symbol,
+            "ex_date": event.ex_date.isoformat(),
+            "record_date": event.record_date.isoformat(),
+            "payment_date": event.payment_date.isoformat(),
+            "amount_per_share": decimal_text(event.amount_per_share),
+            "entitled_shares": claims[claim_by_event[event.event_id]].entitled_shares,
+            "claim_amount": decimal_text(claims[claim_by_event[event.event_id]].amount),
+            "paid_amount": decimal_text(
+                claims[claim_by_event[event.event_id]].amount
+                if claims[claim_by_event[event.event_id]].paid
+                else ZERO
+            ),
+        }
+        for event in data.distributions
+    )
     return PolicyResult(
         policy.policy_id,
         policy.label,
@@ -911,8 +1157,15 @@ def evaluate_policy(
         mean_spy,
         trajectory[0].wealth,
         terminal.wealth,
-        metrics["total_return"],
-        metrics["annualized_return"],
+        float(terminal.wealth / contract.initial_cash - 1),
+        float(
+            (terminal.wealth / contract.initial_cash)
+            ** (
+                Decimal(contract.annualized_return_day_count)
+                / Decimal((data.terminal_date - contract.execution_date).days)
+            )
+            - 1
+        ),
         metrics["annualized_volatility"],
         metrics["worst_daily_return"],
         metrics["maximum_drawdown"],
@@ -920,13 +1173,70 @@ def evaluate_policy(
         metrics["terminal_drawdown_open"],
         mean_cash,
         ledger.settled_cash,
+        initial_cost,
+        residual_before_cost,
+        residual_after_cost,
         contributions,
+        distribution_accounting,
+        reconciliation,
         len(data.distributions),
         sum(quantities[event.symbol] > 0 for event in data.distributions),
         len(ledger.rejections),
         settled_ids,
         tuple(trajectory),
     )
+
+
+def evaluate_cost_sensitivity(
+    contract: EpisodeContract,
+    data: EpisodeData,
+    baseline: Sequence[PolicyResult],
+) -> tuple[Mapping[str, Any], ...]:
+    baseline_by_id = {item.policy_id: item for item in baseline}
+    scenario_records: list[Mapping[str, Any]] = []
+    for scenario in contract.cost_scenarios:
+        policy_records: list[Mapping[str, Any]] = []
+        for policy in contract.policies:
+            baseline_policy = baseline_by_id[policy.policy_id]
+            if scenario.scenario_id == "S0":
+                result = baseline_policy
+            else:
+                try:
+                    result = evaluate_policy(
+                        contract,
+                        data,
+                        policy,
+                        cost_scenario=scenario,
+                        expected_quantities=baseline_policy.quantities,
+                    )
+                except ScenarioFundingRejection as exc:
+                    policy_records.append(
+                        {
+                            "policy_id": policy.policy_id,
+                            "status": ExecutionStatus.ECONOMIC_ORDER_REJECTED.value,
+                            "reason": str(exc),
+                            "quantities": exc.quantities,
+                            "initial_cost": decimal_text(exc.initial_cost),
+                            "partial_execution": False,
+                            "performance_comparable": False,
+                        }
+                    )
+                    continue
+            record = result.to_record()
+            record["wealth_change_vs_s0"] = decimal_text(
+                result.terminal_wealth - baseline_policy.terminal_wealth
+            )
+            record["performance_comparable"] = True
+            policy_records.append(record)
+        scenario_records.append(
+            {
+                "scenario_id": scenario.scenario_id,
+                "basis_points": decimal_text(scenario.basis_points),
+                "cost_definition": "ONE_OFF_RATE_TIMES_EACH_INITIAL_PURCHASE_NOTIONAL",
+                "policies": policy_records,
+            }
+        )
+    return tuple(scenario_records)
 
 
 def run_evaluation(
@@ -945,15 +1255,22 @@ def run_evaluation(
                 "TERMINAL_COMMON_CLOSE_FIXED",
             ]
         )
+        baseline_scenario = contract.cost_scenarios[0]
         policies = tuple(
-            evaluate_policy(contract, data, policy) for policy in contract.policies
+            evaluate_policy(
+                contract, data, policy, cost_scenario=baseline_scenario
+            )
+            for policy in contract.policies
         )
+        cost_sensitivity = evaluate_cost_sensitivity(contract, data, policies)
         trace.extend(
             [
                 "INITIAL_INTENTS_FROZEN_BEFORE_OPENS",
                 "INITIAL_LOTS_SETTLED_T_PLUS_ONE",
                 "NO_POST_INITIAL_ORDERS",
                 "ACCOUNTING_AND_PATH_METRICS_VERIFIED",
+                "INDEPENDENT_WEALTH_RECONCILIATION_VERIFIED",
+                "PRESPECIFIED_COST_SENSITIVITY_VERIFIED",
             ]
         )
         return EvaluationResult(
@@ -983,8 +1300,14 @@ def run_evaluation(
                     )
                     for symbol in SYMBOLS
                 },
+                "session_coverage": (
+                    data.session_coverage.to_record()
+                    if data.session_coverage is not None
+                    else None
+                ),
             },
             policies,
+            cost_sensitivity,
             tuple(trace),
         )
     except DocumentaryBlock as exc:

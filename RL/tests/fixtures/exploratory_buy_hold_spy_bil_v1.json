@@ -27,6 +27,12 @@
     {"id": "B", "label": "BUY_AND_HOLD_BIL", "target_weight_spy": "0"},
     {"id": "C1", "label": "BUY_AND_HOLD_50_50", "target_weight_spy": "0.5"}
   ],
+  "cost_scenarios": [
+    {"id": "S0", "basis_points": "0"},
+    {"id": "S1", "basis_points": "1"},
+    {"id": "S2", "basis_points": "5"},
+    {"id": "S3", "basis_points": "10"}
+  ],
   "prices": {
     "decision_field": "close",
     "execution_field": "open",
@@ -57,6 +63,7 @@
     "market_audit": "yahoo_spy_bil_market_audit_v1_20261019",
     "distributions": "ssga_spdr_distributions_20261019",
     "settlement_rule": "sec_settlement_cycle_t1_2023_20261019",
-    "settlement_calendar": "dtcc_t1_conversion_guide_may2024_20261020"
+    "settlement_calendar": "dtcc_t1_conversion_guide_may2024_20261020",
+    "trading_calendar": "nyse_trading_calendars_2022_2025_20261019"
   }
 }
