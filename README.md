@@ -1,3 +1,5 @@
+> **English:** [Research overview](docs/OVERVIEW_EN.md). **Related exploratory workstream:** [Sequential financial decisions and RL](RL/README.md). These tracks have distinct validation boundaries; no investment performance is claimed.
+
 # Fiabilité des prévisions du risque financier sous changement d'environnement
 
 Ce dépôt porte sur la fiabilité conditionnelle des prévisions du risque de
