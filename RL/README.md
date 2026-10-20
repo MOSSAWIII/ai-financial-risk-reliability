@@ -14,6 +14,8 @@ Le [registre comptable synthétique](docs/VALIDATION_REGISTRE_COMPTABLE_SYNTHETI
 
 Le rapport [`PREREQUIS_EXPERIENCE_FINANCIERE_SPY_BIL.md`](docs/PREREQUIS_EXPERIENCE_FINANCIERE_SPY_BIL.md) ferme le cadrage opérationnel restant. Les règles DTC/NSCC distinguent désormais jours de traitement et dates de règlement, notamment Columbus Day, Veterans Day, Good Friday et les fermetures imprévues. L'archive annuelle 2018–2026 demeure non exhaustive : le projet est `PARTIALLY_READY`, avec financement conservateur recommandé, contrat d'intégration strict et classification déterministe des situations non représentables. Aucune intégration historique n'est encore autorisée.
 
+La proposition [`MANDAT_EXPERIMENTAL_SPY_BIL_V1_PROPOSITION.md`](docs/MANDAT_EXPERIMENTAL_SPY_BIL_V1_PROPOSITION.md) transforme ces prérequis en choix soumis à approbation. Après examen ciblé des règles de compte cash, elle révise la recommandation provisoire et propose `H_FIN_NET` uniquement pour les produits de ventes de titres réglés et les flux de même échéance, sans marge ni cash projeté négatif. Elle fixe la traduction poids–quantités, le rejet atomique, une richesse principale de 100 000 USD, un horizon économique d'un an et le contrat minimal de la prochaine implémentation. Aucun de ces choix n'est adopté et aucune expérience historique n'est autorisée.
+
 La question de départ est provisoire :
 
 > Dans quelle mesure des politiques de décision financière apprises séquentiellement peuvent-elles améliorer la gestion du risque lorsque les prévisions sont imparfaites et que les conditions économiques et financières évoluent ?
@@ -73,6 +75,7 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 - [x] Implémentation et validation sur cas artificiels d'un registre minimal trade date/settlement date.
 - [x] Durcissement temporel du registre, 45 tests artificiels et concordance documentaire des 2 210 dates de séance.
 - [x] Matrice des décisions finales, contrat d'intégration stricte et délimitation documentaire du règlement DTC/NSCC.
+- [x] Proposition d'un mandat expérimental v1 et d'une convention de financement permettant les rééquilibrages sous conditions explicites.
 - [ ] Approbation de Yahoo `Open` comme référence conventionnelle, sans le confondre avec une exécution garantie.
 - [ ] Complétion d'un calendrier officiel de règlement DTC/NSCC versionné 2018–2026 et résolution du cas SPY du 20 avril 2026.
 - [ ] Validation des références classiques avant toute méthode RL.
