@@ -155,8 +155,8 @@ de covariance donnée :
 \[
 \widehat{\sigma}_{p,d}^2(w)=
 w^2\widehat{\sigma}_{SPY,d}^2
-(1-w)^2\widehat{\sigma}_{BIL,d}^2
-2w(1-w)\widehat{\operatorname{Cov}}_d(SPY,BIL).
++(1-w)^2\widehat{\sigma}_{BIL,d}^2
++2w(1-w)\widehat{\operatorname{Cov}}_d(SPY,BIL).
 \]
 
 La règle simple n'annule ni la volatilité de BIL ni la covariance. La volatilité

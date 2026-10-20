@@ -87,6 +87,20 @@ def prepare_from_cash(
     )
 
 
+def test_ex_post_distribution_accounting_blocks_later_decision() -> None:
+    ledger = strict_ledger()
+    adapter = SyntheticDecisionAdapter(ledger)
+    ledger.accrue_realized_distribution(
+        "SPY",
+        event_id="SPY-20250102",
+        ex_date=date(2025, 1, 2),
+        payment_date=date(2025, 1, 3),
+        amount_per_share="1",
+    )
+    with pytest.raises(AdapterError, match="ex post"):
+        prepare_from_cash(adapter, decision_date=date(2025, 1, 3))
+
+
 def funded_bil_account() -> tuple[SyntheticPortfolioLedger, SyntheticDecisionAdapter]:
     ledger = strict_ledger()
     ledger.set_prices("BIL", market_price="100", price_date=date(2025, 1, 6))

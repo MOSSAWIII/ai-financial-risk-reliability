@@ -188,6 +188,13 @@ class SyntheticDecisionAdapter:
             raise AdapterError("la date de décision n'est pas une séance négociable") from exc
         if any(entry.event_date > decision_date for entry in self.ledger.journal):
             raise AdapterError("la décision est antidatée par rapport à l'état du registre")
+        if any(
+            entry.kind == "REALIZED_DISTRIBUTION_ACCRUAL"
+            for entry in self.ledger.journal
+        ):
+            raise AdapterError(
+                "une comptabilité de distribution ex post interdit toute nouvelle décision"
+            )
         positions = self._normalize_positions(inherited_positions)
         ledger_positions = {symbol: self.ledger.economic_positions.get(symbol, 0) for symbol in SYMBOLS}
         outside = {

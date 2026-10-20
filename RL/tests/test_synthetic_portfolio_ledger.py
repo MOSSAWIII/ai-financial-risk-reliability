@@ -634,6 +634,62 @@ def test_future_announcement_has_no_accounting_effect_until_ex_date() -> None:
     assert ledger.wealth_market() == D("1005")
 
 
+def test_realized_distribution_is_ex_post_distinct_and_payment_is_neutral() -> None:
+    ledger = strict_ledger()
+    strict_buy_and_settle(ledger)
+    before = ledger.wealth_market()
+    claim_id = ledger.accrue_realized_distribution(
+        "SPY",
+        event_id="SPY-20240108",
+        ex_date=date(2024, 1, 8),
+        payment_date=date(2024, 1, 12),
+        amount_per_share="1",
+    )
+    assert claim_id == 1
+    assert ledger.distribution_announcements == []
+    assert ledger.distribution_receivables == D("5")
+    assert ledger.wealth_market() == before + D("5")
+    ledger.pay_distributions_through(date(2024, 1, 12))
+    assert ledger.distribution_receivables == 0
+    assert ledger.settled_cash == D("505")
+    assert ledger.wealth_market() == before + D("5")
+
+
+def test_realized_distribution_cannot_be_counted_twice() -> None:
+    ledger = strict_ledger()
+    strict_buy_and_settle(ledger)
+    kwargs = {
+        "event_id": "SPY-20240108",
+        "ex_date": date(2024, 1, 8),
+        "payment_date": date(2024, 1, 12),
+        "amount_per_share": "1",
+    }
+    ledger.accrue_realized_distribution("SPY", **kwargs)
+    before = ledger.accounting_snapshot()
+    with pytest.raises(LedgerError, match="déjà comptabilisée"):
+        ledger.accrue_realized_distribution("SPY", **kwargs)
+    assert ledger.accounting_snapshot() == before
+
+
+def test_realized_distribution_blocks_later_transaction() -> None:
+    ledger = strict_ledger()
+    strict_buy_and_settle(ledger)
+    ledger.accrue_realized_distribution(
+        "SPY",
+        event_id="SPY-20240108",
+        ex_date=date(2024, 1, 8),
+        payment_date=date(2024, 1, 12),
+        amount_per_share="1",
+    )
+    before = ledger.accounting_snapshot()
+    with pytest.raises(LedgerError, match="ex post"):
+        ledger.execute_batch(
+            [request("SPY", 1, "100", decision_date=date(2024, 1, 8))],
+            trade_date=date(2024, 1, 9),
+        )
+    assert ledger.accounting_snapshot() == before
+
+
 def test_future_knowledge_date_advances_chronology_without_financial_effect() -> None:
     ledger = strict_ledger()
     strict_buy_and_settle(ledger)

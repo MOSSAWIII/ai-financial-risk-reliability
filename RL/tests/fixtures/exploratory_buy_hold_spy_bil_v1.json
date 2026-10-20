@@ -1,0 +1,62 @@
+{
+  "schema_version": "exploratory_buy_hold_spy_bil/v1",
+  "episode_id": "spy-bil-buy-hold-2024-05-29-to-2025-05-29",
+  "provenance": "HISTORICAL_AUDITED_PROXY",
+  "scope": "ONE_PRESPECIFIED_EPISODE_A_B_C1",
+  "dates": {
+    "decision_price_date": "2024-05-28",
+    "decision_at": "2024-05-29T08:00:00-04:00",
+    "execution_date": "2024-05-29",
+    "initial_settlement_date": "2024-05-30",
+    "anniversary_date": "2025-05-29",
+    "terminal_rule": "LAST_COMMON_CLOSE_ON_OR_BEFORE_ANNIVERSARY"
+  },
+  "account": {
+    "currency": "USD",
+    "initial_cash": "100000",
+    "strict_temporal": true,
+    "whole_shares": true,
+    "funding": "H_FIN_NET",
+    "external_fees": "0",
+    "residual_cash_interest": "0",
+    "automatic_distribution_reinvestment": false,
+    "forced_terminal_liquidation": false
+  },
+  "policies": [
+    {"id": "A", "label": "BUY_AND_HOLD_SPY", "target_weight_spy": "1"},
+    {"id": "B", "label": "BUY_AND_HOLD_BIL", "target_weight_spy": "0"},
+    {"id": "C1", "label": "BUY_AND_HOLD_50_50", "target_weight_spy": "0.5"}
+  ],
+  "prices": {
+    "decision_field": "close",
+    "execution_field": "open",
+    "valuation_field": "close",
+    "status": "MARKET_OBSERVABLE_PROXY",
+    "adjusted_close_prohibited": true
+  },
+  "distributions": {
+    "mode": "REALIZED_EX_POST_ACCOUNTING_ONLY",
+    "entitlement_at_ex_date": true,
+    "cash_at_payment_date": true,
+    "no_decision_after_initial_purchase": true
+  },
+  "metrics": {
+    "daily_return_first_interval": "EXECUTION_OPEN_TO_FIRST_CLOSE",
+    "daily_return_later_intervals": "COMMON_CLOSE_TO_COMMON_CLOSE",
+    "volatility_annualization_factor": 252,
+    "annualized_return_day_count": 365,
+    "drawdown_basis": "ECONOMIC_WEALTH_WITH_ENTRY_OPEN_BASE"
+  },
+  "coverage": {
+    "comparison": "PAIRED",
+    "block_all_policies_on_required_common_source_failure": true
+  },
+  "sources": {
+    "SPY": "yahoo_spy_chart_ohlcv_20261019",
+    "BIL": "yahoo_bil_chart_ohlcv_20261019",
+    "market_audit": "yahoo_spy_bil_market_audit_v1_20261019",
+    "distributions": "ssga_spdr_distributions_20261019",
+    "settlement_rule": "sec_settlement_cycle_t1_2023_20261019",
+    "settlement_calendar": "dtcc_t1_conversion_guide_may2024_20261020"
+  }
+}

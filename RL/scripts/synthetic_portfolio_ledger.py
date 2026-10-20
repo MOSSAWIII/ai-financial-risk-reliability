@@ -224,6 +224,7 @@ class SyntheticPortfolioLedger:
     rejections: list[RejectionRecord] = field(default_factory=list, init=False)
     _position_events: dict[str, list[tuple[date, int, str, Any]]] = field(default_factory=dict, init=False)
     _applied_splits: set[tuple[str, date, int, int]] = field(default_factory=set, init=False)
+    _realized_distribution_event_ids: set[str] = field(default_factory=set, init=False)
     _sequence: int = field(default=0, init=False)
     _next_settlement_id: int = field(default=1, init=False)
     _next_claim_id: int = field(default=1, init=False)
@@ -416,6 +417,10 @@ class SyntheticPortfolioLedger:
     ) -> list[int]:
         """Comptabilise atomiquement des transactions au trade date."""
         try:
+            if self._realized_distribution_event_ids:
+                raise LedgerError(
+                    "une comptabilité de distribution ex post interdit toute nouvelle transaction"
+                )
             if self.strict_temporal:
                 assert self.trading_calendar is not None
                 assert self.settlement_calendar is not None
@@ -750,6 +755,72 @@ class SyntheticPortfolioLedger:
             payment_date=claim.payment_date,
         )
         self._commit_effect_time(event_date, EventPhase.DISTRIBUTION_ENTITLEMENT)
+        self.assert_invariants()
+        return claim.claim_id
+
+    def accrue_realized_distribution(
+        self,
+        symbol: str,
+        *,
+        event_id: str,
+        ex_date: date,
+        payment_date: date,
+        amount_per_share: Any,
+    ) -> int:
+        """Comptabilise ex post un droit réalisé sans inventer une annonce.
+
+        Cette voie est réservée à l'évaluation rétrospective d'une politique dont
+        toutes les décisions sont déjà closes. L'événement n'est jamais enregistré
+        comme information historiquement connue et bloque toute décision ultérieure.
+        """
+        symbol = self._valid_symbol(symbol)
+        try:
+            if not self.strict_temporal:
+                raise LedgerError("la comptabilité ex post exige le mode temporel strict")
+            if not isinstance(event_id, str) or not event_id.strip():
+                raise LedgerError("identifiant de distribution réalisée invalide")
+            event_id = event_id.strip()
+            if event_id in self._realized_distribution_event_ids:
+                raise LedgerError("cette distribution réalisée est déjà comptabilisée")
+            amount = money(amount_per_share, label="distribution par part")
+            if amount < ZERO:
+                raise LedgerError("la distribution ne peut pas être négative")
+            if payment_date < ex_date:
+                raise LedgerError("la payment date précède l'ex-date")
+            self._validate_effect_time(
+                ex_date,
+                EventPhase.DISTRIBUTION_ENTITLEMENT,
+                operation="REALIZED_DISTRIBUTION_ACCRUAL",
+            )
+        except LedgerError as exc:
+            self._reject("REALIZED_DISTRIBUTION_ACCRUAL", str(exc), ex_date)
+
+        shares = self.shares_for_entitlement(symbol, ex_date)
+        claim = DistributionClaim(
+            claim_id=self._next_claim_id,
+            symbol=symbol,
+            ex_date=ex_date,
+            payment_date=payment_date,
+            entitled_shares=shares,
+            amount_per_share=amount,
+            amount=amount * shares,
+        )
+        self._next_claim_id += 1
+        self.distribution_claims.append(claim)
+        self._realized_distribution_event_ids.add(event_id)
+        self._record(
+            ex_date,
+            "REALIZED_DISTRIBUTION_ACCRUAL",
+            event_id=event_id,
+            claim_id=claim.claim_id,
+            symbol=symbol,
+            entitled_shares=shares,
+            amount_per_share=amount,
+            amount=claim.amount,
+            payment_date=payment_date,
+            information_use="EX_POST_ACCOUNTING_ONLY",
+        )
+        self._commit_effect_time(ex_date, EventPhase.DISTRIBUTION_ENTITLEMENT)
         self.assert_invariants()
         return claim.claim_id
 

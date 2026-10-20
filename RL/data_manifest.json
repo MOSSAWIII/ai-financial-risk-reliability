@@ -73,7 +73,7 @@
       "units": "USD par part; volume en parts selon le champ fournisseur",
       "economic_meaning": "OHLC de marché secondaire présenté par Yahoo sur une base ajustée des splits; Adj Close ajusté en plus des distributions; événements de distribution inclus. La méthode exacte de construction de l'ouverture, l'origine consolidée des prix et l'ajustement du volume ne sont pas documentés dans la réponse.",
       "status": "AUDITED",
-      "allowed_uses": ["Analyse descriptive locale des prix quotidiens SPY sous la convention Yahoo explicitée", "Contrôle croisé du SPY Nasdaq à partir du 2016-10-17"],
+      "allowed_uses": ["Analyse descriptive locale des prix quotidiens SPY sous la convention Yahoo explicitée", "Contrôle croisé du SPY Nasdaq à partir du 2016-10-17", "Proxy conditionnel de dimensionnement, exécution initiale et valorisation rétrospective pour l'unique épisode exploratoire A/B/C1 du 2024-05-29 au 2025-05-29"],
       "prohibited_or_unvalidated_uses": ["Prix brut garanti historiquement", "Exécution garantie à l'ouverture", "Bid ou ask", "Rendement total autonome", "Backtest net", "Redistribution publique"],
       "derivation": {"acquisition_code": "RL/scripts/acquire_yahoo_spy_bil_ohlcv.py", "code_version": "1.0.0"},
       "audit": {"handler": "yahoo_chart_json", "expected": {"ticker": "SPY", "exchange_name": "PCX", "full_exchange_name": "NYSEArca", "currency": "USD", "data_granularity": "1d", "rows": 4880, "start": "2007-05-25", "end": "2026-10-16", "duplicate_dates": 0, "weekend_dates": 0, "missing_ohlcv": 0, "invalid_ohlc_rows": 0, "nonpositive_price_values": 0, "negative_volume_rows": 0, "zero_volume_rows": 0, "split_events": 0, "dividend_events": 78}}
@@ -96,7 +96,7 @@
       "units": "USD par part; volume en parts selon le champ fournisseur",
       "economic_meaning": "OHLC de marché secondaire présenté par Yahoo sur une base ajustée du split BIL 1-pour-2; Adj Close ajusté en plus des distributions; split et distributions inclus comme événements. Les OHLC antérieurs au 2017-11-30 ne sont donc pas les prix par ancienne part observables à l'époque.",
       "status": "AUDITED",
-      "allowed_uses": ["Analyse descriptive locale des prix quotidiens BIL sous la convention Yahoo explicitée", "Audit du traitement du split BIL"],
+      "allowed_uses": ["Analyse descriptive locale des prix quotidiens BIL sous la convention Yahoo explicitée", "Audit du traitement du split BIL", "Proxy conditionnel de dimensionnement, exécution initiale et valorisation rétrospective pour l'unique épisode exploratoire A/B/C1 du 2024-05-29 au 2025-05-29"],
       "prohibited_or_unvalidated_uses": ["Prix brut pré-split sans transformation documentée", "Exécution garantie à l'ouverture", "Bid ou ask", "Rendement total autonome", "Backtest net", "Redistribution publique"],
       "derivation": {"acquisition_code": "RL/scripts/acquire_yahoo_spy_bil_ohlcv.py", "code_version": "1.0.0"},
       "audit": {"handler": "yahoo_chart_json", "expected": {"ticker": "BIL", "exchange_name": "PCX", "full_exchange_name": "NYSEArca", "currency": "USD", "data_granularity": "1d", "rows": 4878, "start": "2007-05-30", "end": "2026-10-16", "duplicate_dates": 0, "weekend_dates": 0, "missing_ohlcv": 0, "invalid_ohlc_rows": 0, "nonpositive_price_values": 0, "negative_volume_rows": 0, "zero_volume_rows": 0, "split_events": 1, "dividend_events": 128}}
@@ -119,7 +119,7 @@
       "units": "contrôles structurels, calendaires et écarts de prix/volume",
       "economic_meaning": "Audit des OHLCV, de la convention d'ajustement, du split BIL, des calendriers observés et des concordances avec Nasdaq et State Street.",
       "status": "AUDITED",
-      "allowed_uses": ["Reproduire le verdict limité sur les historiques quotidiens de prix de marché Yahoo SPY–BIL"],
+      "allowed_uses": ["Reproduire le verdict limité sur les historiques quotidiens de prix de marché Yahoo SPY–BIL", "Filtrer les anomalies de prix de l'unique épisode exploratoire A/B/C1 du 2024-05-29 au 2025-05-29"],
       "prohibited_or_unvalidated_uses": ["Promouvoir les OHLCV au rang d'exécution garantie", "Mesurer spread, slippage, profondeur ou impact", "Autoriser un backtest ou une performance nette"],
       "derivation": {"code": "RL/scripts/audit_spy_bil_market_prices.py", "code_version": "1.0.0", "source_ids": ["yahoo_spy_chart_ohlcv_20261019", "yahoo_bil_chart_ohlcv_20261019", "nasdaq_spy_ohlcv_20261019", "nasdaq_ivv_ohlcv_20261019", "nasdaq_vti_ohlcv_20261019", "ssga_spy_nav_20261019", "ssga_bil_nav_20261019", "ssga_spy_premium_discount_20261019", "ssga_bil_premium_discount_20261019", "ssga_spdr_distributions_20261019"]},
       "audit": {"handler": "json_document", "params": {"required_keys": ["audit_version", "source_hashes", "structural_audit", "calendar_audit", "split_bil_audit", "cross_checks", "coverage_decision", "scientific_status", "required_assertions", "all_required_assertions_passed"]}, "expected": {"missing_required_keys": [], "status": "AUDITED", "all_required_assertions_passed": true}}
@@ -384,8 +384,8 @@
       "units": "USD par part",
       "economic_meaning": "Distributions historiques officielles; ne constituent pas seules une série de rendement total.",
       "status": "VALIDATED_FOR_USE",
-      "allowed_uses": ["Validation descriptive des événements de distribution SPY et BIL"],
-      "prohibited_or_unvalidated_uses": ["Rendement total sans convention de réinvestissement et série de prix validée", "Backtest"],
+      "allowed_uses": ["Validation descriptive des événements de distribution SPY et BIL", "Comptabilité ex post des droits, créances et paiements sans réinvestissement pour l'unique épisode exploratoire A/B/C1 du 2024-05-29 au 2025-05-29"],
+      "prohibited_or_unvalidated_uses": ["Rendement total sans convention explicite et série de prix qualifiée", "Information de décision avant preuve de l'annonce historique", "Backtest général ou optimisation"],
       "audit": {"handler": "ssga_distributions_xlsx", "expected": {"rows_all_funds": 13384, "rows_spy_bil": 368, "by_ticker": {"SPY": {"rows": 136, "start": "1993-03-19", "end": "2026-09-18", "duplicate_ex_dates": 0, "missing_dividends": 0, "negative_dividends": 0}, "BIL": {"rows": 232, "start": "2007-07-02", "end": "2026-10-01", "duplicate_ex_dates": 0, "missing_dividends": 0, "negative_dividends": 0}}}}
     },
     {
