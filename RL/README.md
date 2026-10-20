@@ -12,6 +12,8 @@ Le [`protocole d'exécution financière hypothétique v1`](docs/PROTOCOLE_EXECUT
 
 Le [registre comptable synthétique](docs/VALIDATION_REGISTRE_COMPTABLE_SYNTHETIQUE.md) implémente, sans données historiques, les positions économiques et réglées, cash, créances/dettes de règlement, distributions, frais et regroupements de parts. Sa [validation temporelle renforcée](docs/VALIDATION_TEMPORELLE_REGISTRE_SPY_BIL.md) ajoute deux calendriers distincts, une chronologie monotone, un ordre journalier explicite, la séparation annonce/ex-date/paiement et le calcul obligatoire T+2/T+1. Les 29 tests initiaux sont conservés; **45 tests artificiels** passent désormais. Le contrôle documentaire retrouve exactement les 2 210 dates communes Yahoo sur 2018–2026, mais le calendrier de règlement officiel reste incomplet et interdit encore toute expérience historique.
 
+Le rapport [`PREREQUIS_EXPERIENCE_FINANCIERE_SPY_BIL.md`](docs/PREREQUIS_EXPERIENCE_FINANCIERE_SPY_BIL.md) ferme le cadrage opérationnel restant. Les règles DTC/NSCC distinguent désormais jours de traitement et dates de règlement, notamment Columbus Day, Veterans Day, Good Friday et les fermetures imprévues. L'archive annuelle 2018–2026 demeure non exhaustive : le projet est `PARTIALLY_READY`, avec financement conservateur recommandé, contrat d'intégration strict et classification déterministe des situations non représentables. Aucune intégration historique n'est encore autorisée.
+
 La question de départ est provisoire :
 
 > Dans quelle mesure des politiques de décision financière apprises séquentiellement peuvent-elles améliorer la gestion du risque lorsque les prévisions sont imparfaites et que les conditions économiques et financières évoluent ?
@@ -70,6 +72,7 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 - [x] Définition d'un protocole hypothétique v1 et investigation reproductible des divergences d'ouverture.
 - [x] Implémentation et validation sur cas artificiels d'un registre minimal trade date/settlement date.
 - [x] Durcissement temporel du registre, 45 tests artificiels et concordance documentaire des 2 210 dates de séance.
+- [x] Matrice des décisions finales, contrat d'intégration stricte et délimitation documentaire du règlement DTC/NSCC.
 - [ ] Approbation de Yahoo `Open` comme référence conventionnelle, sans le confondre avec une exécution garantie.
 - [ ] Complétion d'un calendrier officiel de règlement DTC/NSCC versionné 2018–2026 et résolution du cas SPY du 20 avril 2026.
 - [ ] Validation des références classiques avant toute méthode RL.
