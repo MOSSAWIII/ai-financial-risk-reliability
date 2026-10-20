@@ -1,0 +1,65 @@
+{
+  "schema_version": "historical_spy_bil_single_cycle/v1",
+  "cycle_id": "spy-bil-2024-05-28-to-2024-05-30",
+  "provenance": "HISTORICAL_AUDITED_PROXY",
+  "scope": "SINGLE_PRESPECIFIED_CYCLE",
+  "account": {
+    "currency": "USD",
+    "initial_cash": "100000",
+    "initial_positions": {
+      "SPY": 0,
+      "BIL": 0
+    },
+    "strict_temporal": true,
+    "funding": "H_FIN_NET",
+    "whole_shares": true,
+    "external_fees": {
+      "SPY": "0",
+      "BIL": "0"
+    },
+    "residual_cash_interest": "0"
+  },
+  "decision": {
+    "decision_price_date": "2024-05-28",
+    "decision_at": "2024-05-29T08:00:00-04:00",
+    "timezone": "America/New_York",
+    "decision_price_field": "close",
+    "decision_price_status": "MARKET_OBSERVABLE_PROXY",
+    "target_weight_spy": "0.5",
+    "target_weight_bil": "0.5"
+  },
+  "execution": {
+    "trade_date": "2024-05-29",
+    "execution_price_field": "open",
+    "execution_price_status": "MARKET_OBSERVABLE_PROXY",
+    "proxy_use_authorized_for_cycle": true,
+    "anomaly_status": "CLEAR",
+    "settlement_date": "2024-05-30",
+    "settlement_cycle": "T+1"
+  },
+  "sources": {
+    "SPY": "yahoo_spy_chart_ohlcv_20261019",
+    "BIL": "yahoo_bil_chart_ohlcv_20261019",
+    "market_audit": "yahoo_spy_bil_market_audit_v1_20261019",
+    "distributions": "ssga_spdr_distributions_20261019",
+    "settlement_rule": "sec_settlement_cycle_t1_2023_20261019",
+    "settlement_calendar": "dtcc_t1_conversion_guide_may2024_20261020"
+  },
+  "calendars": {
+    "trading": [
+      "2024-05-28",
+      "2024-05-29"
+    ],
+    "settlement": [
+      "2024-05-29",
+      "2024-05-30"
+    ],
+    "trading_status": "VERIFIED_POINT_IN_TIME",
+    "settlement_status": "VERIFIED_POINT_IN_TIME"
+  },
+  "event_window": {
+    "start": "2024-05-28",
+    "end": "2024-05-30",
+    "required_status": "CLEAR"
+  }
+}

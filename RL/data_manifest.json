@@ -1121,6 +1121,30 @@
       "status": "AUDITED",
       "allowed_uses": ["Délimiter les catégories de jours non admissibles au règlement", "Documenter la différence entre négociation, compensation et règlement", "Définir les contrôles d'une future intégration"],
       "prohibited_or_unvalidated_uses": ["Déclarer une couverture historique exhaustive 2018-2026", "Supposer que NSCC open implique tous les services disponibles", "Inférer les conditions contractuelles d'un courtier particulier"]
+    },
+    {
+      "id": "dtcc_t1_conversion_guide_may2024_20261020",
+      "source": "DTCC — May 2024 T+1 Conversion Guide",
+      "organization_or_author": "The Depository Trust & Clearing Corporation / National Securities Clearing Corporation",
+      "url": "https://www.dtcc.com/-/media/Files/PDFs/T2/T1-Conversion-Document-March-2024.pdf",
+      "archive_url": "https://web.archive.org/web/20240514125627id_/https://www.dtcc.com/-/media/Files/PDFs/T2/T1-Conversion-Document-March-2024.pdf",
+      "academic_reference": null,
+      "publication_date": "2024-03",
+      "archived_at": "2024-05-14T12:56:27Z",
+      "acquired_at": "2026-10-20",
+      "original_filename": "T1-Conversion-Document-March-2024.pdf",
+      "local_file": "data/raw/rl_calendars/dtcc_t1_conversion_guide_may2024_acquired-2026-10-20.pdf",
+      "format": "PDF officiel DTCC, 24 pages, acquis via une capture Internet Archive du document primaire",
+      "bytes": 627847,
+      "sha256": "1655962c57e5a1459cf0d29c853b0bf924c3255aba5be0e0d04c4a7d2536b7f2",
+      "access_and_redistribution": "Document officiel DTCC publié avant la conversion T+1; URL courante indisponible lors de l'acquisition, copie obtenue par la capture Internet Archive du 14 mai 2024; brut exclu de GitHub.",
+      "coverage": "conversion du 24 au 30 mai 2024; calendrier explicite des trades regular-way et de leur settlement date",
+      "frequency": "guide opérationnel ponctuel",
+      "units": "trade dates, business days et settlement dates",
+      "economic_meaning": "Preuve primaire ciblée que les trades regular-way du 29 mai 2024 reçoivent une settlement date au jeudi 30 mai 2024 sous le régime T+1.",
+      "status": "VALIDATED_FOR_USE",
+      "allowed_uses": ["Qualifier le cycle de règlement regular-way du 29 au 30 mai 2024", "Documenter la conversion opérationnelle T+2 vers T+1"],
+      "prohibited_or_unvalidated_uses": ["Calendrier de règlement exhaustif hors du cycle documenté", "Preuve des conditions contractuelles d'un courtier particulier", "Redistribution publique du PDF brut"]
     }
   ]
 }
