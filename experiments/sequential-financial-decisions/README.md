@@ -1,8 +1,10 @@
-# Sequential Financial Decisions — Exploratory SPY–BIL Study
+# Research Study II — Sequential Financial Decision-Making
 
-This directory contains a complementary, **exploratory historical simulation**: weekly allocation between **SPY** (SPDR S&P 500 ETF Trust) and **BIL** (SPDR Bloomberg 1–3 Month T-Bill ETF), with explicit accounting for integer shares, `T+1` settlement, proportional costs and dividend cash availability.
+*Exploratory SPY–BIL study*
 
-> **Scope.** The study is not connected to the volatility-forecasting track in [`notebooks/`](../../notebooks/): no `RV5` forecast feeds any policy here, no machine-learning signal is evaluated, and no reinforcement-learning agent has been trained. Prices are retrospective public data; the Yahoo `Open` field is a *proxy* for a hypothetical opening execution, not a price obtained from a broker. The results are conditional on the stated assumptions and are not evidence of an implementable or profitable strategy.
+This directory contains a standalone, **exploratory historical simulation**: weekly allocation between **SPY** (SPDR S&P 500 ETF Trust) and **BIL** (SPDR Bloomberg 1–3 Month T-Bill ETF), with explicit accounting for integer shares, `T+1` settlement, proportional costs and dividend cash availability.
+
+> **Scope.** Study II is empirically separate from Study I in [`notebooks/`](../../notebooks/): no `RV5` forecast feeds any policy here, no machine-learning signal is evaluated, and no reinforcement-learning agent has been trained. Prices are retrospective public data; the Yahoo `Open` field is a *proxy* for a hypothetical opening execution, not a price obtained from a broker. The results are conditional on the stated assumptions and are not evidence of an implementable or profitable strategy.
 
 ---
 

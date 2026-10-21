@@ -20,7 +20,7 @@ python -m pip install -r requirements.txt
 python -m pytest -q
 ```
 
-Result of this command in a clean clone without `data/raw/`: `164 passed, 33 skipped`. The 33 skipped tests rebuild outputs from the raw market files and are skipped with the reason `sources historiques locales exclues de GitHub`. These tests concern the sequential study only; **no automated test covers the notebooks of the forecasting track.**
+Result of this command in a clean clone without `data/raw/`: `164 passed, 33 skipped`. The 33 skipped tests rebuild outputs from the raw market files and are skipped with the reason `sources historiques locales exclues de GitHub`. These tests concern Study II only; **no automated test covers the notebooks of Study I.**
 
 ```bash
 python -m ruff check experiments/sequential-financial-decisions/scripts experiments/sequential-financial-decisions/tests
@@ -49,13 +49,13 @@ A third party must download the public sources listed in Section 2, place them u
 
 Raw market and institutional files under `data/raw/` are excluded from Git pending verification of third-party redistribution rights. The tracked [`data_manifest.json`](../experiments/sequential-financial-decisions/data_manifest.json) records their SHA-256 digests and `scripts/verify_local_data.py` checks local files against it; the Fama–French archive filename embeds its own digest. No claim is made that every script or notebook independently re-verifies digests.
 
-### 2.1 Primary Track — Kenneth R. French Data Library (`data/raw/fama_french/`)
+### 2.1 Research Study I — Kenneth R. French Data Library (`data/raw/fama_french/`)
 
 | Local Relative Path | Public Source | Vintage / Coverage | SHA-256 Digest |
 | :--- | :--- | :--- | :--- |
 | `data/raw/fama_french/F-F_Research_Data_Factors_daily_202608_sha256-2f29e22546069914890a712680a6f81f3680ebc3543b52864484d209ca13a7db.zip` | [Kenneth R. French Data Library](https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/Data_Library/f-f_factors.html) (`F-F_Research_Data_Factors_daily_CSV.zip`) | Vintage `202608` (`1926-07-01` to `2026-08-31`; `26,317` daily sessions) | `2f29e22546069914890a712680a6f81f3680ebc3543b52864484d209ca13a7db` |
 
-### 2.2 Complementary Track — ETF & Regulatory Sources (`data/raw/`)
+### 2.2 Research Study II — ETF & Regulatory Sources (`data/raw/`)
 
 The machine-readable provenance manifest is tracked at [`experiments/sequential-financial-decisions/data_manifest.json`](../experiments/sequential-financial-decisions/data_manifest.json) (manifest SHA-256: `8cb901a45313764956abf9fd94c8baf0877a6f9b45e00a51685d70ae4fff56fc`). Key market data inputs used by the `SPY–BIL` sequential decision scripts:
 

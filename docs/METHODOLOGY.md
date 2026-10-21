@@ -4,7 +4,7 @@ This document summarizes the mathematical definitions, chronological protocols, 
 
 ---
 
-## 1. Primary Track — Financial Risk Forecast Reliability (`notebooks/00`–`07`)
+## 1. Research Study I — Financial Risk Forecast Reliability (`notebooks/00`–`07`)
 
 ### 1.1 Data and Return Reconstruction
 
@@ -68,11 +68,11 @@ Three kinds of quantities appear in the notebooks and must not be conflated:
 
 ---
 
-## 2. Complementary Track — Sequential Financial Decisions (`experiments/sequential-financial-decisions/`)
+## 2. Research Study II — Sequential Financial Decision-Making (`experiments/sequential-financial-decisions/`)
 
 ### 2.1 Decision Problem and Simulator Timeline
 
-The complementary study is an exploratory historical simulation of long-only, whole-share allocation between `SPY` (SPDR S&P 500 ETF Trust) and `BIL` (SPDR Bloomberg 1–3 Month T-Bill ETF) starting from `100,000.00 USD` cash. Prices are retrospective public data; the Yahoo `Open` field is used as a proxy for a hypothetical opening execution, not as a price actually obtained from a broker.
+Study II is an exploratory historical simulation of long-only, whole-share allocation between `SPY` (SPDR S&P 500 ETF Trust) and `BIL` (SPDR Bloomberg 1–3 Month T-Bill ETF) starting from `100,000.00 USD` cash. Prices are retrospective public data; the Yahoo `Open` field is used as a proxy for a hypothetical opening execution, not as a price actually obtained from a broker.
 
 - **Decision Timestamp:** `08:00 America/New_York` on the first NYSE trading session of each calendar week (`52` weekly decision cycles per one-year episode).
 - **Two-Stage Pre-Open Sealing (simulator convention):**
