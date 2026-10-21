@@ -4,60 +4,50 @@ This document specifies what can be inspected, tested, and reproduced directly f
 
 ---
 
-## 1. Four Verification Tiers
+## 1. Four Levels of Evidence
 
-### Tier 1 — Directly Inspectable Without Running Code
-All empirical outputs, summary tables, and figures are committed and rendered directly in the repository:
-- **Axis A (`notebooks/00_*.ipynb` to `07_*.ipynb`):** All 8 Jupyter notebooks are saved with their complete execution outputs, numerical tables, and embedded matplotlib figures.
-- **Axis B (`experiments/sequential-financial-decisions/`):**
-  - Documentary and conditional grids in [`experiments/sequential-financial-decisions/docs/`](../experiments/sequential-financial-decisions/docs/).
-  - Locked CSV, JSON, and SVG artifacts for the `2024–2025` `C1–C2` comparison, the `C3` passive distribution reinvestment diagnostic, and the `2025–2026` documentary audit in [`experiments/sequential-financial-decisions/results/`](../experiments/sequential-financial-decisions/results/).
+The levels below are ordered by how much a reader must have in hand. A result at one level is not thereby established at the next.
 
-### Tier 2 — Automated Offline Verification (Fresh Clone, No `data/raw/` Required)
-A fresh clone of `research-overview` can immediately execute `164` deterministic unit, accounting, and fixture-backed tests covering the sequential portfolio simulator, order sealing, `T+1` settlement, net sales financing (`H_FIN_NET`), dividend receivable accounting, and the April 20, 2026 documentary block:
+### Level 1 — Visible (read on GitHub, nothing to run)
+- **Notebooks `00`–`07`** are saved with their execution outputs, tables and figures. Reading them shows what was computed in the author's environment; it does not by itself show that a clean re-execution gives the same output.
+- **Locked outputs** of the sequential study (CSV, JSON, SVG) under [`experiments/sequential-financial-decisions/results/`](../experiments/sequential-financial-decisions/results/) and the documentary grids under [`docs/`](../experiments/sequential-financial-decisions/docs/).
+
+### Level 2 — Auditable without raw data (fresh clone)
+Tracked fixtures, SHA-256 files and result tables allow deterministic checks of the sequential simulator's accounting logic (ledger invariants, order sealing, `T+1` settlement, `H_FIN_NET`, dividend receivables, the Episode 2 documentary block) against committed artifacts:
 
 ```bash
 python -m pip install -r requirements.txt
 python -m pytest -q
 ```
 
-Expected output without `data/raw/`:
-```text
-164 passed, 33 skipped
-```
-The 33 skipped tests are guarded by `@pytest.mark.skipif` because they cross-check the full historical rebuild against the untracked `data/raw/rl_market/` files.
+Result of this command in a clean clone without `data/raw/`: `164 passed, 33 skipped`. The 33 skipped tests rebuild outputs from the raw market files and are skipped with the reason `sources historiques locales exclues de GitHub`. These tests concern the sequential study only; **no automated test covers the notebooks of the forecasting track.**
 
-Static analysis on all retained scripts and test suites can also be run offline:
 ```bash
 python -m ruff check experiments/sequential-financial-decisions/scripts experiments/sequential-financial-decisions/tests
 ```
 
-### Tier 3 — Full Historical Rebuild (With Local `data/raw/` Populated)
-When `data/raw/fama_french/` and `data/raw/rl_market/` are present locally with the SHA-256 digests listed in Section 2:
+### Level 3 — Reproducible locally by the author (archived inputs present)
+With the manifest-listed files under both `data/raw/` and `data/processed/` populated, the skipped tests run and the locked outputs are rebuilt byte for byte. The presence of `data/raw/rl_market/` activates these tests; the derived audit files under `data/processed/rl/` are also required:
 
-1. **Full 197-test suite:**
-   ```bash
-   python -m pytest -q
-   ```
-   Expected output: `197 passed`.
-2. **Byte-for-byte verification of locked Axis B results:**
-   ```bash
-   python experiments/sequential-financial-decisions/scripts/historical_c1_c2_comparison.py --check
-   python experiments/sequential-financial-decisions/scripts/diagnose_distribution_reinvestment.py --check
-   python experiments/sequential-financial-decisions/scripts/lock_second_historical_episode.py --check --check-block
-   ```
-   *(Note: To preserve cryptographic SHA-256 identity with the historical commits on `main`, locked JSON artifacts such as `statut_validation_documentaire.json` and `historical_c1_c2_2025_2026_lock_v1.json` retain their original `"RL/..."` path string keys inside JSON payloads, which the verification scripts automatically resolve to `experiments/sequential-financial-decisions/...`.)*
-3. **Full re-execution of Axis A notebooks (`notebooks/00`–`07`):**
-   Each notebook checks the SHA-256 digest of `data/raw/fama_french/F-F_Research_Data_Factors_daily_202608_sha256-2f29e22546069914890a712680a6f81f3680ebc3543b52864484d209ca13a7db.zip` before executing deterministically from top to bottom (Notebooks `00`–`06` also include an in-memory download fallback from the Kenneth French Data Library if the local archive is absent, whereas Notebook `07` strictly requires the local archive).
+```bash
+python -m pytest -q                      # 197 passed on the author's machine
+python experiments/sequential-financial-decisions/scripts/historical_c1_c2_comparison.py --check
+python experiments/sequential-financial-decisions/scripts/diagnose_distribution_reinvestment.py --check
+python experiments/sequential-financial-decisions/scripts/lock_second_historical_episode.py --check --check-block
+```
 
-### Tier 4 — Primary-Source Limitation (`2025–2026` Replication)
-The second sequential episode (`2025-05-29` to `2026-05-29`) is intentionally halted at Cycle 47 (`2026-04-20`, status `DOCUMENTARY_BLOCK`) because public free sources disagree on the `SPY` opening price (`Yahoo Finance`: `708.78`, intraday range `706.14–709.91`; `Nasdaq`: `710.14`, flat unadjusted OHLC without volume). Resolving this block would require institutional consolidated tape data (`NYSE Daily TAQ` primary opening auction print), which is not included.
+Locked JSON artifacts such as `statut_validation_documentaire.json` and `historical_c1_c2_2025_2026_lock_v1.json` keep their original `"RL/..."` path strings so that their SHA-256 digests match the archived commits on `main`; the scripts resolve these paths to `experiments/sequential-financial-decisions/...`. Locked CSV files keep their original line endings (see the study's `.gitattributes`).
+
+The forecasting notebooks `00`–`07` load the Fama–French archive `data/raw/fama_french/F-F_Research_Data_Factors_daily_202608_sha256-2f29e22546069914890a712680a6f81f3680ebc3543b52864484d209ca13a7db.zip`. According to their code, notebooks `00`–`06` can fall back to downloading the archive in memory if it is absent, while notebook `07` requires the local archive. Their re-execution from a clean clone has **not** been tested.
+
+### Level 4 — Reproducible by a third party who obtains the data
+A third party must download the public sources listed in Section 2, place them under the paths shown, and check the digests. This depends on the continued availability of those sources and on their terms of use. The second sequential episode (`2025-05-29` to `2026-05-29`) cannot be completed even with these data: Cycle 47 (`2026-04-20`) is `DOCUMENTARY_BLOCK` because the Yahoo (`Open 708.78`, `High 709.91`, `Low 706.14`) and Nasdaq (`Open = High = Low = Close = 710.14`, no volume) `SPY` records are incompatible. Resolving it would require a primary source (NYSE Daily TAQ), which has not been acquired; this repository does not decide which public source is correct.
 
 ---
 
 ## 2. Public Data Sources and SHA-256 Provenance
 
-Raw market and institutional files under `data/raw/` are excluded from Git via `.gitignore` pending verification of third-party redistribution rights. Every script and notebook verifies the exact SHA-256 digest of its inputs prior to execution.
+Raw market and institutional files under `data/raw/` are excluded from Git pending verification of third-party redistribution rights. The tracked [`data_manifest.json`](../experiments/sequential-financial-decisions/data_manifest.json) records their SHA-256 digests and `scripts/verify_local_data.py` checks local files against it; the Fama–French archive filename embeds its own digest. No claim is made that every script or notebook independently re-verifies digests.
 
 ### 2.1 Primary Track — Kenneth R. French Data Library (`data/raw/fama_french/`)
 
@@ -82,7 +72,11 @@ All additional regulatory and market-structure references (SEC `T+1` rule releas
 
 ---
 
-## 3. Software Environment and Licensing Note
+## 3. Software Environment, Verification Record and Licensing
 
-- **Tested Environment:** Python `3.11+` (`3.11.9` used for verification), `numpy`, `pandas`, `matplotlib`, `scikit-learn`, `pytest`, and `ruff` as pinned in [`requirements.txt`](../requirements.txt).
-- **Redistribution & Reuse Licensing:** Raw third-party datasets remain excluded from the repository until redistribution rights are verified. No open-source license file is currently attached to the code and documentation; reuse conditions remain to be defined by the author.
+- **Environment used for the local archive checks reported here:** Windows, Python `3.11.5`, `numpy 2.2.1`, `pandas 2.2.3`, `matplotlib 3.10.0`, `scikit-learn 1.6.1`, `openpyxl 3.1.5`, `pytest 8.3.5`, `ruff 0.11.2`. [`requirements.txt`](../requirements.txt) declares compatible *version ranges*; it is not a lockfile. Installation into a fresh Windows/Python `3.11.5` virtual environment was also verified, followed by the Level 2 tests and Ruff check.
+- **What was actually run (clean local clone of the branch, no `data/raw/`):** `python -m pytest -q` → `164 passed, 33 skipped`; `ruff check` on the scripts and tests → no findings. All 33 skips carry the same reason (`sources historiques locales exclues de GitHub`) and are guarded by `skipif` on the absence of `data/raw/rl_market/`.
+- **What was actually run (local machine with the manifest-listed `data/raw/` and `data/processed/` files present):** `python -m pytest -q` → `197 passed`; the three `--check` commands of Level 3 completed successfully; and `python experiments/sequential-financial-decisions/scripts/verify_local_data.py` checked `51` manifest entries with no failure.
+- **Not verified:** execution on Linux/macOS; full top-to-bottom re-execution of the notebooks in a clean clone; availability of the third-party URLs at a later date.
+- **Language:** notebook prose and many identifiers (file and column names) are in French; each notebook starts with an English overview.
+- **Redistribution & Reuse Licensing:** Raw third-party datasets remain excluded from the repository until redistribution rights are verified. No license file is attached to the code and documentation; reuse conditions remain to be defined by the author.
