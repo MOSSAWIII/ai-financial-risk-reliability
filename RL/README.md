@@ -42,6 +42,8 @@ Le [verrouillage informationnel et contrat historique C2](docs/VERROUILLAGE_INFO
 
 La [première comparaison historique C1–C2](docs/PREMIERE_COMPARAISON_HISTORIQUE_C1_C2_2024_2025.md) exécute désormais les huit cellules E-B autorisées sur l'épisode unique du 29 mai 2024 au 29 mai 2025. C1 retrouve exactement ses richesses publiées ; C2 termine devant C1 de 519,07 à 590,12 USD, avec un drawdown légèrement moins profond mais une volatilité légèrement supérieure. Les 416 décisions sont évaluables, 47 à 51 rééquilibrages sont exécutés par cellule, aucun lot n'est rejeté et D+2 réduit la richesse C2 de 8,95 à 20,60 USD par rapport à D+1. Les trajectoires, décisions, synthèses et comparaisons sont publiées sous [results/historical_c1_c2_2024_2025](results/historical_c1_c2_2024_2025/), les **179 tests** passent et le verdict est **`HISTORICAL_C1_C2_COMPARISON_VALIDATED`**. Ces résultats restent exploratoires conditionnels et ne justifient aucune optimisation ou extension automatique.
 
+Le [diagnostic économique du réinvestissement C1–C2–C3](docs/DIAGNOSTIC_ECONOMIQUE_REINVESTISSEMENT_C1_C2_C3.md) ajoute un unique contrôle post hoc : C3 conserve le portefeuille initial et réinvestit chaque distribution uniquement dans l'ETF payeur au moyen de deux réserves étanches. C3 acquiert 1 SPY et 26 BIL, améliore C1 de 76,30 à 84,01 USD et couvre arithmétiquement 13,67 % à 15,02 % de l'écart C2−C1; C2 conserve 442,77 à 506,11 USD d'avance. Les sorties reproductibles se trouvent sous [results/diagnostic_reinvestissement_c1_c2_c3_2024_2025](results/diagnostic_reinvestissement_c1_c2_c3_2024_2025/), les **189 tests** passent et le verdict est **`REINVESTMENT_DIAGNOSTIC_VALIDATED`**. Cette identité entre politiques n'est pas une attribution causale de la prime de rééquilibrage.
+
 La question de départ est provisoire :
 
 > Dans quelle mesure des politiques de décision financière apprises séquentiellement peuvent-elles améliorer la gestion du risque lorsque les prévisions sont imparfaites et que les conditions économiques et financières évoluent ?
@@ -115,6 +117,7 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 - [x] Validation synthétique intégrée de C2 sous E-B, avec ex-date, cash D+1/D+2, règlements, coûts, rejets et contrôle C1–C2 artificiel.
 - [x] Verrouillage de la frontière informationnelle E-B et du contrat de sortie historique C1–C2, sans exécution empirique.
 - [x] Première comparaison historique exploratoire C1–C2 sur les huit cellules verrouillées, avec sorties reproductibles et réconciliation complète.
+- [x] Diagnostic post hoc C3 du réinvestissement passif des distributions, sans modification de C1 ou C2.
 - [x] Approbation de Yahoo `Open` comme référence conventionnelle exploratoire, sans le confondre avec une exécution garantie.
 - [ ] Complétion d'un calendrier officiel de règlement DTC/NSCC versionné 2018–2026 et résolution du cas SPY du 20 avril 2026.
 - [x] Validation des références classiques C1–C2 avant toute méthode RL.
