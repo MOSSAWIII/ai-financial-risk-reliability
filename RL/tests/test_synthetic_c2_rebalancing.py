@@ -226,11 +226,12 @@ def test_announced_distribution_is_known_wealth_but_not_funding_cash() -> None:
     ledger.accrue_announced_distribution(announcement, event_date=date(2025, 1, 9))
 
     snapshot = build_snapshot(adapter, date(2025, 1, 13), "100", "100")
+    audit = adapter.build_economic_audit_state(snapshot)
     assert snapshot.status is SnapshotStatus.READY
     assert snapshot.known_distribution_receivables == D("1000")
     assert ledger.distribution_receivables == D("1000")
-    assert snapshot.economic_distribution_receivables == D("1000")
-    assert snapshot.economic_wealth == D("101000")
+    assert audit.accounting.distribution_receivables == D("1000")
+    assert audit.economic_wealth == D("101000")
     assert snapshot.admissible_wealth == D("101000")
     assert snapshot.funding_resources == 0
 
@@ -246,9 +247,10 @@ def test_realized_unannounced_distribution_is_hidden_and_blocks_exact_target() -
     )
 
     snapshot = build_snapshot(adapter, date(2025, 1, 13), "100", "100")
+    audit = adapter.build_economic_audit_state(snapshot)
     assert ledger.distribution_receivables == D("1000")
-    assert snapshot.economic_distribution_receivables is None
-    assert snapshot.economic_wealth is None
+    assert audit.accounting.distribution_receivables == D("1000")
+    assert audit.economic_wealth == D("101000")
     assert snapshot.known_distribution_receivables == 0
     assert snapshot.unknown_distribution_claim_ids == (1,)
     assert snapshot.status is SnapshotStatus.NOT_EVALUABLE
@@ -314,10 +316,11 @@ def test_same_day_payment_is_not_known_at_0800_without_prior_credit_proof() -> N
     )
 
     snapshot = build_snapshot(adapter, date(2025, 1, 13), "100", "100")
+    audit = adapter.build_economic_audit_state(snapshot)
     assert snapshot.status is SnapshotStatus.NOT_EVALUABLE
     assert snapshot.cash_availability_unproven_claim_ids == (1,)
     assert snapshot.settled_cash == 0
-    assert snapshot.economic_wealth is None
+    assert audit.economic_wealth == D("101000")
     assert "disponibilité du cash" in snapshot.reason
 
 

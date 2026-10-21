@@ -38,6 +38,8 @@ L'[arbitrage méthodologique C2 point-in-time](docs/ARBITRAGE_METHODOLOGIQUE_C2_
 
 La [validation intégrée C2 conditionnelle synthétique](docs/VALIDATION_INTEGREE_C2_CONDITIONNEL_SYNTHETIQUE.md) exerce maintenant E-B de bout en bout sur une unique séquence entièrement artificielle. Le snapshot sépare richesse économique, budget de décision, créances exclues et cash finançable; l'ex-date conserve la richesse sans double comptage, D+1/D+2 pilotent la disponibilité, les intentions restent scellées avant l'open, et `H_FIN_NET`, règlements, coûts S0–S3, rejets et état hérité sont contrôlés. C1 conserve ses positions sous la même identité comptable. Les **169 tests** passent et le verdict est **`SYNTHETIC_CONDITIONAL_C2_VALIDATED`**. Le mode strict reste le défaut et aucune phase historique n'est engagée.
 
+Le [verrouillage informationnel et contrat historique C2](docs/VERROUILLAGE_INFORMATIONNEL_ET_CONTRAT_HISTORIQUE_C2.md) sépare désormais physiquement la vue remise à la politique de l'état économique d'audit. Deux mondes ne différant que par un montant de créance inconnu produisent le même snapshot décisionnel, le même JSON, les mêmes empreintes, cibles, ordres et intention, tandis que leurs audits économiques restent distincts. Le document fige avant tout calcul l'épisode, les huit paires coûts/cash, les sorties, formules et règles d'arrêt ; l'audit ciblé retrouve les 52 décisions, 16 distributions et 52 règlements documentés. Les **170 tests** passent et le verdict est **`HISTORICAL_C2_TECHNICALLY_READY`**. Aucune richesse, performance ou comparaison historique C2 n'a été calculée ; son lancement exige encore une autorisation explicite.
+
 La question de départ est provisoire :
 
 > Dans quelle mesure des politiques de décision financière apprises séquentiellement peuvent-elles améliorer la gestion du risque lorsque les prévisions sont imparfaites et que les conditions économiques et financières évoluent ?
@@ -109,6 +111,7 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 - [x] Grille documentaire exhaustive des 52 décisions hebdomadaires candidates C2, sans transaction ni performance historique C2.
 - [x] Arbitrage entre protocole strict et protocole exploratoire conditionnel, avec identité artificielle à l'ex-date et couverture dérivée des 52 décisions.
 - [x] Validation synthétique intégrée de C2 sous E-B, avec ex-date, cash D+1/D+2, règlements, coûts, rejets et contrôle C1–C2 artificiel.
+- [x] Verrouillage de la frontière informationnelle E-B et du contrat de sortie historique C1–C2, sans exécution empirique.
 - [ ] Approbation de Yahoo `Open` comme référence conventionnelle, sans le confondre avec une exécution garantie.
 - [ ] Complétion d'un calendrier officiel de règlement DTC/NSCC versionné 2018–2026 et résolution du cas SPY du 20 avril 2026.
 - [ ] Validation des références classiques avant toute méthode RL.

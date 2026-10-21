@@ -84,6 +84,8 @@ class DatedPrice:
 
 @dataclass(frozen=True)
 class DecisionSnapshot:
+    """Vue canonique contenant exclusivement l'information admissible à la politique."""
+
     snapshot_id: str
     decision_at: datetime
     price_date: date
@@ -94,10 +96,8 @@ class DecisionSnapshot:
     sale_receivables: Decimal
     purchase_payables: Decimal
     known_distribution_receivables: Decimal
-    economic_distribution_receivables: Decimal | None
     unknown_distribution_claim_ids: tuple[int, ...]
     cash_availability_unproven_claim_ids: tuple[int, ...]
-    economic_wealth: Decimal | None
     admissible_wealth: Decimal | None
     funding_resources: Decimal
     ledger_sequence: int
@@ -106,9 +106,7 @@ class DecisionSnapshot:
     provenance: Mapping[str, str]
     decision_budget: Decimal | None = None
     excluded_distribution_claim_ids: tuple[int, ...] = ()
-    excluded_distribution_claims: Decimal | None = None
     embedded_ex_date_claim_ids: tuple[int, ...] = ()
-    unavailable_paid_cash: Decimal | None = None
     financing_cash: Decimal | None = None
     valuation_reference_at: datetime | None = None
     information_cutoff: datetime | None = None
@@ -116,6 +114,36 @@ class DecisionSnapshot:
     cash_availability_convention: CashAvailabilityConvention = (
         CashAvailabilityConvention.PROVEN_AVAILABILITY
     )
+
+
+@dataclass(frozen=True)
+class AuditedDistributionClaim:
+    """Copie immuable d'une créance, réservée à la comptabilité et à l'audit."""
+
+    claim_id: int
+    symbol: str
+    ex_date: date
+    payment_date: date
+    amount: Decimal
+    paid: bool
+    cash_available_at: datetime | None
+
+
+@dataclass(frozen=True)
+class EconomicAuditState:
+    """État rétrospectif complet qui ne doit jamais être fourni à la politique."""
+
+    audit_id: str
+    decision_at: datetime
+    price_date: date
+    decision_closes: Mapping[str, Decimal]
+    accounting: AccountingSnapshot
+    distribution_claims: tuple[AuditedDistributionClaim, ...]
+    economic_wealth: Decimal | None
+    excluded_distribution_claims: Decimal
+    unavailable_paid_cash: Decimal
+    embedded_ex_date_claims: Decimal
+    ledger_sequence: int
 
 
 @dataclass(frozen=True)
@@ -228,7 +256,7 @@ def canonical_json_bytes(value: Mapping[str, Any]) -> bytes:
 
 
 def decision_snapshot_payload(snapshot: DecisionSnapshot) -> dict[str, Any]:
-    """Retourne tout le contenu scellé d'un instantané, hors identifiant."""
+    """Retourne le contenu décisionnel canonique, hors identifiant."""
     return {
         "decision_at": snapshot.decision_at.isoformat(),
         "price_date": snapshot.price_date.isoformat(),
@@ -243,21 +271,11 @@ def decision_snapshot_payload(snapshot: DecisionSnapshot) -> dict[str, Any]:
         "known_distribution_receivables": _decimal_text(
             snapshot.known_distribution_receivables
         ),
-        "economic_distribution_receivables": (
-            None
-            if snapshot.economic_distribution_receivables is None
-            else _decimal_text(snapshot.economic_distribution_receivables)
-        ),
         "unknown_distribution_claim_ids": list(
             snapshot.unknown_distribution_claim_ids
         ),
         "cash_availability_unproven_claim_ids": list(
             snapshot.cash_availability_unproven_claim_ids
-        ),
-        "economic_wealth": (
-            None
-            if snapshot.economic_wealth is None
-            else _decimal_text(snapshot.economic_wealth)
         ),
         "admissible_wealth": (
             None
@@ -277,17 +295,7 @@ def decision_snapshot_payload(snapshot: DecisionSnapshot) -> dict[str, Any]:
         "excluded_distribution_claim_ids": list(
             snapshot.excluded_distribution_claim_ids
         ),
-        "excluded_distribution_claims": (
-            None
-            if snapshot.excluded_distribution_claims is None
-            else _decimal_text(snapshot.excluded_distribution_claims)
-        ),
         "embedded_ex_date_claim_ids": list(snapshot.embedded_ex_date_claim_ids),
-        "unavailable_paid_cash": (
-            None
-            if snapshot.unavailable_paid_cash is None
-            else _decimal_text(snapshot.unavailable_paid_cash)
-        ),
         "financing_cash": (
             None
             if snapshot.financing_cash is None
@@ -308,6 +316,61 @@ def decision_snapshot_payload(snapshot: DecisionSnapshot) -> dict[str, Any]:
             snapshot.cash_availability_convention.value
         ),
     }
+
+
+def economic_audit_payload(state: EconomicAuditState) -> dict[str, Any]:
+    """Retourne le contenu canonique rétrospectif, hors identifiant d'audit."""
+    return {
+        "decision_at": state.decision_at.isoformat(),
+        "price_date": state.price_date.isoformat(),
+        "decision_closes": {
+            key: _decimal_text(value) for key, value in state.decision_closes.items()
+        },
+        "accounting": {
+            "settled_cash": _decimal_text(state.accounting.settled_cash),
+            "economic_positions": dict(state.accounting.economic_positions),
+            "settled_positions": dict(state.accounting.settled_positions),
+            "sale_receivables": _decimal_text(state.accounting.sale_receivables),
+            "purchase_payables": _decimal_text(state.accounting.purchase_payables),
+            "distribution_receivables": _decimal_text(
+                state.accounting.distribution_receivables
+            ),
+            "fees_recognized": _decimal_text(state.accounting.fees_recognized),
+            "pending_settlement_count": state.accounting.pending_settlement_count,
+            "unpaid_distribution_count": state.accounting.unpaid_distribution_count,
+        },
+        "distribution_claims": [
+            {
+                "claim_id": claim.claim_id,
+                "symbol": claim.symbol,
+                "ex_date": claim.ex_date.isoformat(),
+                "payment_date": claim.payment_date.isoformat(),
+                "amount": _decimal_text(claim.amount),
+                "paid": claim.paid,
+                "cash_available_at": (
+                    None
+                    if claim.cash_available_at is None
+                    else claim.cash_available_at.isoformat()
+                ),
+            }
+            for claim in state.distribution_claims
+        ],
+        "economic_wealth": (
+            None
+            if state.economic_wealth is None
+            else _decimal_text(state.economic_wealth)
+        ),
+        "excluded_distribution_claims": _decimal_text(
+            state.excluded_distribution_claims
+        ),
+        "unavailable_paid_cash": _decimal_text(state.unavailable_paid_cash),
+        "embedded_ex_date_claims": _decimal_text(state.embedded_ex_date_claims),
+        "ledger_sequence": state.ledger_sequence,
+    }
+
+
+def economic_audit_content_sha256(state: EconomicAuditState) -> str:
+    return hashlib.sha256(canonical_json_bytes(economic_audit_payload(state))).hexdigest()
 
 
 def decision_snapshot_content_sha256(snapshot: DecisionSnapshot) -> str:
@@ -535,33 +598,27 @@ class SyntheticDecisionAdapter:
         )
         reason = "instantané décisionnel complet" if not reasons else "; ".join(reasons)
         provisional = DecisionSnapshot(
-            "",
-            decision_at,
-            price_date,
-            _frozen_mapping(closes),
-            _frozen_mapping(positions),
-            _frozen_mapping(settled_positions),
-            known_settled_cash,
-            self.ledger.sale_receivables,
-            self.ledger.purchase_payables,
-            known_receivables,
-            (
-                None
-                if unknown_claim_ids
-                else self.ledger.distribution_receivables
-            ),
-            tuple(unknown_claim_ids),
-            tuple(unproven_cash_ids),
-            economic_wealth,
-            admissible_wealth,
-            max(
+            snapshot_id="",
+            decision_at=decision_at,
+            price_date=price_date,
+            decision_closes=_frozen_mapping(closes),
+            economic_positions=_frozen_mapping(positions),
+            settled_positions=_frozen_mapping(settled_positions),
+            settled_cash=known_settled_cash,
+            sale_receivables=self.ledger.sale_receivables,
+            purchase_payables=self.ledger.purchase_payables,
+            known_distribution_receivables=known_receivables,
+            unknown_distribution_claim_ids=tuple(unknown_claim_ids),
+            cash_availability_unproven_claim_ids=tuple(unproven_cash_ids),
+            admissible_wealth=admissible_wealth,
+            funding_resources=max(
                 ZERO,
                 known_settled_cash - self.ledger.purchase_payables,
             ),
-            self.ledger.event_sequence,
-            status,
-            reason,
-            _frozen_mapping(provenance),
+            ledger_sequence=self.ledger.event_sequence,
+            status=status,
+            reason=reason,
+            provenance=_frozen_mapping(provenance),
         )
         return replace(
             provisional,
@@ -610,15 +667,12 @@ class SyntheticDecisionAdapter:
         }
         known_unpaid = ZERO
         unknown_ids: list[int] = []
-        excluded_unknown = ZERO
         embedded_ids: list[int] = []
-        embedded_amount = ZERO
         unavailable_paid_ids: list[int] = []
         unavailable_paid_amount = ZERO
         for claim in self.ledger.distribution_claims:
             if claim.ex_date == decision_session:
                 embedded_ids.append(claim.claim_id)
-                embedded_amount += claim.amount
             if claim.paid:
                 available_date = self.ledger.settlement_calendar.business_date_after(
                     claim.payment_date, delay
@@ -643,8 +697,6 @@ class SyntheticDecisionAdapter:
                     known_unpaid += claim.amount
             else:
                 unknown_ids.append(claim.claim_id)
-                if claim.ex_date < decision_session:
-                    excluded_unknown += claim.amount
 
         available_cash = self.ledger.settled_cash - unavailable_paid_amount
         holdings = (
@@ -655,16 +707,6 @@ class SyntheticDecisionAdapter:
             )
             if set(strict.decision_closes) == set(SYMBOLS)
             else None
-        )
-        economic_wealth = (
-            None
-            if holdings is None
-            else holdings
-            + self.ledger.settled_cash
-            + self.ledger.distribution_receivables
-            + self.ledger.sale_receivables
-            - self.ledger.purchase_payables
-            - embedded_amount
         )
         decision_budget = (
             None
@@ -715,10 +757,8 @@ class SyntheticDecisionAdapter:
             snapshot_id="",
             settled_cash=available_cash,
             known_distribution_receivables=known_unpaid,
-            economic_distribution_receivables=self.ledger.distribution_receivables,
             unknown_distribution_claim_ids=tuple(unknown_ids),
             cash_availability_unproven_claim_ids=tuple(unavailable_paid_ids),
-            economic_wealth=economic_wealth,
             admissible_wealth=decision_budget,
             funding_resources=financing_cash,
             status=status,
@@ -726,9 +766,7 @@ class SyntheticDecisionAdapter:
             provenance=_frozen_mapping(conditional_provenance),
             decision_budget=decision_budget,
             excluded_distribution_claim_ids=tuple(unknown_ids),
-            excluded_distribution_claims=excluded_unknown,
             embedded_ex_date_claim_ids=tuple(embedded_ids),
-            unavailable_paid_cash=unavailable_paid_amount,
             financing_cash=financing_cash,
             valuation_reference_at=datetime.combine(
                 strict.price_date, time(16), ZoneInfo("America/New_York")
@@ -741,6 +779,96 @@ class SyntheticDecisionAdapter:
             provisional,
             snapshot_id="SNAPSHOT-"
             + decision_snapshot_content_sha256(provisional),
+        )
+
+    def build_economic_audit_state(
+        self, snapshot: DecisionSnapshot
+    ) -> EconomicAuditState:
+        """Capture séparément la comptabilité rétrospective liée à une vue scellée."""
+        if not isinstance(snapshot, DecisionSnapshot):
+            raise AdapterError("instantané décisionnel invalide")
+        if snapshot.snapshot_id != (
+            "SNAPSHOT-" + decision_snapshot_content_sha256(snapshot)
+        ):
+            raise AdapterError("l'empreinte de l'instantané est invalide")
+        if snapshot.ledger_sequence != self.ledger.event_sequence:
+            raise AdapterError("instantané périmé avant audit")
+
+        decision_session = snapshot.decision_at.astimezone(
+            ZoneInfo("America/New_York")
+        ).date()
+        embedded_amount = sum(
+            (
+                claim.amount
+                for claim in self.ledger.distribution_claims
+                if claim.ex_date == decision_session
+            ),
+            ZERO,
+        )
+        unknown_ids = set(snapshot.excluded_distribution_claim_ids)
+        excluded_amount = sum(
+            (
+                claim.amount
+                for claim in self.ledger.distribution_claims
+                if claim.claim_id in unknown_ids and claim.ex_date < decision_session
+            ),
+            ZERO,
+        )
+        unavailable_ids = set(snapshot.cash_availability_unproven_claim_ids)
+        unavailable_amount = sum(
+            (
+                claim.amount
+                for claim in self.ledger.distribution_claims
+                if claim.claim_id in unavailable_ids
+            ),
+            ZERO,
+        )
+        holdings = (
+            sum(
+                snapshot.decision_closes[symbol]
+                * snapshot.economic_positions[symbol]
+                for symbol in SYMBOLS
+            )
+            if set(snapshot.decision_closes) == set(SYMBOLS)
+            else None
+        )
+        economic_wealth = (
+            None
+            if holdings is None
+            else holdings
+            + self.ledger.settled_cash
+            + self.ledger.distribution_receivables
+            + self.ledger.sale_receivables
+            - self.ledger.purchase_payables
+            - embedded_amount
+        )
+        provisional = EconomicAuditState(
+            audit_id="",
+            decision_at=snapshot.decision_at,
+            price_date=snapshot.price_date,
+            decision_closes=_frozen_mapping(snapshot.decision_closes),
+            accounting=self.ledger.accounting_snapshot(),
+            distribution_claims=tuple(
+                AuditedDistributionClaim(
+                    claim_id=claim.claim_id,
+                    symbol=claim.symbol,
+                    ex_date=claim.ex_date,
+                    payment_date=claim.payment_date,
+                    amount=claim.amount,
+                    paid=claim.paid,
+                    cash_available_at=claim.cash_available_at,
+                )
+                for claim in self.ledger.distribution_claims
+            ),
+            economic_wealth=economic_wealth,
+            excluded_distribution_claims=excluded_amount,
+            unavailable_paid_cash=unavailable_amount,
+            embedded_ex_date_claims=embedded_amount,
+            ledger_sequence=self.ledger.event_sequence,
+        )
+        return replace(
+            provisional,
+            audit_id="AUDIT-" + economic_audit_content_sha256(provisional),
         )
 
     def prepare_intent_from_snapshot(
@@ -1459,9 +1587,11 @@ class SyntheticDecisionAdapter:
 
 __all__ = [
     "AdapterError",
+    "AuditedDistributionClaim",
     "CashAvailabilityConvention",
     "DatedPrice",
     "DecisionSnapshot",
+    "EconomicAuditState",
     "DecisionIntent",
     "ExecutionOutcome",
     "ExecutionStatus",
@@ -1475,6 +1605,8 @@ __all__ = [
     "cost_scenario_fees",
     "decision_snapshot_content_sha256",
     "decision_snapshot_payload",
+    "economic_audit_content_sha256",
+    "economic_audit_payload",
     "intent_content_sha256",
     "intent_payload",
 ]
