@@ -1,0 +1,315 @@
+{
+  "schema_version": "historical_c1_c2_episode_lock/v1",
+  "episode_id": "spy-bil-c1-c2-2025-05-29-to-2026-05-29",
+  "reference_commit": "893afda71ed930b5eec8a95058ebcfca962f49b1",
+  "scientific_status": "EXPLORATORY_TEMPORAL_REPLICATION_POST_HOC",
+  "locked_before_performance": true,
+  "performance_computed": false,
+  "dates": {
+    "decision_price_date": "2025-05-28",
+    "decision_at": "2025-05-29T08:00:00-04:00",
+    "execution_date": "2025-05-29",
+    "initial_settlement_date": "2025-05-30",
+    "first_recurring_week": "2025-06-02",
+    "terminal_date": "2026-05-29",
+    "terminal_rule": "COMMON_CLOSE_NO_FICTITIOUS_LIQUIDATION"
+  },
+  "account": {
+    "currency": "USD",
+    "initial_cash": "100000",
+    "whole_shares": true,
+    "funding": "H_FIN_NET",
+    "borrowing": false,
+    "shorting": false,
+    "batch_resizing_after_rejection": false
+  },
+  "policies": {
+    "C1": "INITIAL_50_50_THEN_HOLD_DISTRIBUTIONS_IN_CASH",
+    "C2": "INITIAL_50_50_THEN_WEEKLY_50_50_OF_E_B_DECISION_BUDGET"
+  },
+  "decision_protocol": {
+    "mode": "EXPLORATORY_CONDITIONAL",
+    "decision_time": "08:00 America/New_York",
+    "frequency": "FIRST_NYSE_SESSION_OF_EACH_WEEK",
+    "decision_price": "LAST_ADMISSIBLE_CLOSE",
+    "execution_price": "SAME_DAY_YAHOO_OPEN_READ_AFTER_SEALING",
+    "cash_conventions": [
+      "D_PLUS_1",
+      "D_PLUS_2"
+    ],
+    "unknown_distribution_receivables_excluded": true
+  },
+  "cost_scenarios_bps": {
+    "S0": "0",
+    "S1": "1",
+    "S2": "5",
+    "S3": "10"
+  },
+  "coverage": {
+    "common_sessions": 252,
+    "weekly_decisions": 52,
+    "distribution_events": 16,
+    "spy_distributions": 4,
+    "bil_distributions": 12
+  },
+  "distribution_events": [
+    {
+      "event_id": "SSGA-BIL-2025-06-02",
+      "symbol": "BIL",
+      "ex_date": "2025-06-02",
+      "payment_date": "2025-06-05",
+      "amount_per_share_usd": "0.316408"
+    },
+    {
+      "event_id": "SSGA-SPY-2025-06-20",
+      "symbol": "SPY",
+      "ex_date": "2025-06-20",
+      "payment_date": "2025-07-31",
+      "amount_per_share_usd": "1.761117"
+    },
+    {
+      "event_id": "SSGA-BIL-2025-07-01",
+      "symbol": "BIL",
+      "ex_date": "2025-07-01",
+      "payment_date": "2025-07-07",
+      "amount_per_share_usd": "0.306416"
+    },
+    {
+      "event_id": "SSGA-BIL-2025-08-01",
+      "symbol": "BIL",
+      "ex_date": "2025-08-01",
+      "payment_date": "2025-08-06",
+      "amount_per_share_usd": "0.319295"
+    },
+    {
+      "event_id": "SSGA-BIL-2025-09-02",
+      "symbol": "BIL",
+      "ex_date": "2025-09-02",
+      "payment_date": "2025-09-05",
+      "amount_per_share_usd": "0.321993"
+    },
+    {
+      "event_id": "SSGA-SPY-2025-09-19",
+      "symbol": "SPY",
+      "ex_date": "2025-09-19",
+      "payment_date": "2025-10-31",
+      "amount_per_share_usd": "1.831114"
+    },
+    {
+      "event_id": "SSGA-BIL-2025-10-01",
+      "symbol": "BIL",
+      "ex_date": "2025-10-01",
+      "payment_date": "2025-10-06",
+      "amount_per_share_usd": "0.310508"
+    },
+    {
+      "event_id": "SSGA-BIL-2025-11-03",
+      "symbol": "BIL",
+      "ex_date": "2025-11-03",
+      "payment_date": "2025-11-06",
+      "amount_per_share_usd": "0.303301"
+    },
+    {
+      "event_id": "SSGA-BIL-2025-12-01",
+      "symbol": "BIL",
+      "ex_date": "2025-12-01",
+      "payment_date": "2025-12-04",
+      "amount_per_share_usd": "0.281225"
+    },
+    {
+      "event_id": "SSGA-BIL-2025-12-18",
+      "symbol": "BIL",
+      "ex_date": "2025-12-18",
+      "payment_date": "2025-12-23",
+      "amount_per_share_usd": "0.365425"
+    },
+    {
+      "event_id": "SSGA-SPY-2025-12-19",
+      "symbol": "SPY",
+      "ex_date": "2025-12-19",
+      "payment_date": "2026-01-30",
+      "amount_per_share_usd": "1.993368"
+    },
+    {
+      "event_id": "SSGA-BIL-2026-02-02",
+      "symbol": "BIL",
+      "ex_date": "2026-02-02",
+      "payment_date": "2026-02-05",
+      "amount_per_share_usd": "0.273931"
+    },
+    {
+      "event_id": "SSGA-BIL-2026-03-02",
+      "symbol": "BIL",
+      "ex_date": "2026-03-02",
+      "payment_date": "2026-03-05",
+      "amount_per_share_usd": "0.243106"
+    },
+    {
+      "event_id": "SSGA-SPY-2026-03-20",
+      "symbol": "SPY",
+      "ex_date": "2026-03-20",
+      "payment_date": "2026-04-30",
+      "amount_per_share_usd": "1.796999"
+    },
+    {
+      "event_id": "SSGA-BIL-2026-04-01",
+      "symbol": "BIL",
+      "ex_date": "2026-04-01",
+      "payment_date": "2026-04-06",
+      "amount_per_share_usd": "0.263657"
+    },
+    {
+      "event_id": "SSGA-BIL-2026-05-01",
+      "symbol": "BIL",
+      "ex_date": "2026-05-01",
+      "payment_date": "2026-05-06",
+      "amount_per_share_usd": "0.269910"
+    }
+  ],
+  "dtc_no_settlement_dates": [
+    "2025-06-19",
+    "2025-07-04",
+    "2025-09-01",
+    "2025-10-13",
+    "2025-11-11",
+    "2025-11-27",
+    "2025-12-25",
+    "2026-01-01",
+    "2026-01-19",
+    "2026-02-16",
+    "2026-04-03",
+    "2026-05-25"
+  ],
+  "documentary_gate": {
+    "status": "DOCUMENTARY_BLOCK",
+    "blocking_cycle": 47,
+    "blocking_date": "2026-04-20",
+    "affected_scope": "ALL_EIGHT_C2_CELLS",
+    "reason": "SPY Yahoo/Nasdaq OHLC incompatibles et aucun TAQ primaire acquis",
+    "required_resolution": "archive primaire NYSE Daily TAQ ou source équivalente préautorisée"
+  },
+  "sources": {
+    "SPY": {
+      "id": "yahoo_spy_chart_ohlcv_20261019",
+      "sha256": "b77099e8c46a954f045e95432d2b6220a526f15322c87b877aafae628da14f52",
+      "local_file": "data/raw/rl_market/yahoo_spy_2007-05-25_2026-10-16_acquired-2026-10-19_sha256-b77099e8c46a954f045e95432d2b6220a526f15322c87b877aafae628da14f52.json",
+      "acquired_at": "2026-10-19",
+      "coverage": "2007-05-25 à 2026-10-16",
+      "units": "USD par part; volume en parts selon le champ fournisseur",
+      "status": "AUDITED",
+      "verified_bytes": 541190,
+      "additional_files": []
+    },
+    "BIL": {
+      "id": "yahoo_bil_chart_ohlcv_20261019",
+      "sha256": "2eaa0529ae97b0e8e078285e8daa5247176c42b6df114019d6e0e2c4b3f838d2",
+      "local_file": "data/raw/rl_market/yahoo_bil_2007-05-25_2026-10-16_acquired-2026-10-19_sha256-2eaa0529ae97b0e8e078285e8daa5247176c42b6df114019d6e0e2c4b3f838d2.json",
+      "acquired_at": "2026-10-19",
+      "coverage": "2007-05-30 à 2026-10-16",
+      "units": "USD par part; volume en parts selon le champ fournisseur",
+      "status": "AUDITED",
+      "verified_bytes": 522516,
+      "additional_files": []
+    },
+    "market_audit": {
+      "id": "yahoo_spy_bil_market_audit_v1_20261019",
+      "sha256": "e33ba4c2b5b962e6f46b7f37853eb73fc5bdc27269456830dbc77fb72274fe89",
+      "local_file": "data/processed/rl/yahoo_spy_bil_market_audit_v1.json",
+      "acquired_at": "2026-10-19",
+      "coverage": "Yahoo commun 2007-05-30–2026-10-16; fenêtre prioritaire commune 2016-10-17–2026-10-16",
+      "units": "contrôles structurels, calendaires et écarts de prix/volume",
+      "status": "AUDITED",
+      "verified_bytes": 26632,
+      "additional_files": []
+    },
+    "distributions": {
+      "id": "ssga_spdr_distributions_20261019",
+      "sha256": "6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320",
+      "local_file": "data/raw/rl_research/state_street/spdr-etf-historical-distributions_2026-10-19_sha256-6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320.xlsx",
+      "acquired_at": "2026-10-19",
+      "coverage": "SPY: 1993-03-19–2026-09-18; BIL: 2007-07-02–2026-10-01",
+      "units": "USD par part",
+      "status": "VALIDATED_FOR_USE",
+      "verified_bytes": 581216,
+      "additional_files": []
+    },
+    "trading_calendar_2025": {
+      "id": "nyse_trading_calendars_2022_2025_20261019",
+      "sha256": "2c2e63b780c4a373d8d546904ae46c8ba7e8070ad9357d23d2c92749985bb6c9",
+      "local_file": "data/raw/rl_calendars/nyse_trading_calendar_2022.pdf",
+      "acquired_at": "2026-10-19",
+      "coverage": "années civiles 2022, 2023, 2024 et 2025",
+      "units": "dates de fermeture, jours bancaires signalés et séances écourtées",
+      "status": "AUDITED",
+      "verified_bytes": 111260,
+      "additional_files": [
+        {
+          "local_file": "data/raw/rl_calendars/nyse_trading_calendar_2023.pdf",
+          "bytes": 112881,
+          "sha256": "3d28b46a7197424c822087fb7117cdf3f303bd9a73f29660525b605f542bcfe2"
+        },
+        {
+          "local_file": "data/raw/rl_calendars/nyse_trading_calendar_2024.pdf",
+          "bytes": 115340,
+          "sha256": "02282e733512d1f112230372efccfd18f81599c682af94bb6f21fd9bccbfd145"
+        },
+        {
+          "local_file": "data/raw/rl_calendars/nyse_trading_calendar_2025.pdf",
+          "bytes": 115262,
+          "sha256": "3e8b540ad74474bc12a0aba473dbca28f37e0a5c1795cf66701b9a506a34226e"
+        }
+      ]
+    },
+    "trading_calendar_2026": {
+      "id": "nyse_trading_calendar_2026_20261021",
+      "sha256": "70f5577eb43e60a9dbbecaae3cec23d0f02028c05c7f175013bb3e97816d394f",
+      "local_file": "data/raw/rl_calendars/nyse_trading_calendar_2026.pdf",
+      "acquired_at": "2026-10-21",
+      "coverage": "année civile 2026",
+      "units": "dates de fermeture, jours bancaires signalés et séances écourtées",
+      "status": "VALIDATED_FOR_USE",
+      "verified_bytes": 232670,
+      "additional_files": []
+    },
+    "settlement_rule": {
+      "id": "sec_settlement_cycle_t1_2023_20261019",
+      "sha256": "e214bf80244fe9107c867d7abeb6a6b969029c519566036e42b081977a9b575a",
+      "local_file": "data/raw/rl_calendars/sec_t1_final_rule_2023.pdf",
+      "acquired_at": "2026-10-19",
+      "coverage": "règle T+1 et date d'application du 2024-05-28; rappel du régime T+2 antérieur",
+      "units": "jours ouvrables après trade date",
+      "status": "VALIDATED_FOR_USE",
+      "verified_bytes": 2301204,
+      "additional_files": []
+    },
+    "settlement_calendar": {
+      "id": "dtcc_settlement_documentary_bundle_20261020",
+      "sha256": "129d15810713a064d4de9aaf0bdd60319ae9065260268caa4f66976f84a1bf6e",
+      "local_file": "data/raw/rl_calendars/dtc_rules_acquired-2026-10-20.pdf",
+      "acquired_at": "2026-10-20",
+      "coverage": "règles institutionnelles courantes en 2026; catégories de jours fériés et traitement opérationnel 2025-2026; fermetures imprévues",
+      "units": "règles d'ouverture, catégories de jours non admissibles au règlement et procédures de continuité",
+      "status": "AUDITED",
+      "verified_bytes": 863045,
+      "additional_files": [
+        {
+          "local_file": "data/raw/rl_calendars/nscc_rules_acquired-2026-10-20.pdf",
+          "bytes": 1489193,
+          "sha256": "8db8b5201cc665e7b74054058e9fb20cc2a36f49b33ad84a936e33f0cd57da06"
+        },
+        {
+          "local_file": "data/raw/rl_calendars/tradesuite_holiday_processing_2025.pdf",
+          "bytes": 2097729,
+          "sha256": "6537ce7359f1c272c54eede62cd763567de82d906d694d0eaf8db47547684918"
+        },
+        {
+          "local_file": "data/raw/rl_calendars/dtcc_unscheduled_close_guide_2026.pdf",
+          "bytes": 318283,
+          "sha256": "1a96121ca81972eff558204a5b5c0469401c618cb96698e6310ef1f6d7161459"
+        }
+      ]
+    }
+  },
+  "source_fingerprint": "72e7efc950c8f79beef9bd539f1f9786b1f556c628386f722ea8cdeb59e0bc25",
+  "config_sha256": "39c05d75a8ef83eef4601cdd9343e0c0fc0ac93c84009c389da90a250795e1b9"
+}

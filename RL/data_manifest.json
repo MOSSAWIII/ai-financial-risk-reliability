@@ -1027,6 +1027,28 @@
       "prohibited_or_unvalidated_uses": ["Calendrier de règlement exhaustif", "Preuve des règles 2018-2021 ou 2026", "Reconstruction intrajournalière"]
     },
     {
+      "id": "nyse_trading_calendar_2026_20261021",
+      "source": "NYSE / ICE — calendrier annuel de négociation 2026",
+      "organization_or_author": "New York Stock Exchange / Intercontinental Exchange",
+      "url": "https://www.nyse.com/publicdocs/nyse/ICE_NYSE_2026_Yearly_Trading_Calendar.pdf",
+      "academic_reference": null,
+      "publication_date": "Dates indiquées correctes au 2025-12-10, sous réserve de modification",
+      "acquired_at": "2026-10-21",
+      "original_filename": "ICE_NYSE_2026_Yearly_Trading_Calendar.pdf",
+      "local_file": "data/raw/rl_calendars/nyse_trading_calendar_2026.pdf",
+      "format": "PDF",
+      "bytes": 232670,
+      "sha256": "70f5577eb43e60a9dbbecaae3cec23d0f02028c05c7f175013bb3e97816d394f",
+      "access_and_redistribution": "Accès public; contenu NYSE/ICE soumis aux conditions de réutilisation du site. Copie brute exclue de GitHub.",
+      "coverage": "année civile 2026",
+      "frequency": "calendrier annuel",
+      "units": "dates de fermeture, jours bancaires signalés et séances écourtées",
+      "economic_meaning": "Preuve primaire annuelle du calendrier de négociation NYSE 2026; les jours bancaires où NYSE reste ouvert sont distingués des fermetures de marché.",
+      "status": "VALIDATED_FOR_USE",
+      "allowed_uses": ["Validation documentaire des séances et fermetures 2026", "Reconstruction du calendrier de décision de l'épisode C1-C2 2025-2026"],
+      "prohibited_or_unvalidated_uses": ["Calendrier de règlement DTC exhaustif à lui seul", "Prix ou horaires d'exécution intrajournaliers", "Preuve d'absence d'interruption propre à un titre"]
+    },
+    {
       "id": "nyse_exceptional_closures_2018_2025_20261019",
       "source": "NYSE Arca — mémos des journées nationales de deuil",
       "organization_or_author": "NYSE Regulation",
