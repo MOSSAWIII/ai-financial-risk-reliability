@@ -40,6 +40,8 @@ La [validation intégrée C2 conditionnelle synthétique](docs/VALIDATION_INTEGR
 
 Le [verrouillage informationnel et contrat historique C2](docs/VERROUILLAGE_INFORMATIONNEL_ET_CONTRAT_HISTORIQUE_C2.md) sépare désormais physiquement la vue remise à la politique de l'état économique d'audit. Deux mondes ne différant que par un montant de créance inconnu produisent le même snapshot décisionnel, le même JSON, les mêmes empreintes, cibles, ordres et intention, tandis que leurs audits économiques restent distincts. Le document fige avant tout calcul l'épisode, les huit paires coûts/cash, les sorties, formules et règles d'arrêt ; l'audit ciblé retrouve les 52 décisions, 16 distributions et 52 règlements documentés. Les **170 tests** passent et le verdict est **`HISTORICAL_C2_TECHNICALLY_READY`**. Aucune richesse, performance ou comparaison historique C2 n'a été calculée ; son lancement exige encore une autorisation explicite.
 
+La [première comparaison historique C1–C2](docs/PREMIERE_COMPARAISON_HISTORIQUE_C1_C2_2024_2025.md) exécute désormais les huit cellules E-B autorisées sur l'épisode unique du 29 mai 2024 au 29 mai 2025. C1 retrouve exactement ses richesses publiées ; C2 termine devant C1 de 519,07 à 590,12 USD, avec un drawdown légèrement moins profond mais une volatilité légèrement supérieure. Les 416 décisions sont évaluables, 47 à 51 rééquilibrages sont exécutés par cellule, aucun lot n'est rejeté et D+2 réduit la richesse C2 de 8,95 à 20,60 USD par rapport à D+1. Les trajectoires, décisions, synthèses et comparaisons sont publiées sous [results/historical_c1_c2_2024_2025](results/historical_c1_c2_2024_2025/), les **179 tests** passent et le verdict est **`HISTORICAL_C1_C2_COMPARISON_VALIDATED`**. Ces résultats restent exploratoires conditionnels et ne justifient aucune optimisation ou extension automatique.
+
 La question de départ est provisoire :
 
 > Dans quelle mesure des politiques de décision financière apprises séquentiellement peuvent-elles améliorer la gestion du risque lorsque les prévisions sont imparfaites et que les conditions économiques et financières évoluent ?
@@ -112,10 +114,11 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 - [x] Arbitrage entre protocole strict et protocole exploratoire conditionnel, avec identité artificielle à l'ex-date et couverture dérivée des 52 décisions.
 - [x] Validation synthétique intégrée de C2 sous E-B, avec ex-date, cash D+1/D+2, règlements, coûts, rejets et contrôle C1–C2 artificiel.
 - [x] Verrouillage de la frontière informationnelle E-B et du contrat de sortie historique C1–C2, sans exécution empirique.
-- [ ] Approbation de Yahoo `Open` comme référence conventionnelle, sans le confondre avec une exécution garantie.
+- [x] Première comparaison historique exploratoire C1–C2 sur les huit cellules verrouillées, avec sorties reproductibles et réconciliation complète.
+- [x] Approbation de Yahoo `Open` comme référence conventionnelle exploratoire, sans le confondre avec une exécution garantie.
 - [ ] Complétion d'un calendrier officiel de règlement DTC/NSCC versionné 2018–2026 et résolution du cas SPY du 20 avril 2026.
-- [ ] Validation des références classiques avant toute méthode RL.
-- [ ] Autorisation explicite d'une première expérience.
+- [x] Validation des références classiques C1–C2 avant toute méthode RL.
+- [x] Autorisation explicite et exécution de la première expérience historique conditionnelle.
 
 ## Questions prioritaires à discuter
 
