@@ -1,0 +1,16 @@
+# Core scientific stack required for the Axis A notebooks (notebooks/00_*.ipynb to 07_*.ipynb)
+# Note: The Axis B sequential decision scripts (experiments/sequential-financial-decisions/scripts/)
+# rely purely on the Python >= 3.11 standard library.
+numpy>=2.0,<3.0
+pandas>=2.2,<3.0
+matplotlib>=3.9,<4.0
+scikit-learn>=1.5,<2.0
+
+# Notebook inspection and execution
+jupyterlab>=4.0,<5.0
+ipykernel>=6.29,<7.0
+
+# Automated verification and static analysis
+pytest>=8.0,<10.0
+ruff>=0.6,<1.0
+

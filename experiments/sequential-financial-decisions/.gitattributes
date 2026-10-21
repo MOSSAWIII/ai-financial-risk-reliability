@@ -1,0 +1,6 @@
+results/** text eol=lf
+docs/grille_documentaire_c2_2025_2026.csv text eol=lf
+docs/grille_documentaire_c2_2024_2025.csv text eol=crlf
+docs/grille_conditionnelle_c2_2024_2025.csv text eol=crlf
+data_manifest.json text eol=crlf
+
