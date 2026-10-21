@@ -44,6 +44,8 @@ La [première comparaison historique C1–C2](docs/PREMIERE_COMPARAISON_HISTORIQ
 
 Le [diagnostic économique du réinvestissement C1–C2–C3](docs/DIAGNOSTIC_ECONOMIQUE_REINVESTISSEMENT_C1_C2_C3.md) ajoute un unique contrôle post hoc : C3 conserve le portefeuille initial et réinvestit chaque distribution uniquement dans l'ETF payeur au moyen de deux réserves étanches. C3 acquiert 1 SPY et 26 BIL, améliore C1 de 76,30 à 84,01 USD et couvre arithmétiquement 13,67 % à 15,02 % de l'écart C2−C1; C2 conserve 442,77 à 506,11 USD d'avance. Les sorties reproductibles se trouvent sous [results/diagnostic_reinvestissement_c1_c2_c3_2024_2025](results/diagnostic_reinvestissement_c1_c2_c3_2024_2025/), les **189 tests** passent et le verdict est **`REINVESTMENT_DIAGNOSTIC_VALIDATED`**. Cette identité entre politiques n'est pas une attribution causale de la prime de rééquilibrage.
 
+La [réplication historique C1–C2 2025–2026](docs/REPLICATION_HISTORIQUE_C1_C2_2025_2026.md) a été verrouillée avant performance dans un commit séparé. Elle couvre 252 séances, 52 décisions candidates et 16 distributions, mais le cycle du 20 avril 2026 rencontre l'open SPY déjà classé `PRICE_MISSING_OR_DISPUTED` : Yahoo et Nasdaq fournissent des OHLC incompatibles et la source primaire NYSE Daily TAQ n'est pas acquise. Les huit cellules C2 sont donc arrêtées conformément au contrat; aucune performance partielle n'est publiée. Les **197 tests** passent et le verdict est **`DOCUMENTARY_BLOCK`**.
+
 La question de départ est provisoire :
 
 > Dans quelle mesure des politiques de décision financière apprises séquentiellement peuvent-elles améliorer la gestion du risque lorsque les prévisions sont imparfaites et que les conditions économiques et financières évoluent ?
@@ -118,6 +120,7 @@ Aucun de ces candidats n'est encore adopté comme objet empirique.
 - [x] Verrouillage de la frontière informationnelle E-B et du contrat de sortie historique C1–C2, sans exécution empirique.
 - [x] Première comparaison historique exploratoire C1–C2 sur les huit cellules verrouillées, avec sorties reproductibles et réconciliation complète.
 - [x] Diagnostic post hoc C3 du réinvestissement passif des distributions, sans modification de C1 ou C2.
+- [x] Verrouillage de la réplication C1–C2 2025–2026 et constat reproductible du blocage documentaire du 20 avril 2026.
 - [x] Approbation de Yahoo `Open` comme référence conventionnelle exploratoire, sans le confondre avec une exécution garantie.
 - [ ] Complétion d'un calendrier officiel de règlement DTC/NSCC versionné 2018–2026 et résolution du cas SPY du 20 avril 2026.
 - [x] Validation des références classiques C1–C2 avant toute méthode RL.

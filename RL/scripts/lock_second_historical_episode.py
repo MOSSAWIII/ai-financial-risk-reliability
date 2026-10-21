@@ -28,7 +28,11 @@ CONFIG_PATH = (
     ROOT / "RL" / "tests" / "fixtures" / "historical_c1_c2_2025_2026_lock_v1.json"
 )
 GRID_PATH = ROOT / "RL" / "docs" / "grille_documentaire_c2_2025_2026.csv"
+RESULTS_DIR = ROOT / "RL" / "results" / "historical_c1_c2_2025_2026"
+BLOCK_STATUS_PATH = RESULTS_DIR / "statut_validation_documentaire.json"
+SOURCES_PATH = RESULTS_DIR / "sources_configuration.csv"
 REFERENCE_COMMIT = "893afda71ed930b5eec8a95058ebcfca962f49b1"
+CONFIG_COMMIT = "7372cf3db90dfcd7d8eafb06cfe9151c98bf3490"
 START = date(2025, 5, 29)
 TERMINAL = date(2026, 5, 29)
 DECISION_PRICE_DATE = date(2025, 5, 28)
@@ -59,6 +63,20 @@ DTC_NO_SETTLEMENT = {
     date(2026, 4, 3),
     date(2026, 5, 25),
 }
+LOCKED_ARTIFACT_HASHES = {
+    "RL/results/historical_c1_c2_2024_2025/comparaison_appariee.csv": "e0b86234c6f5eb435c1dd6d426d22b3f0af265d2f8a231e3facecc45775ac311",
+    "RL/results/historical_c1_c2_2024_2025/journal_decisions_c2.csv": "41fa6239c2a67ed7725f411d50830a42c785d5543aed395350208668980fcd3f",
+    "RL/results/historical_c1_c2_2024_2025/synthese_financiere.csv": "aa3b6b992a6b29f21fc4a3eef47127fb21f82ed47dc1412b29efb103fd8d53bf",
+    "RL/results/historical_c1_c2_2024_2025/trajectoire_et_drawdown_s0_d1.svg": "7f3b936ae3f0ee23a97ac9cee4a1fa87963b04bb8927e66aa164dd4d540f4b10",
+    "RL/results/historical_c1_c2_2024_2025/trajectoires_quotidiennes.csv": "6407a80efc20ea2a5defb73a95bcffc45d697ae7b8f8b762daceddd382085849",
+    "RL/results/diagnostic_reinvestissement_c1_c2_c3_2024_2025/chronologie_ecarts_richesse_c1_c2_c3.csv": "e3f41f3047f7d28db3c16ef7c8a1e3206f49de085ca6fcb532d851846fe0486b",
+    "RL/results/diagnostic_reinvestissement_c1_c2_c3_2024_2025/differences_richesse_c3_c1_c2_c3.csv": "1a4c7fa0135df328d4d9d51bee7ca6d23330fdbc5e1dad2b068bddcaa5d7bb4c",
+    "RL/results/diagnostic_reinvestissement_c1_c2_c3_2024_2025/journal_reinvestissements_c3.csv": "8db63c790c85e8f745aaba4156384984e49718fc9ef661c2e60502c9998aae01",
+    "RL/results/diagnostic_reinvestissement_c1_c2_c3_2024_2025/reserves_distributions_c3.csv": "b166a0a285771691b490386a80b9ff62e4855a916c4a067c7228272391fbc18d",
+    "RL/results/diagnostic_reinvestissement_c1_c2_c3_2024_2025/synthese_comparative_c1_c2_c3.csv": "c73e582dd2aaa8e8f24bfb3fa65285747ecc0f2a7868edaa8bb592e8c441ce29",
+    "RL/results/diagnostic_reinvestissement_c1_c2_c3_2024_2025/trajectoires_c1_c2_c3_s0_d1.svg": "31fc530f3b17cb93cd5fc80e93fb0a86c184e6b0de89c8189a9f149eb04df596",
+    "RL/results/diagnostic_reinvestissement_c1_c2_c3_2024_2025/trajectoires_economiques_c3.csv": "e38e9cf21d8e3dcc301e2648e57085d34602c8dadf612c353cd1a881b1d3dff0",
+}
 
 
 class LockError(RuntimeError):
@@ -75,6 +93,13 @@ def sha256_file(path: Path) -> str:
 
 def canonical_json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def verify_locked_artifacts(root: Path = ROOT) -> None:
+    for relative, expected in LOCKED_ARTIFACT_HASHES.items():
+        path = root / relative
+        if not path.is_file() or sha256_file(path) != expected:
+            raise LockError(f"livrable historique antérieur modifié: {relative}")
 
 
 def next_settlement_day(trade_date: date) -> date:
@@ -139,6 +164,7 @@ def _source_record(
 
 
 def build_lock(root: Path = ROOT) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    verify_locked_artifacts(root)
     records = manifest_index(root)
     source_records = {
         label: _source_record(records, source_id, root)
@@ -316,16 +342,83 @@ def check_lock(config: Mapping[str, Any], rows: Sequence[Mapping[str, Any]]) -> 
         raise LockError("grille verrouillée non reproductible")
 
 
+def _block_status(config: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "episode_id": config["episode_id"],
+        "validation_status": "DOCUMENTARY_BLOCK",
+        "performance_computed": False,
+        "complete_cells": 0,
+        "affected_cells": [
+            f"S{scenario}-{cash}"
+            for cash in ("D1", "D2")
+            for scenario in range(4)
+        ],
+        "blocking_cycle": config["documentary_gate"]["blocking_cycle"],
+        "blocking_date": config["documentary_gate"]["blocking_date"],
+        "reason": config["documentary_gate"]["reason"],
+        "required_resolution": config["documentary_gate"]["required_resolution"],
+        "configuration_commit": CONFIG_COMMIT,
+        "configuration_path": str(CONFIG_PATH.relative_to(ROOT)).replace("\\", "/"),
+        "configuration_sha256": config["config_sha256"],
+        "configuration_file_sha256": sha256_file(CONFIG_PATH),
+        "documentary_grid_path": str(GRID_PATH.relative_to(ROOT)).replace("\\", "/"),
+        "documentary_grid_sha256": sha256_file(GRID_PATH),
+        "locked_artifacts_verified": LOCKED_ARTIFACT_HASHES,
+    }
+
+
+def _render_sources(config: Mapping[str, Any]) -> str:
+    rows = [
+        {
+            "usage": usage,
+            "source_id": source["id"],
+            "sha256": source["sha256"],
+            "acquired_at": source["acquired_at"],
+            "coverage": source["coverage"],
+            "units": source["units"],
+            "status": source["status"],
+        }
+        for usage, source in config["sources"].items()
+    ]
+    return _render_grid(rows)
+
+
+def write_block_artifacts(config: Mapping[str, Any]) -> None:
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    BLOCK_STATUS_PATH.write_text(
+        json.dumps(_block_status(config), ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    SOURCES_PATH.write_text(_render_sources(config), encoding="utf-8", newline="\n")
+
+
+def check_block_artifacts(config: Mapping[str, Any]) -> None:
+    expected_status = json.dumps(_block_status(config), ensure_ascii=False, indent=2) + "\n"
+    if BLOCK_STATUS_PATH.read_text(encoding="utf-8") != expected_status:
+        raise LockError("statut documentaire publié non reproductible")
+    if SOURCES_PATH.read_text(encoding="utf-8") != _render_sources(config):
+        raise LockError("inventaire des sources publié non reproductible")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--publish-block", action="store_true")
+    parser.add_argument("--check-block", action="store_true")
     args = parser.parse_args()
     try:
         config, rows = build_lock(ROOT)
         if args.check:
             check_lock(config, rows)
-        else:
+        elif not args.publish_block and not args.check_block:
             write_lock(config, rows)
+        if args.publish_block:
+            check_lock(config, rows)
+            write_block_artifacts(config)
+        if args.check_block:
+            check_lock(config, rows)
+            check_block_artifacts(config)
     except (LockError, KeyError, ValueError) as exc:
         print(f"LOCK_FAILED: {exc}", file=sys.stderr)
         return 1

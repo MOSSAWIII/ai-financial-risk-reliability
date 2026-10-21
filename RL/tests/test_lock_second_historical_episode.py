@@ -15,8 +15,10 @@ from lock_second_historical_episode import (  # noqa: E402
     GRID_PATH,
     PRICE_BLOCK_DATE,
     build_lock,
+    check_block_artifacts,
     check_lock,
     sha256_file,
+    verify_locked_artifacts,
 )
 
 
@@ -83,3 +85,9 @@ def test_config_hash_is_self_consistent() -> None:
 
     assert hashlib.sha256(canonical_json(config).encode("utf-8")).hexdigest() == expected
     assert GRID_PATH.is_file()
+
+
+def test_prior_results_and_block_artifacts_are_reproducible() -> None:
+    config, _ = build_lock(ROOT)
+    verify_locked_artifacts(ROOT)
+    check_block_artifacts(config)
