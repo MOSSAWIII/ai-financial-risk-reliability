@@ -33,7 +33,11 @@ absentes : le verdict reproductible est `DOCUMENTARY_BLOCK`. Le script
 tests et le
 [`readiness_report.json`](results/g2_empirical_sequentiality/readiness_report.json)
 garantissent qu'aucune performance G2 n'est calculée ou publiée avant
-restauration conforme. PPO reste hors périmètre.
+restauration conforme. Le restaurateur
+[`scripts/g2_restore_sources.py`](scripts/g2_restore_sources.py) vérifie les six
+empreintes avant toute copie, refuse les destinations conflictuelles et reste
+inactif tant que le disque de sauvegarde n'est pas monté. PPO reste hors
+périmètre.
 
 Ce dossier ouvre un axe de recherche autonome au sein de `ai-financial-risk-reliability`. Il contient un cadrage scientifique, une étude fondamentale sur la nature séquentielle d'une décision, une formalisation financière, un audit de faisabilité d'un mandat SPY–BIL et un patrimoine local de données documentées. BIL-A reste validée sous la convention à l'ex-date. SPY-B et BIL-B suivent les parts, les créances et leur réinvestissement à la date de paiement. BIL-B est validée pour l'analyse NAV du 4 mars 2008 au 15 octobre 2026 ; sa frontière exclut explicitement la distribution du 3 mars 2008 dont les dates historiques restent incohérentes. Aucun algorithme de Reinforcement Learning (RL), modèle prédictif, environnement de simulation, stratégie ou backtest n'a été créé.
 

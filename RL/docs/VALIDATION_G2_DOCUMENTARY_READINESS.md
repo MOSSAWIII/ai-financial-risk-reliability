@@ -60,6 +60,23 @@ téléchargement dont l'empreinte diffère restera `HASH_MISMATCH`. À ce moment
 prochaine étape sera l'exécution appariée `M_G2`–`D_G2` définie par le protocole,
 pas une modification de celui-ci et pas PPO.
 
+Le restaurateur [`g2_restore_sources.py`](../scripts/g2_restore_sources.py)
+accepte plusieurs racines datées. Il effectue d'abord un précontrôle global et
+ne copie aucun fichier si l'un des six originaux manque ou diffère. Il refuse
+également d'écraser une destination existante non conforme. Exemple sur la
+machine qui porte le disque de sauvegarde :
+
+```powershell
+python RL/scripts/g2_restore_sources.py `
+  --backup-root 'D:\ai-financial-risk-reliability-data-backup\2026-10-19' `
+  --backup-root 'D:\ai-financial-risk-reliability-data-backup\2026-10-20' `
+  --apply
+```
+
+L'espace d'exécution distant utilisé pour cette validation ne monte pas le
+disque Windows `D:`. Le script est donc validé mais la copie réelle demeure
+conditionnée à la mise à disposition de ces dossiers dans l'espace de travail.
+
 ## Portée scientifique
 
 Ce blocage est un résultat de reproductibilité, non un échec de la méthode. Il
