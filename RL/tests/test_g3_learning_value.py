@@ -43,6 +43,8 @@ class G3Tests(unittest.TestCase):
         expected = solve_dynamic_program(default_model(horizon=12), COST)
         reproduced = solve_dynamic_program(default_model(horizon=12), COST)
         self.assertEqual(expected.actions, reproduced.actions)
+        self.assertEqual(1.0, reproduced.actions[(0, "RISK_ON", 0.5)])
+        self.assertEqual(0.0, reproduced.actions[(0, "RISK_OFF", 0.5)])
 
     def test_future_terminal_shock_does_not_change_any_past_action(self):
         first = simulate(fixture())
@@ -54,6 +56,22 @@ class G3Tests(unittest.TestCase):
                         second["policy_decisions.csv"]):
             self.assertEqual((a["date"], a["policy"], a["target_weight"]),
                              (b["date"], b["policy"], b["target_weight"]))
+
+    def test_interior_future_shock_cannot_rewrite_past_decisions(self):
+        before = simulate(fixture())
+        altered = fixture()
+        affected = date(2025, 9, 1)
+        self.assertIn(affected, {r[0] for r in altered})
+        altered = [(day, spy*1.25 if day == affected else spy, bil)
+                   for day, spy, bil in altered]
+        after = simulate(altered)
+        left = [(r["date"], r["policy"], r["target_weight"])
+                for r in before["policy_decisions.csv"]
+                if date.fromisoformat(r["date"]) < affected]
+        right = [(r["date"], r["policy"], r["target_weight"])
+                 for r in after["policy_decisions.csv"]
+                 if date.fromisoformat(r["date"]) < affected]
+        self.assertEqual(left, right)
 
     def test_warmup_and_matched_policy_calendars(self):
         rows = simulate(fixture())["policy_decisions.csv"]
