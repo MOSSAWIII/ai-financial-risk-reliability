@@ -1,0 +1,115 @@
+{
+  "blockers": [
+    {
+      "id": "yahoo_spy_chart_ohlcv_20261019",
+      "status": "FILE_MISSING"
+    },
+    {
+      "id": "yahoo_bil_chart_ohlcv_20261019",
+      "status": "FILE_MISSING"
+    },
+    {
+      "id": "ssga_spdr_distributions_20261019",
+      "status": "FILE_MISSING"
+    },
+    {
+      "id": "nyse_trading_calendars_2022_2025_20261019",
+      "status": "FILE_MISSING"
+    },
+    {
+      "id": "sec_settlement_cycle_t1_2023_20261019",
+      "status": "FILE_MISSING"
+    },
+    {
+      "id": "dtcc_t1_conversion_guide_may2024_20261020",
+      "status": "FILE_MISSING"
+    }
+  ],
+  "documentary_verdict": "DOCUMENTARY_BLOCK",
+  "performance_computed": false,
+  "performance_outputs_authorized": false,
+  "protocol": {
+    "path": "RL/docs/PROTOCOLE_G2_MATERIALITE_EMPIRIQUE.md",
+    "sha256": "6d931da043cd88ca5f195bd9b75e87e7b251aa8005653e10a387ee6fa58edee6"
+  },
+  "protocol_status": "FROZEN_RETROSPECTIVE_DIAGNOSTIC",
+  "published_controls": [
+    {
+      "bytes": 455437,
+      "path": "RL/results/historical_c1_c2_2024_2025/journal_decisions_c2.csv",
+      "present": true,
+      "sha256": "41fa6239c2a67ed7725f411d50830a42c785d5543aed395350208668980fcd3f"
+    },
+    {
+      "bytes": 2052598,
+      "path": "RL/results/historical_c1_c2_2024_2025/trajectoires_quotidiennes.csv",
+      "present": true,
+      "sha256": "6407a80efc20ea2a5defb73a95bcffc45d697ae7b8f8b762daceddd382085849"
+    },
+    {
+      "bytes": 35722,
+      "path": "RL/results/historical_c1_c2_2024_2025/synthese_financiere.csv",
+      "present": true,
+      "sha256": "aa3b6b992a6b29f21fc4a3eef47127fb21f82ed47dc1412b29efb103fd8d53bf"
+    },
+    {
+      "bytes": 14536,
+      "path": "RL/results/historical_c1_c2_2024_2025/comparaison_appariee.csv",
+      "present": true,
+      "sha256": "e0b86234c6f5eb435c1dd6d426d22b3f0af265d2f8a231e3facecc45775ac311"
+    }
+  ],
+  "published_controls_can_replace_raw_sources": false,
+  "schema_version": "1.0",
+  "source_checks": [
+    {
+      "expected_bytes": 541190,
+      "expected_sha256": "b77099e8c46a954f045e95432d2b6220a526f15322c87b877aafae628da14f52",
+      "id": "yahoo_spy_chart_ohlcv_20261019",
+      "local_file": "data/raw/rl_market/yahoo_spy_2007-05-25_2026-10-16_acquired-2026-10-19_sha256-b77099e8c46a954f045e95432d2b6220a526f15322c87b877aafae628da14f52.json",
+      "ready": false,
+      "status": "FILE_MISSING"
+    },
+    {
+      "expected_bytes": 522516,
+      "expected_sha256": "2eaa0529ae97b0e8e078285e8daa5247176c42b6df114019d6e0e2c4b3f838d2",
+      "id": "yahoo_bil_chart_ohlcv_20261019",
+      "local_file": "data/raw/rl_market/yahoo_bil_2007-05-25_2026-10-16_acquired-2026-10-19_sha256-2eaa0529ae97b0e8e078285e8daa5247176c42b6df114019d6e0e2c4b3f838d2.json",
+      "ready": false,
+      "status": "FILE_MISSING"
+    },
+    {
+      "expected_bytes": 581216,
+      "expected_sha256": "6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320",
+      "id": "ssga_spdr_distributions_20261019",
+      "local_file": "data/raw/rl_research/state_street/spdr-etf-historical-distributions_2026-10-19_sha256-6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320.xlsx",
+      "ready": false,
+      "status": "FILE_MISSING"
+    },
+    {
+      "expected_bytes": 111260,
+      "expected_sha256": "2c2e63b780c4a373d8d546904ae46c8ba7e8070ad9357d23d2c92749985bb6c9",
+      "id": "nyse_trading_calendars_2022_2025_20261019",
+      "local_file": "data/raw/rl_calendars/nyse_trading_calendar_2022.pdf",
+      "ready": false,
+      "status": "FILE_MISSING"
+    },
+    {
+      "expected_bytes": 2301204,
+      "expected_sha256": "e214bf80244fe9107c867d7abeb6a6b969029c519566036e42b081977a9b575a",
+      "id": "sec_settlement_cycle_t1_2023_20261019",
+      "local_file": "data/raw/rl_calendars/sec_t1_final_rule_2023.pdf",
+      "ready": false,
+      "status": "FILE_MISSING"
+    },
+    {
+      "expected_bytes": 627847,
+      "expected_sha256": "1655962c57e5a1459cf0d29c853b0bf924c3255aba5be0e0d04c4a7d2536b7f2",
+      "id": "dtcc_t1_conversion_guide_may2024_20261020",
+      "local_file": "data/raw/rl_calendars/dtcc_t1_conversion_guide_may2024_acquired-2026-10-20.pdf",
+      "ready": false,
+      "status": "FILE_MISSING"
+    }
+  ],
+  "study": "G2_EMPIRICAL_SEQUENTIALITY"
+}

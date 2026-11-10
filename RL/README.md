@@ -20,6 +20,21 @@ tests V2 passent indépendamment et les sorties sont reproductibles sous
 [`results/sequentiality_v2`](results/sequentiality_v2/). Ce jalon ne crée aucun
 agent RL et n'autorise aucune conclusion historique.
 
+### Jalon G2 — matérialité empirique
+
+Le [protocole G2](docs/PROTOCOLE_G2_MATERIALITE_EMPIRIQUE.md) fige désormais une
+comparaison rétrospective appariée entre une décision myope et le contrôleur
+dynamique G1 dans le moteur SPY–BIL. Avant toute richesse, le
+[contrôle documentaire](docs/VALIDATION_G2_DOCUMENTARY_READINESS.md) exige les
+six sources originales et leurs empreintes exactes. Dans le clone courant, les
+quatre résultats C1–C2 publiés sont présents, mais les six sources brutes sont
+absentes : le verdict reproductible est `DOCUMENTARY_BLOCK`. Le script
+[`scripts/g2_empirical_readiness.py`](scripts/g2_empirical_readiness.py), ses six
+tests et le
+[`readiness_report.json`](results/g2_empirical_sequentiality/readiness_report.json)
+garantissent qu'aucune performance G2 n'est calculée ou publiée avant
+restauration conforme. PPO reste hors périmètre.
+
 Ce dossier ouvre un axe de recherche autonome au sein de `ai-financial-risk-reliability`. Il contient un cadrage scientifique, une étude fondamentale sur la nature séquentielle d'une décision, une formalisation financière, un audit de faisabilité d'un mandat SPY–BIL et un patrimoine local de données documentées. BIL-A reste validée sous la convention à l'ex-date. SPY-B et BIL-B suivent les parts, les créances et leur réinvestissement à la date de paiement. BIL-B est validée pour l'analyse NAV du 4 mars 2008 au 15 octobre 2026 ; sa frontière exclut explicitement la distribution du 3 mars 2008 dont les dates historiques restent incohérentes. Aucun algorithme de Reinforcement Learning (RL), modèle prédictif, environnement de simulation, stratégie ou backtest n'a été créé.
 
 La priorité active est désormais : **qualifier la grille documentaire ciblée des décisions hebdomadaires candidates avant toute exécution historique C2.** Les données brutes sont conservées localement sous `data/raw/`, exclues de GitHub et sauvegardées sur un disque physique distinct. Leur inventaire publiable se trouve dans [`data_manifest.json`](data_manifest.json), les contrôles reproductibles dans [`scripts/verify_local_data.py`](scripts/verify_local_data.py), et les résultats détaillés dans [`docs/AUDIT_DONNEES_ACADEMIQUES_LOCALES.md`](docs/AUDIT_DONNEES_ACADEMIQUES_LOCALES.md).
