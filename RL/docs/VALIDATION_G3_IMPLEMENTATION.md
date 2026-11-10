@@ -29,7 +29,7 @@ Les quatre CSV et le JSON définis par le protocole sont écrits **uniquement ap
 
 ## Contrôles automatisés
 
-La suite [test_g3_learning_value.py](../tests/test_g3_learning_value.py) comprend six contrôles sans données de marché : séparation temporelle, identité du contrôleur G2, résistance à la modification d'un prix terminal futur, warm-up/calendriers communs, CSV identiques octet pour octet, refus d'exécution sans originaux. Ces contrôles ne remplacent **pas** l'exécution avec sources originales ni l'audit du rapport G3A.
+La suite [test_g3_learning_value.py](../tests/test_g3_learning_value.py) comprend sept contrôles sans données de marché : séparation temporelle, identité du contrôleur G2, résistance à la modification d'un prix futur intérieur ou terminal, warm-up/calendriers communs, CSV identiques octet pour octet, refus d'exécution sans originaux. Ces contrôles ne remplacent **pas** l'exécution avec sources originales ni l'audit du rapport G3A.
 
 Depuis la racine du dépôt :
 
