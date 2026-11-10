@@ -2,6 +2,24 @@
 
 ## Statut
 
+### Jalon scientifique V2 — valeur de la séquentialité
+
+Le [protocole scientifique V2](docs/PROTOCOLE_SCIENTIFIQUE_V2.md) fige désormais
+un test structurel antérieur à tout algorithme RL. Il compare, dans un
+laboratoire de Markov synthétique et entièrement contrôlé, une optimisation
+myope à une programmation dynamique exacte. La position cible devient la
+position héritée suivante ; les coûts de rotation constituent l'unique mécanisme
+intertemporel étudié. Le script
+[`scripts/sequentiality_test.py`](scripts/sequentiality_test.py) et ses tests
+vérifient notamment l'équivalence à coût nul et à horizon unitaire, puis mesurent
+la valeur dynamique pour six niveaux de coûts gelés. La
+[validation V2](docs/VALIDATION_SEQUENTIALITE_V2.md) obtient `G1_PASS` : la
+valeur séquentielle est nulle aux contrôles de 0 et 5 pb, positive à 10 et 25 pb,
+puis nulle à 50 et 100 pb lorsque les deux politiques restent immobiles. Les six
+tests V2 passent indépendamment et les sorties sont reproductibles sous
+[`results/sequentiality_v2`](results/sequentiality_v2/). Ce jalon ne crée aucun
+agent RL et n'autorise aucune conclusion historique.
+
 Ce dossier ouvre un axe de recherche autonome au sein de `ai-financial-risk-reliability`. Il contient un cadrage scientifique, une étude fondamentale sur la nature séquentielle d'une décision, une formalisation financière, un audit de faisabilité d'un mandat SPY–BIL et un patrimoine local de données documentées. BIL-A reste validée sous la convention à l'ex-date. SPY-B et BIL-B suivent les parts, les créances et leur réinvestissement à la date de paiement. BIL-B est validée pour l'analyse NAV du 4 mars 2008 au 15 octobre 2026 ; sa frontière exclut explicitement la distribution du 3 mars 2008 dont les dates historiques restent incohérentes. Aucun algorithme de Reinforcement Learning (RL), modèle prédictif, environnement de simulation, stratégie ou backtest n'a été créé.
 
 La priorité active est désormais : **qualifier la grille documentaire ciblée des décisions hebdomadaires candidates avant toute exécution historique C2.** Les données brutes sont conservées localement sous `data/raw/`, exclues de GitHub et sauvegardées sur un disque physique distinct. Leur inventaire publiable se trouve dans [`data_manifest.json`](data_manifest.json), les contrôles reproductibles dans [`scripts/verify_local_data.py`](scripts/verify_local_data.py), et les résultats détaillés dans [`docs/AUDIT_DONNEES_ACADEMIQUES_LOCALES.md`](docs/AUDIT_DONNEES_ACADEMIQUES_LOCALES.md).

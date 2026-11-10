@@ -1,0 +1,164 @@
+{
+  "controls": {
+    "dynamic_weakly_dominates": true,
+    "one_step_equivalence": true,
+    "positive_cost_improvement_exists": true,
+    "probabilities_valid": true,
+    "reachable_policy_disagreement_exists": true,
+    "zero_cost_equivalence": true
+  },
+  "costs_bps": [
+    0,
+    5,
+    10,
+    25,
+    50,
+    100
+  ],
+  "gate_g1": "PASS",
+  "interpretation_boundary": "G1 démontre seulement une interdépendance synthétique créée par les coûts et la position héritée; aucune performance historique ou RL.",
+  "model": {
+    "actions": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "horizon": 12,
+    "initial_probabilities": {
+      "RISK_OFF": 0.5,
+      "RISK_ON": 0.5
+    },
+    "initial_weight_spy": 0.5,
+    "returns": {
+      "RISK_OFF": {
+        "BIL": 0.001,
+        "SPY": 0.0
+      },
+      "RISK_ON": {
+        "BIL": 0.001,
+        "SPY": 0.002
+      }
+    },
+    "states": [
+      "RISK_ON",
+      "RISK_OFF"
+    ],
+    "transition": {
+      "RISK_OFF": {
+        "RISK_OFF": 0.65,
+        "RISK_ON": 0.35
+      },
+      "RISK_ON": {
+        "RISK_OFF": 0.2,
+        "RISK_ON": 0.8
+      }
+    }
+  },
+  "results": [
+    {
+      "cost_bps": 0,
+      "dynamic_expected_log_growth": 0.019371385386511786,
+      "dynamic_initial_actions": {
+        "RISK_OFF": 0.0,
+        "RISK_ON": 1.0
+      },
+      "myopic_expected_log_growth": 0.019371385386511786,
+      "myopic_initial_actions": {
+        "RISK_OFF": 0.0,
+        "RISK_ON": 1.0
+      },
+      "reachable_disagreement": false,
+      "sequential_value_log": 0.0,
+      "wealth_uplift": 0.0
+    },
+    {
+      "cost_bps": 5,
+      "dynamic_expected_log_growth": 0.01770240717294989,
+      "dynamic_initial_actions": {
+        "RISK_OFF": 0.0,
+        "RISK_ON": 1.0
+      },
+      "myopic_expected_log_growth": 0.01770240717294989,
+      "myopic_initial_actions": {
+        "RISK_OFF": 0.0,
+        "RISK_ON": 1.0
+      },
+      "reachable_disagreement": false,
+      "sequential_value_log": 0.0,
+      "wealth_uplift": 0.0
+    },
+    {
+      "cost_bps": 10,
+      "dynamic_expected_log_growth": 0.016033038009502808,
+      "dynamic_initial_actions": {
+        "RISK_OFF": 0.0,
+        "RISK_ON": 1.0
+      },
+      "myopic_expected_log_growth": 0.013379566895622837,
+      "myopic_initial_actions": {
+        "RISK_OFF": 0.5,
+        "RISK_ON": 0.5
+      },
+      "reachable_disagreement": true,
+      "sequential_value_log": 0.0026534711138799707,
+      "wealth_uplift": 0.002656994684230852
+    },
+    {
+      "cost_bps": 25,
+      "dynamic_expected_log_growth": 0.014232271996189927,
+      "dynamic_initial_actions": {
+        "RISK_OFF": 0.5,
+        "RISK_ON": 1.0
+      },
+      "myopic_expected_log_growth": 0.013379566895622837,
+      "myopic_initial_actions": {
+        "RISK_OFF": 0.5,
+        "RISK_ON": 0.5
+      },
+      "reachable_disagreement": true,
+      "sequential_value_log": 0.0008527051005670899,
+      "wealth_uplift": 0.0008530687569178861
+    },
+    {
+      "cost_bps": 50,
+      "dynamic_expected_log_growth": 0.013379566895622837,
+      "dynamic_initial_actions": {
+        "RISK_OFF": 0.5,
+        "RISK_ON": 0.5
+      },
+      "myopic_expected_log_growth": 0.013379566895622837,
+      "myopic_initial_actions": {
+        "RISK_OFF": 0.5,
+        "RISK_ON": 0.5
+      },
+      "reachable_disagreement": false,
+      "sequential_value_log": 0.0,
+      "wealth_uplift": 0.0
+    },
+    {
+      "cost_bps": 100,
+      "dynamic_expected_log_growth": 0.013379566895622837,
+      "dynamic_initial_actions": {
+        "RISK_OFF": 0.5,
+        "RISK_ON": 0.5
+      },
+      "myopic_expected_log_growth": 0.013379566895622837,
+      "myopic_initial_actions": {
+        "RISK_OFF": 0.5,
+        "RISK_ON": 0.5
+      },
+      "reachable_disagreement": false,
+      "sequential_value_log": 0.0,
+      "wealth_uplift": 0.0
+    }
+  ],
+  "schema_version": "sequentiality-v2.0",
+  "source_hashes": {
+    "protocol_sha256": "f9a6cb2d1dec8f546ee1d50f49c014596bd9518626da5d0ec7e986f44634780e",
+    "script_sha256": "c972b7bf96c0a3404a58667bd6812a5c03ea87dfa2af5d5971ba01d1c9d8f39f"
+  },
+  "status": "STRUCTURAL_TEST_ONLY",
+  "tolerance": 1e-12
+}
