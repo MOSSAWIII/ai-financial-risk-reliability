@@ -152,7 +152,15 @@ def estimate(weekly: list, observations: list, decision: date) -> tuple:
     latest = None
     for item in observations:
         i, state = item["idx"], item["state"]
-        if i + 1 >= len(weekly) or weekly[i+1][0] >= decision:
+        if i + 1 >= len(weekly):
+            continue
+        start_day, outcome_day = weekly[i][0], weekly[i+1][0]
+        # L'épisode G2 2024–2025 reste une zone interdite pour
+        # l'estimation primaire. La fenêtre croissante reprend seulement
+        # avec les rendements G3 déjà réalisés avant la décision courante.
+        initial_training = START <= start_day and outcome_day <= INITIAL_END
+        online_g3_training = start_day >= EVAL_START and outcome_day < decision
+        if outcome_day >= decision or not (initial_training or online_g3_training):
             continue
         n[state] += 1
         sums[state][0] += math.log(weekly[i+1][1]/weekly[i][1])
@@ -320,6 +328,12 @@ def run(root: Path, output: Path) -> str:
         "terminal_difference_usd": format(result["delta"], ".12f"),
         "threshold_usd": "250", "initial_capital_usd": "100000",
         "cost_bps": 10,
+        "training_policy": {
+            "initial_sample_end": INITIAL_END.isoformat(),
+            "excluded_g2_episode": "2024-05-29/2025-06-01",
+            "online_update_from": EVAL_START.isoformat(),
+            "future_returns_strictly_excluded": True
+        },
         "period": {"first_decision": EVAL_START.isoformat(),
                    "last_decision": EVAL_END.isoformat(),
                    "terminal": TERMINAL.isoformat()},
