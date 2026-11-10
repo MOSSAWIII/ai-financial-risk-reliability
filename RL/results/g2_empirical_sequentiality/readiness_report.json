@@ -1,36 +1,11 @@
 {
-  "blockers": [
-    {
-      "id": "yahoo_spy_chart_ohlcv_20261019",
-      "status": "FILE_MISSING"
-    },
-    {
-      "id": "yahoo_bil_chart_ohlcv_20261019",
-      "status": "FILE_MISSING"
-    },
-    {
-      "id": "ssga_spdr_distributions_20261019",
-      "status": "FILE_MISSING"
-    },
-    {
-      "id": "nyse_trading_calendars_2022_2025_20261019",
-      "status": "FILE_MISSING"
-    },
-    {
-      "id": "sec_settlement_cycle_t1_2023_20261019",
-      "status": "FILE_MISSING"
-    },
-    {
-      "id": "dtcc_t1_conversion_guide_may2024_20261020",
-      "status": "FILE_MISSING"
-    }
-  ],
-  "documentary_verdict": "DOCUMENTARY_BLOCK",
+  "blockers": [],
+  "documentary_verdict": "READY_FOR_G2_EXECUTION",
   "performance_computed": false,
-  "performance_outputs_authorized": false,
+  "performance_outputs_authorized": true,
   "protocol": {
     "path": "RL/docs/PROTOCOLE_G2_MATERIALITE_EMPIRIQUE.md",
-    "sha256": "6d931da043cd88ca5f195bd9b75e87e7b251aa8005653e10a387ee6fa58edee6"
+    "sha256": "5949ef0e920f8c9a3a6cd85cbe62916a10bcfed8b4fbb251ceb5a6cf7771a5bb"
   },
   "protocol_status": "FROZEN_RETROSPECTIVE_DIAGNOSTIC",
   "published_controls": [
@@ -67,48 +42,99 @@
       "expected_sha256": "b77099e8c46a954f045e95432d2b6220a526f15322c87b877aafae628da14f52",
       "id": "yahoo_spy_chart_ohlcv_20261019",
       "local_file": "data/raw/rl_market/yahoo_spy_2007-05-25_2026-10-16_acquired-2026-10-19_sha256-b77099e8c46a954f045e95432d2b6220a526f15322c87b877aafae628da14f52.json",
-      "ready": false,
-      "status": "FILE_MISSING"
+      "observed_bytes": 541190,
+      "observed_sha256": "b77099e8c46a954f045e95432d2b6220a526f15322c87b877aafae628da14f52",
+      "ready": true,
+      "status": "VERIFIED"
     },
     {
       "expected_bytes": 522516,
       "expected_sha256": "2eaa0529ae97b0e8e078285e8daa5247176c42b6df114019d6e0e2c4b3f838d2",
       "id": "yahoo_bil_chart_ohlcv_20261019",
       "local_file": "data/raw/rl_market/yahoo_bil_2007-05-25_2026-10-16_acquired-2026-10-19_sha256-2eaa0529ae97b0e8e078285e8daa5247176c42b6df114019d6e0e2c4b3f838d2.json",
-      "ready": false,
-      "status": "FILE_MISSING"
+      "observed_bytes": 522516,
+      "observed_sha256": "2eaa0529ae97b0e8e078285e8daa5247176c42b6df114019d6e0e2c4b3f838d2",
+      "ready": true,
+      "status": "VERIFIED"
+    },
+    {
+      "expected_bytes": 26632,
+      "expected_sha256": "e33ba4c2b5b962e6f46b7f37853eb73fc5bdc27269456830dbc77fb72274fe89",
+      "id": "yahoo_spy_bil_market_audit_v1_20261019",
+      "local_file": "data/processed/rl/yahoo_spy_bil_market_audit_v1.json",
+      "observed_bytes": 26632,
+      "observed_sha256": "e33ba4c2b5b962e6f46b7f37853eb73fc5bdc27269456830dbc77fb72274fe89",
+      "ready": true,
+      "status": "VERIFIED"
     },
     {
       "expected_bytes": 581216,
       "expected_sha256": "6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320",
       "id": "ssga_spdr_distributions_20261019",
       "local_file": "data/raw/rl_research/state_street/spdr-etf-historical-distributions_2026-10-19_sha256-6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320.xlsx",
-      "ready": false,
-      "status": "FILE_MISSING"
+      "observed_bytes": 581216,
+      "observed_sha256": "6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320",
+      "ready": true,
+      "status": "VERIFIED"
     },
     {
+      "additional_file_checks": [
+        {
+          "expected_bytes": 112881,
+          "expected_sha256": "3d28b46a7197424c822087fb7117cdf3f303bd9a73f29660525b605f542bcfe2",
+          "local_file": "data/raw/rl_calendars/nyse_trading_calendar_2023.pdf",
+          "observed_bytes": 112881,
+          "observed_sha256": "3d28b46a7197424c822087fb7117cdf3f303bd9a73f29660525b605f542bcfe2",
+          "ready": true,
+          "status": "VERIFIED"
+        },
+        {
+          "expected_bytes": 115340,
+          "expected_sha256": "02282e733512d1f112230372efccfd18f81599c682af94bb6f21fd9bccbfd145",
+          "local_file": "data/raw/rl_calendars/nyse_trading_calendar_2024.pdf",
+          "observed_bytes": 115340,
+          "observed_sha256": "02282e733512d1f112230372efccfd18f81599c682af94bb6f21fd9bccbfd145",
+          "ready": true,
+          "status": "VERIFIED"
+        },
+        {
+          "expected_bytes": 115262,
+          "expected_sha256": "3e8b540ad74474bc12a0aba473dbca28f37e0a5c1795cf66701b9a506a34226e",
+          "local_file": "data/raw/rl_calendars/nyse_trading_calendar_2025.pdf",
+          "observed_bytes": 115262,
+          "observed_sha256": "3e8b540ad74474bc12a0aba473dbca28f37e0a5c1795cf66701b9a506a34226e",
+          "ready": true,
+          "status": "VERIFIED"
+        }
+      ],
       "expected_bytes": 111260,
       "expected_sha256": "2c2e63b780c4a373d8d546904ae46c8ba7e8070ad9357d23d2c92749985bb6c9",
       "id": "nyse_trading_calendars_2022_2025_20261019",
       "local_file": "data/raw/rl_calendars/nyse_trading_calendar_2022.pdf",
-      "ready": false,
-      "status": "FILE_MISSING"
+      "observed_bytes": 111260,
+      "observed_sha256": "2c2e63b780c4a373d8d546904ae46c8ba7e8070ad9357d23d2c92749985bb6c9",
+      "ready": true,
+      "status": "VERIFIED"
     },
     {
       "expected_bytes": 2301204,
       "expected_sha256": "e214bf80244fe9107c867d7abeb6a6b969029c519566036e42b081977a9b575a",
       "id": "sec_settlement_cycle_t1_2023_20261019",
       "local_file": "data/raw/rl_calendars/sec_t1_final_rule_2023.pdf",
-      "ready": false,
-      "status": "FILE_MISSING"
+      "observed_bytes": 2301204,
+      "observed_sha256": "e214bf80244fe9107c867d7abeb6a6b969029c519566036e42b081977a9b575a",
+      "ready": true,
+      "status": "VERIFIED"
     },
     {
       "expected_bytes": 627847,
       "expected_sha256": "1655962c57e5a1459cf0d29c853b0bf924c3255aba5be0e0d04c4a7d2536b7f2",
       "id": "dtcc_t1_conversion_guide_may2024_20261020",
       "local_file": "data/raw/rl_calendars/dtcc_t1_conversion_guide_may2024_acquired-2026-10-20.pdf",
-      "ready": false,
-      "status": "FILE_MISSING"
+      "observed_bytes": 627847,
+      "observed_sha256": "1655962c57e5a1459cf0d29c853b0bf924c3255aba5be0e0d04c4a7d2536b7f2",
+      "ready": true,
+      "status": "VERIFIED"
     }
   ],
   "study": "G2_EMPIRICAL_SEQUENTIALITY"

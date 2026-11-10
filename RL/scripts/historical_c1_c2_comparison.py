@@ -16,7 +16,7 @@ from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any, Callable, Iterable, Mapping, Sequence
 from zoneinfo import ZoneInfo
 
 from analyze_c2_conditional_protocol import build_conditional_rows
@@ -125,6 +125,17 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def sha256_csv_canonical_crlf(path: Path) -> str:
+    """Empreinte stable des grilles CSV, indépendante du checkout Git.
+
+    Les grilles gelées ont été publiées depuis Windows avec CRLF. Git peut les
+    matérialiser en LF; leur contenu tabulaire reste identique. La représentation
+    canonique conserve CRLF afin de retrouver les fingerprints publiés.
+    """
+    canonical = "\r\n".join(path.read_text(encoding="utf-8").splitlines()) + "\r\n"
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
 def _date_range(start: date, end: date) -> Iterable[date]:
     current = start
     while current <= end:
@@ -178,7 +189,11 @@ def _validate_locked_inputs(
         raise ComparisonError("une décision E-B n'est pas documentée")
     if [row["cycle"] for row in strict_rows] != [row["cycle"] for row in conditional_rows]:
         raise ComparisonError("grilles stricte et E-B désalignées")
-    return strict_rows, sha256_file(STRICT_GRID_PATH), sha256_file(CONDITIONAL_GRID_PATH)
+    return (
+        strict_rows,
+        sha256_csv_canonical_crlf(STRICT_GRID_PATH),
+        sha256_csv_canonical_crlf(CONDITIONAL_GRID_PATH),
+    )
 
 
 def _cells(contract: EpisodeContract) -> tuple[CellDefinition, ...]:
@@ -485,6 +500,10 @@ def _run_policy(
     policy_id: str,
     source_fingerprint: str,
     source_manifest: str,
+    target_weight_resolver: Callable[
+        [CellDefinition, Mapping[str, str], Any], Decimal
+    ]
+    | None = None,
 ) -> RunResult:
     ledger, adapter = _new_ledger(contract, data)
     initial_quantities, initial_cost, initial_notional, _ = _initialize_50_50(
@@ -524,7 +543,7 @@ def _run_policy(
             if current in payment_dates:
                 ledger.pay_distributions_through(current)
 
-            if policy_id == "C2" and current in grid_by_date:
+            if policy_id != "C1" and current in grid_by_date:
                 grid_row = grid_by_date[current]
                 decision_at = datetime.fromisoformat(grid_row["decision_at"])
                 price_date = date.fromisoformat(grid_row["close_reference"])
@@ -553,8 +572,15 @@ def _run_policy(
                 audit = adapter.build_economic_audit_state(snapshot)
                 if audit.ledger_sequence != snapshot.ledger_sequence:
                     raise ComparisonError("versions audit et décision désalignées")
+                target_weight = (
+                    HALF
+                    if target_weight_resolver is None
+                    else target_weight_resolver(cell, grid_row, snapshot)
+                )
+                if target_weight < ZERO or target_weight > Decimal("1"):
+                    raise ComparisonError("poids cible hors de [0,1]")
                 intent = adapter.prepare_intent_from_snapshot(
-                    snapshot, target_weight_spy=HALF
+                    snapshot, target_weight_spy=target_weight
                 )
                 sealed_quantities = dict(intent.target_quantities)
                 opens = {
@@ -596,7 +622,7 @@ def _run_policy(
                         snapshot.economic_positions["SPY"]
                         * snapshot.decision_closes["SPY"]
                         / snapshot.decision_budget
-                        - HALF
+                        - target_weight
                     )
                 )
                 decision_rows.append(
@@ -632,8 +658,8 @@ def _run_policy(
 
     if len(trajectory_rows) != 251:
         raise ComparisonError("trajectoire quotidienne incomplète")
-    if policy_id == "C2" and len(decision_rows) != 52:
-        raise ComparisonError("journal C2 incomplet")
+    if policy_id != "C1" and len(decision_rows) != 52:
+        raise ComparisonError("journal de décisions incomplet")
     if ledger.pending_settlements or ledger.distribution_receivables != ZERO:
         raise ComparisonError("flux non dénoué au terminal")
     ledger.assert_invariants()

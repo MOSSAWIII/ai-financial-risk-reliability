@@ -23,6 +23,7 @@ PROTOCOL_PATH = ROOT / "RL" / "docs" / "PROTOCOLE_G2_MATERIALITE_EMPIRIQUE.md"
 REQUIRED_SOURCE_IDS = (
     "yahoo_spy_chart_ohlcv_20261019",
     "yahoo_bil_chart_ohlcv_20261019",
+    "yahoo_spy_bil_market_audit_v1_20261019",
     "ssga_spdr_distributions_20261019",
     "nyse_trading_calendars_2022_2025_20261019",
     "sec_settlement_cycle_t1_2023_20261019",
@@ -117,6 +118,34 @@ def _check_source(repo_root: Path, dataset_id: str, entry: dict[str, Any] | None
         return result
     if isinstance(expected_bytes, int) and observed_bytes != expected_bytes:
         result["status"] = "SIZE_MISMATCH"
+        return result
+    additional_checks = []
+    for additional in entry.get("additional_files", []):
+        additional_path = repo_root / str(additional.get("local_file", ""))
+        additional_check: dict[str, Any] = {
+            "local_file": additional.get("local_file"),
+            "expected_sha256": additional.get("sha256"),
+            "expected_bytes": additional.get("bytes"),
+            "ready": False,
+        }
+        if not additional_path.is_file():
+            additional_check["status"] = "FILE_MISSING"
+        else:
+            additional_check["observed_sha256"] = sha256_file(additional_path)
+            additional_check["observed_bytes"] = additional_path.stat().st_size
+            if additional_check["observed_sha256"] != additional.get("sha256"):
+                additional_check["status"] = "HASH_MISMATCH"
+            elif isinstance(additional.get("bytes"), int) and additional_check[
+                "observed_bytes"
+            ] != additional["bytes"]:
+                additional_check["status"] = "SIZE_MISMATCH"
+            else:
+                additional_check.update(status="VERIFIED", ready=True)
+        additional_checks.append(additional_check)
+    if additional_checks:
+        result["additional_file_checks"] = additional_checks
+    if any(not item["ready"] for item in additional_checks):
+        result["status"] = "ADDITIONAL_FILE_INVALID"
         return result
     result.update(status="VERIFIED", ready=True)
     return result

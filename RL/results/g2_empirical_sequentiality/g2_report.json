@@ -1,0 +1,71 @@
+{
+  "controls": {
+    "all_decision_journals_complete": true,
+    "all_runs_complete": true,
+    "no_documentary_block": true,
+    "s0_s1_s2_action_sequences_identical": true,
+    "s0_s1_s2_financial_paths_identical": true,
+    "s3_reachable_disagreement_observed": true,
+    "warmup_equal_50_50": true
+  },
+  "decisions": 832,
+  "g3_authorized": true,
+  "interpretation_boundary": "Diagnostic rétrospectif sur un épisode consulté; aucune preuve hors échantillon et aucun RL.",
+  "materiality_threshold_usd": "250",
+  "output_sha256": {
+    "daily_trajectories.csv": "5b865f798778c9bf68f439d01a2e6f70662c0ae8f55994591a00435355ab6ce5",
+    "financial_summary.csv": "5d7c5a160987457ca1e362aac8a1c4da9f5f336d69109a347f3d151835952aaa",
+    "paired_comparison.csv": "07944727cb73f5922b231a9976826337b23a8d94b585fde43fe21e0e31fb284b",
+    "policy_decisions.csv": "9f4e9e803dc5c1fc3512f55dbeae861a231f25fb707ca3b73d4c07bd7b918fc7"
+  },
+  "primary_cells": [
+    {
+      "action_sequences_identical": false,
+      "annualized_volatility_difference": "0.012028322496",
+      "cash_convention": "D_PLUS_1",
+      "cell_id": "S3-D1",
+      "cost_bps": "10",
+      "cost_scenario": "S3",
+      "dynamic_target_changes": 9,
+      "dynamic_terminal_wealth_usd": "113691.54882607514022936",
+      "financial_paths_identical": false,
+      "incremental_fees_usd": "1308.41601954650878121",
+      "incremental_gross_notional_usd": "1308416.01954650878121",
+      "log_terminal_wealth_difference": "0.037872380053",
+      "maximum_drawdown_difference": "0.009530445858",
+      "myopic_target_changes": 0,
+      "myopic_terminal_wealth_usd": "109466.29451610554462057",
+      "source_fingerprint": "8c6a9d0308d570c20fa8f422f2df33cf5fcb13b40db6935c202dc8155568b310",
+      "terminal_wealth_difference_initial_capital": "0.042252543100",
+      "terminal_wealth_difference_usd": "4225.25430996959560879"
+    },
+    {
+      "action_sequences_identical": false,
+      "annualized_volatility_difference": "0.011245572848",
+      "cash_convention": "D_PLUS_2",
+      "cell_id": "S3-D2",
+      "cost_bps": "10",
+      "cost_scenario": "S3",
+      "dynamic_target_changes": 9,
+      "dynamic_terminal_wealth_usd": "113052.82744834271101252",
+      "financial_paths_identical": false,
+      "incremental_fees_usd": "1300.07514981079100956",
+      "incremental_gross_notional_usd": "1300075.14981079100956",
+      "log_terminal_wealth_difference": "0.032426756796",
+      "maximum_drawdown_difference": "0.009554793424",
+      "myopic_target_changes": 0,
+      "myopic_terminal_wealth_usd": "109445.69084644306908208",
+      "source_fingerprint": "8c6a9d0308d570c20fa8f422f2df33cf5fcb13b40db6935c202dc8155568b310",
+      "terminal_wealth_difference_initial_capital": "0.036071366019",
+      "terminal_wealth_difference_usd": "3607.13660189964193044"
+    }
+  ],
+  "protocol_sha256": "5949ef0e920f8c9a3a6cd85cbe62916a10bcfed8b4fbb251ceb5a6cf7771a5bb",
+  "readiness_sha256": "5d22b005892b981167a73be8d61a4c5d86a84042cade56ab413c03a7c36d488c",
+  "runs": 16,
+  "schema_version": "g2-empirical-sequentiality-1.0",
+  "source_fingerprint": "8c6a9d0308d570c20fa8f422f2df33cf5fcb13b40db6935c202dc8155568b310",
+  "status": "COMPLETE",
+  "study_status": "FROZEN_RETROSPECTIVE_DIAGNOSTIC",
+  "verdict": "G2_MATERIAL_POSITIVE"
+}

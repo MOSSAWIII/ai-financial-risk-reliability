@@ -1,85 +1,59 @@
 # Validation G2 — porte documentaire empirique
 
-## Verdict
+## Verdict courant
 
-**`DOCUMENTARY_BLOCK`** — aucune performance G2 n'a été calculée.
+**`READY_FOR_G2_EXECUTION`**.
 
-Le protocole G2 a été figé avant l'exécution d'une nouvelle politique. Le
-contrôle hors ligne retrouve les quatre artefacts publiés de la comparaison
-C1–C2, mais aucune des six sources originales obligatoires n'est présente dans
-le clone de travail. Ces artefacts dérivés ne remplacent pas les données brutes.
+Le clone initial était `DOCUMENTARY_BLOCK`. L'archive de sauvegarde datée du
+19 octobre 2026, qui contient également le sous-dossier du 20 octobre, a ensuite
+été fournie. Les sept identifiants requis — dix fichiers physiques en comptant
+les trois calendriers NYSE additionnels — ont été restaurés à leurs chemins du
+manifeste et vérifiés octet par octet.
 
-## Contrôle exécuté
+## Dépendances vérifiées
 
-Le script [`g2_empirical_readiness.py`](../scripts/g2_empirical_readiness.py) :
-
-1. résout les six identifiants dans `data_manifest.json` ;
-2. exige le chemin, la taille et l'empreinte SHA-256 exacts ;
-3. inventorie séparément les résultats historiques versionnés ;
-4. produit `readiness_report.json` ;
-5. interdit la présence de toute sortie de performance tant que le verdict est
-   `DOCUMENTARY_BLOCK`.
-
-Le résultat courant est :
-
-| Contrôle | Résultat |
+| Dépendance | Résultat |
 |---|---|
-| Yahoo SPY original | `FILE_MISSING` |
-| Yahoo BIL original | `FILE_MISSING` |
-| Distributions State Street | `FILE_MISSING` |
-| Calendrier NYSE 2022–2025 | `FILE_MISSING` |
-| Règle SEC T+1 | `FILE_MISSING` |
-| Guide DTCC T+1 | `FILE_MISSING` |
+| Yahoo SPY original | `VERIFIED` |
+| Yahoo BIL original | `VERIFIED` |
+| Audit dérivé Yahoo SPY–BIL | `VERIFIED` |
+| Distributions State Street | `VERIFIED` |
+| Calendriers NYSE 2022, 2023, 2024 et 2025 | `VERIFIED` |
+| Règle SEC T+1 | `VERIFIED` |
+| Guide DTCC T+1 | `VERIFIED` |
 | Contrôles C1–C2 publiés | 4 sur 4 présents et hachés |
-| Richesse ou performance G2 | non calculée |
 
 Le rapport machine se trouve sous
 [`results/g2_empirical_sequentiality/readiness_report.json`](../results/g2_empirical_sequentiality/readiness_report.json).
 
+## Mécanisme de restauration
+
+Le restaurateur [`g2_restore_sources.py`](../scripts/g2_restore_sources.py) :
+
+1. résout les identifiants et leurs fichiers additionnels dans le manifeste ;
+2. effectue un précontrôle global des tailles et SHA-256 ;
+3. ne copie rien si une dépendance manque ou diffère ;
+4. refuse d'écraser une destination conflictuelle ;
+5. vérifie encore chaque copie intermédiaire avant son déplacement atomique.
+
+Le vérificateur [`g2_empirical_readiness.py`](../scripts/g2_empirical_readiness.py)
+interdit toute performance si l'une de ces conditions échoue. Les artefacts
+historiques publiés ne peuvent jamais remplacer les sources brutes.
+
+## Correction de frontière
+
+Le premier appel au moteur, encore bloqué avant performance, a révélé deux
+dépendances qui n'étaient pas contrôlées assez finement par la première version
+de la porte : le rapport dérivé d'audit Yahoo et les trois fichiers additionnels
+du calendrier NYSE. La porte et le restaurateur ont été corrigés avant G2. Cette
+correction ne change aucun choix analytique du protocole.
+
 ## Tests
 
-Six tests ciblés valident :
+Les tests couvrent l'original exact, l'absence, l'empreinte différente, les
+fichiers additionnels, l'idempotence, les conflits de destination, l'interdiction
+des sorties sous blocage et l'absence de substitution par des résultats dérivés.
 
-- l'ouverture de la porte avec un original exact ;
-- le blocage si le fichier manque ;
-- le blocage si l'empreinte diffère ;
-- l'impossibilité de substituer un résultat dérivé à une source brute ;
-- l'écriture exclusive du rapport de préparation en cas de blocage ;
-- le refus d'un répertoire bloqué contenant déjà une sortie de performance.
-
-## Condition exacte de reprise
-
-Les documents antérieurs indiquent une sauvegarde contrôlée sur le disque
-physique distinct, notamment sous
-`D:\ai-financial-risk-reliability-data-backup\2026-10-19\` et, pour certains
-documents de règlement, sous la sauvegarde datée du 20 octobre 2026.
-
-G2 pourra reprendre uniquement après restauration des fichiers à leurs chemins
-relatifs du manifeste et concordance des six empreintes. Un nouveau
-téléchargement dont l'empreinte diffère restera `HASH_MISMATCH`. À ce moment, la
-prochaine étape sera l'exécution appariée `M_G2`–`D_G2` définie par le protocole,
-pas une modification de celui-ci et pas PPO.
-
-Le restaurateur [`g2_restore_sources.py`](../scripts/g2_restore_sources.py)
-accepte plusieurs racines datées. Il effectue d'abord un précontrôle global et
-ne copie aucun fichier si l'un des six originaux manque ou diffère. Il refuse
-également d'écraser une destination existante non conforme. Exemple sur la
-machine qui porte le disque de sauvegarde :
-
-```powershell
-python RL/scripts/g2_restore_sources.py `
-  --backup-root 'D:\ai-financial-risk-reliability-data-backup\2026-10-19' `
-  --backup-root 'D:\ai-financial-risk-reliability-data-backup\2026-10-20' `
-  --apply
-```
-
-L'espace d'exécution distant utilisé pour cette validation ne monte pas le
-disque Windows `D:`. Le script est donc validé mais la copie réelle demeure
-conditionnée à la mise à disposition de ces dossiers dans l'espace de travail.
-
-## Portée scientifique
-
-Ce blocage est un résultat de reproductibilité, non un échec de la méthode. Il
-empêche que des données actuelles ou des sorties agrégées soient silencieusement
-présentées comme les sources gelées du moteur historique. Le seul verdict
-scientifique établi à ce stade reste donc la préparation documentaire de G2.
+La restauration ouvre uniquement la porte documentaire. Son résultat
+scientifique est décrit séparément dans
+[`VALIDATION_G2_MATERIALITE_EMPIRIQUE.md`](VALIDATION_G2_MATERIALITE_EMPIRIQUE.md).

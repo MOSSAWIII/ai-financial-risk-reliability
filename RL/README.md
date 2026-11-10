@@ -26,18 +26,24 @@ Le [protocole G2](docs/PROTOCOLE_G2_MATERIALITE_EMPIRIQUE.md) fige désormais un
 comparaison rétrospective appariée entre une décision myope et le contrôleur
 dynamique G1 dans le moteur SPY–BIL. Avant toute richesse, le
 [contrôle documentaire](docs/VALIDATION_G2_DOCUMENTARY_READINESS.md) exige les
-six sources originales et leurs empreintes exactes. Dans le clone courant, les
-quatre résultats C1–C2 publiés sont présents, mais les six sources brutes sont
-absentes : le verdict reproductible est `DOCUMENTARY_BLOCK`. Le script
-[`scripts/g2_empirical_readiness.py`](scripts/g2_empirical_readiness.py), ses six
+sept identifiants du moteur, leurs fichiers additionnels et leurs empreintes
+exactes. Le clone initial était `DOCUMENTARY_BLOCK`; la restauration contrôlée
+de la sauvegarde a ensuite porté la porte à `READY_FOR_G2_EXECUTION`. Le script
+[`scripts/g2_empirical_readiness.py`](scripts/g2_empirical_readiness.py), ses
 tests et le
 [`readiness_report.json`](results/g2_empirical_sequentiality/readiness_report.json)
 garantissent qu'aucune performance G2 n'est calculée ou publiée avant
 restauration conforme. Le restaurateur
-[`scripts/g2_restore_sources.py`](scripts/g2_restore_sources.py) vérifie les six
-empreintes avant toute copie, refuse les destinations conflictuelles et reste
-inactif tant que le disque de sauvegarde n'est pas monté. PPO reste hors
-périmètre.
+[`scripts/g2_restore_sources.py`](scripts/g2_restore_sources.py) vérifie les sept
+identifiants et les calendriers additionnels avant toute copie, puis refuse les
+destinations conflictuelles.
+
+L'[évaluation G2](docs/VALIDATION_G2_MATERIALITE_EMPIRIQUE.md) obtient
+`G2_MATERIAL_POSITIVE`. À 10 pb, `D_G2` dépasse `M_G2` de 4 225,25 USD en D+1
+et 3 607,14 USD en D+2, contre un seuil gelé de 250 USD. Les actions et les
+trajectoires restent exactement identiques de S0 à S2. Le verdict autorise G3 —
+démontrer si l'apprentissage ajoute une valeur face au contrôleur connu — mais
+ne démontre ni généralisation hors échantillon ni nécessité de PPO.
 
 Ce dossier ouvre un axe de recherche autonome au sein de `ai-financial-risk-reliability`. Il contient un cadrage scientifique, une étude fondamentale sur la nature séquentielle d'une décision, une formalisation financière, un audit de faisabilité d'un mandat SPY–BIL et un patrimoine local de données documentées. BIL-A reste validée sous la convention à l'ex-date. SPY-B et BIL-B suivent les parts, les créances et leur réinvestissement à la date de paiement. BIL-B est validée pour l'analyse NAV du 4 mars 2008 au 15 octobre 2026 ; sa frontière exclut explicitement la distribution du 3 mars 2008 dont les dates historiques restent incohérentes. Aucun algorithme de Reinforcement Learning (RL), modèle prédictif, environnement de simulation, stratégie ou backtest n'a été créé.
 

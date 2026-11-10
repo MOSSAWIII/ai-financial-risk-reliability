@@ -106,3 +106,27 @@ def test_already_present_exact_file_is_idempotent(tmp_path: Path) -> None:
     applied = apply_restore_plan(plan)
     assert applied["restored_count"] == 0
     assert (repo / "data/raw/source.bin").read_bytes() == expected
+
+
+def test_manifest_additional_files_are_restored_too(tmp_path: Path) -> None:
+    repo, backup, manifest, required, _ = _fixture(
+        tmp_path, backup_payload=b"frozen original"
+    )
+    payload = json.loads(manifest.read_text(encoding="utf-8"))
+    additional_payload = b"calendar supplement"
+    payload["datasets"][0]["additional_files"] = [
+        {
+            "local_file": "data/raw/supplement.pdf",
+            "sha256": hashlib.sha256(additional_payload).hexdigest(),
+            "bytes": len(additional_payload),
+        }
+    ]
+    manifest.write_text(json.dumps(payload), encoding="utf-8")
+    additional = backup / "data/raw/supplement.pdf"
+    additional.parent.mkdir(parents=True, exist_ok=True)
+    additional.write_bytes(additional_payload)
+    plan = build_restore_plan(repo, [backup], manifest, required)
+    assert plan["preflight_status"] == "PASS"
+    assert len(plan["sources"]) == 2
+    apply_restore_plan(plan)
+    assert (repo / "data/raw/supplement.pdf").read_bytes() == additional_payload

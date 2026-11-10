@@ -4,6 +4,13 @@
 
 **Statut : `FROZEN_RETROSPECTIVE_DIAGNOSTIC`.**
 
+**Amendement documentaire non analytique du 10 novembre 2026.** Lors du premier
+appel au moteur, avant tout calcul de performance, le rapport dérivé d'audit
+Yahoo et les trois PDF calendaires additionnels déclarés dans le manifeste ont
+été identifiés comme dépendances techniques. Ils ont été ajoutés à la porte
+documentaire avec leurs empreintes existantes. Aucun signal, paramètre,
+politique, seuil, mesure ou règle de verdict n'a été modifié.
+
 Ce protocole définit la première traduction empirique du mécanisme identifié
 par G1. Il est gelé avant toute exécution d'une nouvelle politique sur le moteur
 historique. Il ne constitue pas une préinscription confirmatoire : l'épisode du
@@ -35,12 +42,14 @@ notamment :
 |---|---|
 | Yahoo SPY | `b77099e8c46a954f045e95432d2b6220a526f15322c87b877aafae628da14f52` |
 | Yahoo BIL | `2eaa0529ae97b0e8e078285e8daa5247176c42b6df114019d6e0e2c4b3f838d2` |
+| Audit dérivé Yahoo SPY–BIL | `e33ba4c2b5b962e6f46b7f37853eb73fc5bdc27269456830dbc77fb72274fe89` |
 | Distributions State Street | `6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320` |
 | Calendrier NYSE 2022–2025 | `2c2e63b780c4a373d8d546904ae46c8ba7e8070ad9357d23d2c92749985bb6c9` |
 | Règle SEC T+1 | `e214bf80244fe9107c867d7abeb6a6b969029c519566036e42b081977a9b575a` |
 | Guide DTC T+1 | `1655962c57e5a1459cf0d29c853b0bf924c3255aba5be0e0d04c4a7d2536b7f2` |
 
-Une nouvelle réponse téléchargée depuis la même URL n'est pas substituable si
+L'audit dérivé est une dépendance technique explicite du moteur, pas un substitut
+aux deux réponses Yahoo brutes. Une nouvelle réponse téléchargée depuis la même URL n'est pas substituable si
 son empreinte diffère. Les sorties historiques versionnées peuvent servir de
 contrôle de réplication, mais ne remplacent pas silencieusement les sources
 brutes pour l'exécution d'une nouvelle politique.

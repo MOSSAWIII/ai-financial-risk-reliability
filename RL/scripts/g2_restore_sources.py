@@ -67,62 +67,74 @@ def build_restore_plan(
             rows.append(row)
             blockers.append({"id": dataset_id, "status": row["status"]})
             continue
-        relative_path = entry.get("local_file")
-        expected_hash = entry.get("sha256")
-        expected_bytes = entry.get("bytes")
-        if not isinstance(relative_path, str) or not isinstance(expected_hash, str):
-            row = {"id": dataset_id, "status": "MANIFEST_FIELDS_INVALID"}
-            rows.append(row)
-            blockers.append({"id": dataset_id, "status": row["status"]})
-            continue
-
-        destination = repo_root / relative_path
-        row: dict[str, Any] = {
-            "id": dataset_id,
-            "relative_path": relative_path,
-            "expected_sha256": expected_hash,
-            "expected_bytes": expected_bytes,
-            "destination": str(destination),
-        }
-        if destination.is_file():
-            destination_hash = sha256_file(destination)
-            row["destination_sha256"] = destination_hash
-            if destination_hash == expected_hash and (
-                not isinstance(expected_bytes, int) or destination.stat().st_size == expected_bytes
-            ):
-                row["status"] = "ALREADY_PRESENT"
+        components = [("primary", entry), *[
+            (f"additional_{index}", item)
+            for index, item in enumerate(entry.get("additional_files", []), start=1)
+        ]]
+        for component, file_entry in components:
+            component_id = dataset_id if component == "primary" else f"{dataset_id}#{component}"
+            relative_path = file_entry.get("local_file")
+            expected_hash = file_entry.get("sha256")
+            expected_bytes = file_entry.get("bytes")
+            if not isinstance(relative_path, str) or not isinstance(expected_hash, str):
+                row = {"id": component_id, "dataset_id": dataset_id, "status": "MANIFEST_FIELDS_INVALID"}
                 rows.append(row)
+                blockers.append({"id": component_id, "status": row["status"]})
                 continue
-            row["status"] = "DESTINATION_CONFLICT"
-            rows.append(row)
-            blockers.append({"id": dataset_id, "status": row["status"]})
-            continue
 
-        candidates = _candidate_paths(roots, relative_path)
-        checked = [
-            {
-                "path": str(path),
-                "bytes": path.stat().st_size,
-                "sha256": sha256_file(path),
+            destination = repo_root / relative_path
+            row = {
+                "id": component_id,
+                "dataset_id": dataset_id,
+                "component": component,
+                "relative_path": relative_path,
+                "expected_sha256": expected_hash,
+                "expected_bytes": expected_bytes,
+                "destination": str(destination),
             }
-            for path in candidates
-        ]
-        row["backup_candidates"] = checked
-        valid = [
-            item
-            for item in checked
-            if item["sha256"] == expected_hash
-            and (not isinstance(expected_bytes, int) or item["bytes"] == expected_bytes)
-        ]
-        if valid:
-            row.update(status="READY_TO_COPY", source=valid[0]["path"])
-        elif checked:
-            row["status"] = "BACKUP_HASH_MISMATCH"
-            blockers.append({"id": dataset_id, "status": row["status"]})
-        else:
-            row["status"] = "BACKUP_FILE_MISSING"
-            blockers.append({"id": dataset_id, "status": row["status"]})
-        rows.append(row)
+            if destination.is_file():
+                destination_hash = sha256_file(destination)
+                row["destination_sha256"] = destination_hash
+                if destination_hash == expected_hash and (
+                    not isinstance(expected_bytes, int)
+                    or destination.stat().st_size == expected_bytes
+                ):
+                    row["status"] = "ALREADY_PRESENT"
+                    rows.append(row)
+                    continue
+                row["status"] = "DESTINATION_CONFLICT"
+                rows.append(row)
+                blockers.append({"id": component_id, "status": row["status"]})
+                continue
+
+            candidates = _candidate_paths(roots, relative_path)
+            checked = [
+                {
+                    "path": str(path),
+                    "bytes": path.stat().st_size,
+                    "sha256": sha256_file(path),
+                }
+                for path in candidates
+            ]
+            row["backup_candidates"] = checked
+            valid = [
+                item
+                for item in checked
+                if item["sha256"] == expected_hash
+                and (
+                    not isinstance(expected_bytes, int)
+                    or item["bytes"] == expected_bytes
+                )
+            ]
+            if valid:
+                row.update(status="READY_TO_COPY", source=valid[0]["path"])
+            elif checked:
+                row["status"] = "BACKUP_HASH_MISMATCH"
+                blockers.append({"id": component_id, "status": row["status"]})
+            else:
+                row["status"] = "BACKUP_FILE_MISSING"
+                blockers.append({"id": component_id, "status": row["status"]})
+            rows.append(row)
 
     return {
         "schema_version": "1.0",

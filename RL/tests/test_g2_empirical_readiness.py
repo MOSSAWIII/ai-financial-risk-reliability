@@ -108,3 +108,19 @@ def test_blocked_run_refuses_preexisting_performance_output(tmp_path: Path) -> N
     (output_dir / "g2_report.json").write_text("{}\n", encoding="utf-8")
     with pytest.raises(ReadinessError, match="malgré le blocage"):
         write_readiness_only(report, output_dir)
+
+
+def test_missing_manifest_additional_file_blocks_readiness(tmp_path: Path) -> None:
+    manifest, protocol, required = _fixture(tmp_path)
+    payload = json.loads(manifest.read_text(encoding="utf-8"))
+    payload["datasets"][0]["additional_files"] = [
+        {
+            "local_file": "data/raw/supplement.pdf",
+            "sha256": _sha256(b"supplement"),
+            "bytes": len(b"supplement"),
+        }
+    ]
+    manifest.write_text(json.dumps(payload), encoding="utf-8")
+    report = build_readiness_report(tmp_path, manifest, required, protocol)
+    assert report["documentary_verdict"] == "DOCUMENTARY_BLOCK"
+    assert report["source_checks"][0]["status"] == "ADDITIONAL_FILE_INVALID"
