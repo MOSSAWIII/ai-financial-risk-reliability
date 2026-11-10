@@ -36,8 +36,25 @@ class G3Tests(unittest.TestCase):
         self.assertTrue({START, INITIAL_END, EVAL_START, EVAL_END, TERMINAL}
                         <= {row[0] for row in weekly})
         _, params = estimate(weekly, samples(weekly), EVAL_START)
-        self.assertLess(date.fromisoformat(params["latest_training_outcome"]),
-                        EVAL_START)
+        self.assertLessEqual(date.fromisoformat(params["latest_training_outcome"]),
+                             INITIAL_END)
+
+    def test_g2_holdout_not_used_in_parameter_estimation(self):
+        rows = fixture()
+        decision = date(2025, 8, 11)
+        original_model, original = estimate(rows, samples(rows), decision)
+        # Le prix modifié est à l'intérieur de G2, hors de toute fenêtre
+        # admissible pour les paramètres de G3.
+        shocked = [(day, spy * 1.8 if day == date(2024, 7, 1) else spy, bil)
+                   for day, spy, bil in rows]
+        changed_model, changed = estimate(shocked, samples(shocked), decision)
+        self.assertEqual(original, changed)
+        self.assertEqual(original_model.returns, changed_model.returns)
+        self.assertEqual(original_model.transition, changed_model.transition)
+        self.assertGreater(date.fromisoformat(original["latest_training_outcome"]),
+                           EVAL_START)
+        self.assertLess(date.fromisoformat(original["latest_training_outcome"]),
+                        decision)
 
     def test_frozen_solver_unchanged(self):
         expected = solve_dynamic_program(default_model(horizon=12), COST)
