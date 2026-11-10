@@ -9,7 +9,8 @@ from tempfile import TemporaryDirectory
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from g3_learning_value import (
     START, INITIAL_END, EVAL_START, EVAL_END, TERMINAL, COST,
-    FIELDS, csv_write, estimate, samples, simulate, verify_inputs, sha256
+    FIELDS, csv_write, estimate, samples, simulate, verify_inputs, sha256,
+    run, G3Error
 )
 from sequentiality_test import default_model, solve_dynamic_program
 
@@ -109,6 +110,15 @@ class G3Tests(unittest.TestCase):
                 csv_write(Path(right)/filename, columns, result[filename])
                 self.assertEqual(sha256(Path(left)/filename),
                                  sha256(Path(right)/filename))
+
+    def test_block_never_emits_performance_files(self):
+        with TemporaryDirectory() as folder:
+            root = Path(folder) / "unrestored_repo"
+            root.mkdir()
+            output = Path(folder) / "results"
+            with self.assertRaisesRegex(G3Error, "DOCUMENTARY_BLOCK"):
+                run(root, output)
+            self.assertFalse(output.exists())
 
     def test_documentary_block_on_missing_sources(self):
         with TemporaryDirectory() as folder:
