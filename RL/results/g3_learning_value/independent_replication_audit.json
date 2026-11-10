@@ -1,0 +1,41 @@
+{
+  "schema_version": "g3a-independent-replication-audit-1.0",
+  "date": "2026-11-10",
+  "status": "INDEPENDENT_REPLICATION_POSITIVE_PENDING_CANONICAL_REEXECUTION",
+  "data_sources_verified": true,
+  "source_sha256": {
+    "SPY": "b77099e8c46a954f045e95432d2b6220a526f15322c87b877aafae628da14f52",
+    "BIL": "2eaa0529ae97b0e8e078285e8daa5247176c42b6df114019d6e0e2c4b3f838d2"
+  },
+  "protocol_sha256": "5caba8a67da6a8ceef721ad2ddc2dde1d9a3cee7780674d6d7cd40309afefd79",
+  "canonical_github_script_executed": false,
+  "evaluation": {
+    "first_decision": "2025-06-02",
+    "last_decision": "2026-04-13",
+    "terminal": "2026-04-17",
+    "n_decisions": 46,
+    "cost_bps": 10,
+    "initial_capital_usd": 100000,
+    "threshold_usd": 250
+  },
+  "terminal_wealth_usd": {
+    "D_G2_FROZEN": "112178.84659208138",
+    "D_G3_LEARNED": "117476.69534051670",
+    "M_G3_LEARNED": "117476.69534051670"
+  },
+  "paired_difference_usd": "5297.84874843532",
+  "frozen_criterion_verdict": "G3_LEARNING_VALUE_POSITIVE",
+  "output_sha256": {
+    "model_estimates.csv": "0d714f511cdbbab8c10f1309c95b3659659ba54ab0181a25fd1aae0f2fdd59e5",
+    "policy_decisions.csv": "21af4ddd915f65d3db3434190e66b45891380a698d9345e524567a751bb6bb55",
+    "wealth_paths.csv": "1ae6c384afb895123744663ef0faa22fb6a104580e3e96501c721b53c7b1eb4e",
+    "paired_comparison.csv": "f28706978ac9aee57811ed20a0c6bcca38615b95b696b1e1a1fe43b2f3f6c192"
+  },
+  "reproduction_note": "These four CSV files were computed in the isolated sandbox by an independently written reproduction of the frozen G3A equations; they are NOT yet committed to GitHub, and their hashes are published for comparison with the canonical script.",
+  "additional_checks": {
+    "passed": 17,
+    "total": 17
+  },
+  "critical_result": "D_G3_LEARNED equals M_G3_LEARNED and static 100% SPY after four-week warmup; no incremental sequential policy value demonstrated",
+  "interpretation": "exploratory close-to-close unadjusted-price proxy, not executable returns; PPO not authorized"
+}
