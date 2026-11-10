@@ -45,6 +45,17 @@ trajectoires restent exactement identiques de S0 à S2. Le verdict autorise G3 �
 démontrer si l'apprentissage ajoute une valeur face au contrôleur connu — mais
 ne démontre ni généralisation hors échantillon ni nécessité de PPO.
 
+### Jalon G3A — valeur incrémentale de l'apprentissage (implémentation)
+
+Le [protocole G3](docs/PROTOCOLE_G3_VALEUR_APPRENTISSAGE.md) a été gelé avant
+l'évaluation. Le script [`g3_learning_value.py`](scripts/g3_learning_value.py)
+compare le contrôleur `D_G2_FROZEN` à un contrôleur dynamique réestimé et à un
+contrôle myope appris, sur la fenêtre 2 juin 2025–17 avril 2026. La
+[validation d'implémentation](docs/VALIDATION_G3_IMPLEMENTATION.md) documente
+les contrôles négatifs, les limites du close-à-close et le blocage documentaire
+à respecter si les deux sources Yahoo originales ne sont pas disponibles.
+**Aucun verdict empirique G3 n'est encore publié** et PPO reste hors périmètre.
+
 Ce dossier ouvre un axe de recherche autonome au sein de `ai-financial-risk-reliability`. Il contient un cadrage scientifique, une étude fondamentale sur la nature séquentielle d'une décision, une formalisation financière, un audit de faisabilité d'un mandat SPY–BIL et un patrimoine local de données documentées. BIL-A reste validée sous la convention à l'ex-date. SPY-B et BIL-B suivent les parts, les créances et leur réinvestissement à la date de paiement. BIL-B est validée pour l'analyse NAV du 4 mars 2008 au 15 octobre 2026 ; sa frontière exclut explicitement la distribution du 3 mars 2008 dont les dates historiques restent incohérentes. Aucun algorithme de Reinforcement Learning (RL), modèle prédictif, environnement de simulation, stratégie ou backtest n'a été créé.
 
 La priorité active est désormais : **qualifier la grille documentaire ciblée des décisions hebdomadaires candidates avant toute exécution historique C2.** Les données brutes sont conservées localement sous `data/raw/`, exclues de GitHub et sauvegardées sur un disque physique distinct. Leur inventaire publiable se trouve dans [`data_manifest.json`](data_manifest.json), les contrôles reproductibles dans [`scripts/verify_local_data.py`](scripts/verify_local_data.py), et les résultats détaillés dans [`docs/AUDIT_DONNEES_ACADEMIQUES_LOCALES.md`](docs/AUDIT_DONNEES_ACADEMIQUES_LOCALES.md).
