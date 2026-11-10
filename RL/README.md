@@ -56,6 +56,16 @@ les contrôles négatifs, les limites du close-à-close et le blocage documentai
 à respecter si les deux sources Yahoo originales ne sont pas disponibles.
 **Aucun verdict empirique G3 n'est encore publié** et PPO reste hors périmètre.
 
+La [reproduction empirique indépendante de G3A](docs/VALIDATION_G3A_EMPIRIQUE_INDEPENDANTE.md)
+a maintenant retrouvé les deux sources Yahoo originales avec concordance SHA-256.
+Le critère comparatif prédéfini est positif (+5 297,85 USD par rapport à
+`D_G2_FROZEN`), mais le contrôleur appris reproduit exactement une position
+statique 100 % SPY après quatre semaines de warm-up. Aucune valeur séquentielle
+supplémentaire ni nécessité de PPO n'est démontrée. Les quatre empreintes CSV
+sont [consignées ici](results/g3_learning_value/independent_replication_audit.json).
+**Le script canonique doit encore être exécuté sur les originaux et confronté
+octet pour octet à la reproduction indépendante.**
+
 Ce dossier ouvre un axe de recherche autonome au sein de `ai-financial-risk-reliability`. Il contient un cadrage scientifique, une étude fondamentale sur la nature séquentielle d'une décision, une formalisation financière, un audit de faisabilité d'un mandat SPY–BIL et un patrimoine local de données documentées. BIL-A reste validée sous la convention à l'ex-date. SPY-B et BIL-B suivent les parts, les créances et leur réinvestissement à la date de paiement. BIL-B est validée pour l'analyse NAV du 4 mars 2008 au 15 octobre 2026 ; sa frontière exclut explicitement la distribution du 3 mars 2008 dont les dates historiques restent incohérentes. Aucun algorithme de Reinforcement Learning (RL), modèle prédictif, environnement de simulation, stratégie ou backtest n'a été créé.
 
 La priorité active est désormais : **qualifier la grille documentaire ciblée des décisions hebdomadaires candidates avant toute exécution historique C2.** Les données brutes sont conservées localement sous `data/raw/`, exclues de GitHub et sauvegardées sur un disque physique distinct. Leur inventaire publiable se trouve dans [`data_manifest.json`](data_manifest.json), les contrôles reproductibles dans [`scripts/verify_local_data.py`](scripts/verify_local_data.py), et les résultats détaillés dans [`docs/AUDIT_DONNEES_ACADEMIQUES_LOCALES.md`](docs/AUDIT_DONNEES_ACADEMIQUES_LOCALES.md).
