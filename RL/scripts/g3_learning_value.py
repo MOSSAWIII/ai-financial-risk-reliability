@@ -354,7 +354,14 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--repo-root", type=Path, default=ROOT)
     p.add_argument("--output-dir", type=Path, default=OUTPUT)
+    p.add_argument("--readiness-only", action="store_true",
+                   help="Audit hashes and source availability without creating any performance files")
     args = p.parse_args()
+    if args.readiness_only:
+        audit = verify_inputs(args.repo_root)
+        audit.pop("paths")
+        print(json.dumps(audit, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0 if audit["verdict"] == "READY_FOR_G3_EXECUTION" else 2
     print(json.dumps({"verdict": run(args.repo_root, args.output_dir)}))
     return 0
 
