@@ -8,6 +8,21 @@ Le contrôle de document initial est **non satisfaisable dans cet environnement 
 
 **Statut scientifique : \`G3A_IMPLEMENTED_NOT_EMPIRICALLY_EVALUATED\`.** Ce statut ne vaut ni \`G3_LEARNING_VALUE_POSITIVE\`, ni \`G3_LEARNING_VALUE_NEGATIVE\`, ni \`G3_LEARNING_VALUE_NOT_MATERIAL\`.
 
+## Amendement d'implémentation avant toute performance G3
+
+La fenêtre 2024–2025, déjà utilisée par G2, est **exclue des couples
+d'apprentissage** (rendements conditionnels et transitions). L'entraînement
+initial s'arrête au 28 mai 2024 ; les estimations sont ensuite actualisées
+uniquement avec les rendements **réalisés en G3** et clos avant la décision.
+Les closes de mai 2025 peuvent servir au calcul du signal rétrospectif à
+quatre semaines au démarrage G3, mais pas comme observations cibles
+d'entraînement. Ce correctif respecte la séparation du protocole gelé et
+a été effectué sans accès aux résultats historiques G3.
+
+La commande `--readiness-only` renvoie un JSON documentaire sans aucun
+calcul de richesse. Sa sortie non nulle `2` indique `DOCUMENTARY_BLOCK`.
+Le dépôt GitHub ne contient volontairement aucun des fichiers Yahoo bruts.
+
 ## Structure des calculs
 
 1. Porte documentaire : SHA-256, tailles, métadonnées et prix closés bruts originaux de Yahoo SPY et BIL.
@@ -29,12 +44,13 @@ Les quatre CSV et le JSON définis par le protocole sont écrits **uniquement ap
 
 ## Contrôles automatisés
 
-La suite [test_g3_learning_value.py](../tests/test_g3_learning_value.py) comprend sept contrôles sans données de marché : séparation temporelle, identité du contrôleur G2, résistance à la modification d'un prix futur intérieur ou terminal, warm-up/calendriers communs, CSV identiques octet pour octet, refus d'exécution sans originaux. Ces contrôles ne remplacent **pas** l'exécution avec sources originales ni l'audit du rapport G3A.
+La suite [test_g3_learning_value.py](../tests/test_g3_learning_value.py) comprend neuf contrôles sans données de marché : séparation temporelle, identité du contrôleur G2, résistance à la modification d'un prix futur intérieur ou terminal, exclusion vérifiable de l'épisode G2 de l'estimation, warm-up/calendriers communs, CSV identiques octet pour octet, refus d'exécution sans originaux et absence de fichiers de performance lorsque le contrôle documentaire échoue. Ces contrôles ne remplacent **pas** l'exécution avec sources originales ni l'audit du rapport G3A.
 
 Depuis la racine du dépôt :
 
 \`\`\`sh
 python -m unittest discover -s RL/tests -p 'test_g3_learning_value.py' -v
+python RL/scripts/g3_learning_value.py --readiness-only
 python RL/scripts/g3_learning_value.py
 \`\`\`
 
