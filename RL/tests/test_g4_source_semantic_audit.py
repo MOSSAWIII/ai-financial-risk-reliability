@@ -84,6 +84,17 @@ class SemanticAuditTests(unittest.TestCase):
         canonical_second, _ = canonical_document(second, "SPY")
         self.assertEqual(sha256_bytes(canonical_first), sha256_bytes(canonical_second))
 
+    def test_unused_ohlcv_fields_are_excluded_from_causal_hash(self):
+        EXPECTED["SPY"] = {"rows": 3, "start": "2007-05-25", "end": "2007-05-27", "dividends": 0, "splits": 0}
+        first = payload("SPY", 3)
+        document = json.loads(first)
+        document["chart"]["result"][0]["indicators"]["quote"][0]["volume"][1] = 999999.0
+        document["chart"]["result"][0]["indicators"]["quote"][0]["open"][1] = 999999.0
+        second = json.dumps(document, separators=(",", ":")).encode()
+        canonical_first, _ = canonical_document(first, "SPY")
+        canonical_second, _ = canonical_document(second, "SPY")
+        self.assertEqual(sha256_bytes(canonical_first), sha256_bytes(canonical_second))
+
     def test_structural_divergence_is_a_hard_failure(self):
         EXPECTED["SPY"] = {"rows": 4, "start": "2007-05-25", "end": "2007-05-28", "dividends": 0, "splits": 0}
         with self.assertRaisesRegex(G4SourceAuditError, "structure historique divergente"):

@@ -77,16 +77,14 @@ def canonical_document(payload: bytes, expected_symbol: str) -> tuple[bytes, dic
         raise G4SourceAuditError(f"tableaux d�salign�s ou incomplets pour {expected_symbol}")
     events = result.get("events") or {}
     canonical = {
-        "schema_version": "g4-yahoo-causal-slice-1.1",
+        "schema_version": "g4-yahoo-causal-slice-1.2",
         "meta": required_meta,
         "timestamp": timestamps,
         "events": {
             "dividends": _canonical_event_map(events, "dividends"),
             "splits": _canonical_event_map(events, "splits"),
         },
-        "indicators": {
-            "quote": [{name: fields[name] for name in ("open", "high", "low", "close", "volume")}],
-        },
+        "indicators": {"quote": [{"close": fields["close"]}]},
     }
     rendered = json.dumps(canonical, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8") + b"\n"
     timezone = ZoneInfo("America/New_York")
@@ -152,7 +150,8 @@ def audit_sources(output_dir: Path, local_inputs: dict[str, Path] | None = None)
         "scope": "SOURCE_BYTES_AND_HISTORICAL_FIELDS_ONLY_NO_RETURNS",
         "canonical_exclusions": [
             "live_meta_fields",
-            "adjclose_revised_by_distributions_after_the_requested_period"
+            "adjclose_revised_by_distributions_after_the_requested_period",
+            "open_high_low_volume_not_consumed_by_the_g4_transition_builder"
         ],
         "performance_computation_performed": False,
         "sources": sources,
