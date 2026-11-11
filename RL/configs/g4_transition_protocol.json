@@ -38,7 +38,9 @@
     "first_decision": "2008-05-30",
     "last_decision": "2026-10-09",
     "sha256": "dd95e2bd438fca90f9636cda3b8c7c86c1ab3b4e0c0834cc171f4af95fde9a0d",
-    "ci_run_id": 43056193204
+    "ci_run_id": 43056193204,
+    "independent_reproduction_ci_run_id": 43056556439,
+    "independently_reproduced": true
   },
   "structural_sequentiality_lab_authorized": true,
   "historical_policy_comparison_authorized": false,

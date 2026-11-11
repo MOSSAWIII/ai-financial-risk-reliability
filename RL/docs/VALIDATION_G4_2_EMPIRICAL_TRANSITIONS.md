@@ -47,7 +47,9 @@ r�visables sans masquer une modification des cl�tures ou �v�nements util
 - aucun calcul de performance de politique ;
 - aucun entra�nement RL.
 
-La reconstruction a r�ussi dans GitHub Actions, ex�cution `43056193204`. Les
+La reconstruction a r�ussi dans GitHub Actions, ex�cution `43056193204`. Une
+seconde acquisition et reconstruction ind�pendante, ex�cution `43056556439`,
+a reproduit exactement les quatre SHA causaux et le SHA final du JSONL. Les
 fichiers bruts et canoniques restent hors Git ; le code, les contrats, les
 empreintes et le rapport sont versionn�s.
 

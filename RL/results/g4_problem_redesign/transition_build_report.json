@@ -7,6 +7,7 @@
     "BIL"
   ],
   "ci_run_id": 43056193204,
+  "independent_reproduction_ci_run_id": 43056556439,
   "first_decision": "2008-05-30",
   "last_decision": "2026-10-09",
   "performance_comparison_performed": false,
@@ -22,5 +23,6 @@
   },
   "state_lookback_weeks": 52,
   "transitions_sha256": "dd95e2bd438fca90f9636cda3b8c7c86c1ab3b4e0c0834cc171f4af95fde9a0d",
+  "independently_reproduced": true,
   "verdict": "G4_2_TRANSITIONS_BUILT"
 }
