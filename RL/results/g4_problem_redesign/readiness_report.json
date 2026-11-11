@@ -1,0 +1,27 @@
+{
+  "action_count": 35,
+  "authorized_work": "DOCUMENTARY_AND_STATISTICAL_DATA_AUDIT_ONLY",
+  "candidate_instruments": [
+    "SPY",
+    "IEF",
+    "GLD",
+    "BIL"
+  ],
+  "checks": {
+    "benchmark_ladder_is_complete": true,
+    "candidate_instruments_are_not_yet_adopted": true,
+    "g3a_is_canonically_validated": true,
+    "no_performance_is_authorized": true,
+    "no_rl_algorithm_is_authorized": true,
+    "only_data_audit_is_authorized": true,
+    "simplex_action_count_is_exact": true,
+    "spy_bil_is_closed_for_rl_necessity": true,
+    "turnover_budget_is_endogenous_state": true
+  },
+  "config_sha256": "8e3aa547d91f27e3c54b1e84a02c6e6d7386a5a4a231772ecee8c8335f1bcadb",
+  "g3a_canonical_validation_sha256": "b574637ca43a61df34b32fb1b232fcd1e4396343f92abb5933bfdd9b1240849d",
+  "performance_computation_authorized": false,
+  "rl_algorithms_authorized": [],
+  "schema_version": "g4-protocol-readiness-1.0",
+  "verdict": "READY_FOR_G4_DATA_AUDIT"
+}

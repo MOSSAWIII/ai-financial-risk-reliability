@@ -1,0 +1,46 @@
+{
+  "schema_version": "g4-problem-redesign-1.0",
+  "status": "FROZEN_BEFORE_G4_DATA_AUDIT",
+  "predecessor_status": "G3A_CANONICAL_VALIDATED",
+  "closed_candidate": "SPY_BIL_RL_NECESSITY",
+  "selected_problem": "LONG_ONLY_MULTI_ASSET_ALLOCATION_WITH_CUMULATIVE_TURNOVER_BUDGET",
+  "candidate_instruments": ["SPY", "IEF", "GLD", "BIL"],
+  "instruments_adopted": false,
+  "decision_frequency": "WEEKLY",
+  "action_step": "0.25",
+  "expected_action_count": 35,
+  "constraints": {
+    "long_only": true,
+    "fully_invested": true,
+    "leverage": false,
+    "shorting": false,
+    "per_decision_turnover_cap": "0.25",
+    "cumulative_turnover_budget_is_state": true,
+    "candidate_annualized_volatility_cap": "0.12",
+    "volatility_cap_adopted": false
+  },
+  "primary_objective": "EXPECTED_TERMINAL_LOG_WEALTH_NET_OF_COSTS",
+  "mandatory_benchmarks": [
+    "STATIC_SLEEVES",
+    "EQUAL_WEIGHT",
+    "SIXTY_FORTY",
+    "VOLATILITY_TARGETING",
+    "RISK_PARITY",
+    "ROLLING_MEAN_VARIANCE",
+    "NO_TRADE_BAND",
+    "MODEL_PREDICTIVE_CONTROL",
+    "LEARNED_MYOPIC",
+    "ORACLE_DISCRETE_DP"
+  ],
+  "gates": [
+    "G4_0_CLOSURE",
+    "G4_1_DATA_READINESS",
+    "G4_2_STRUCTURAL_SEQUENTIALITY",
+    "G4_3_CLASSICAL_CONTROLLERS",
+    "G4_4_OFFLINE_SUPPORT",
+    "G4_5_WALK_FORWARD_ROBUSTNESS"
+  ],
+  "currently_authorized_gate": "G4_1_DATA_READINESS",
+  "rl_algorithms_authorized": [],
+  "performance_computation_authorized": false
+}
