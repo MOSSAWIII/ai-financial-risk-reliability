@@ -1,0 +1,226 @@
+{
+  "common_calendar": {
+    "assertions": {
+      "candidate_common_start_observed": true,
+      "common_end_aligned": true,
+      "common_window_nonempty": true
+    },
+    "asset_missing_vs_union": {
+      "BIL": 2,
+      "GLD": 0,
+      "IEF": 0,
+      "SPY": 0
+    },
+    "asset_only_vs_common": {
+      "BIL": 0,
+      "GLD": 2,
+      "IEF": 2,
+      "SPY": 2
+    },
+    "common_end": "2026-10-16",
+    "common_rows": 4878,
+    "common_start": "2007-05-30",
+    "union_rows": 4880
+  },
+  "failed_assertions": [],
+  "issuer_sources": {
+    "GLD": {
+      "assertions": {
+        "all_required_labels_present": true,
+        "historical_sheet_present": true,
+        "substantial_history": true
+      },
+      "bytes": 543694,
+      "format": "XLSX",
+      "historical_sheet_rows_including_headers": 5734,
+      "required_labels": {
+        "Daily Share Volume": true,
+        "Date": true,
+        "NAV/Share at 10:30am NYT": true,
+        "Ounces of Gold per Share": true,
+        "Total Net Asset Value in the Trust": true
+      },
+      "sheets": [
+        "Disclaimer",
+        "US GLD Historical Archive"
+      ]
+    },
+    "IEF": {
+      "assertions": {
+        "all_required_labels_present": true,
+        "substantial_document": true
+      },
+      "bytes": 2491955,
+      "format": "SpreadsheetML XML",
+      "required_labels": {
+        "Distributions": true,
+        "Ex-Date": true,
+        "Historical": true,
+        "Holdings": true,
+        "Payable Date": true,
+        "Performance": true,
+        "Record Date": true,
+        "Total Distribution": true
+      }
+    }
+  },
+  "market_sources": {
+    "BIL": {
+      "assertions": {
+        "arrays_aligned": true,
+        "ascending_unique_dates": true,
+        "currency_usd": true,
+        "daily_granularity": true,
+        "no_missing_rows": true,
+        "no_weekend_dates": true,
+        "nonnegative_volume": true,
+        "positive_prices": true,
+        "symbol_matches": true,
+        "valid_ohlc": true
+      },
+      "currency": "USD",
+      "dividend_event_count": 128,
+      "duplicate_dates": 0,
+      "end": "2026-10-16",
+      "exchange_name": "PCX",
+      "field_lengths": {
+        "adjclose": 4878,
+        "close": 4878,
+        "high": 4878,
+        "low": 4878,
+        "open": 4878,
+        "timestamp": 4878,
+        "volume": 4878
+      },
+      "full_exchange_name": "NYSEArca",
+      "invalid_ohlc_rows": 0,
+      "missing_rows": 0,
+      "negative_volume_rows": 0,
+      "nonpositive_price_values": 0,
+      "rows": 4878,
+      "split_event_count": 1,
+      "start": "2007-05-30",
+      "symbol": "BIL",
+      "weekend_dates": 0
+    },
+    "GLD": {
+      "assertions": {
+        "arrays_aligned": true,
+        "ascending_unique_dates": true,
+        "currency_usd": true,
+        "daily_granularity": true,
+        "no_missing_rows": true,
+        "no_weekend_dates": true,
+        "nonnegative_volume": true,
+        "positive_prices": true,
+        "symbol_matches": true,
+        "valid_ohlc": true
+      },
+      "currency": "USD",
+      "dividend_event_count": 0,
+      "duplicate_dates": 0,
+      "end": "2026-10-16",
+      "exchange_name": "PCX",
+      "field_lengths": {
+        "adjclose": 4880,
+        "close": 4880,
+        "high": 4880,
+        "low": 4880,
+        "open": 4880,
+        "timestamp": 4880,
+        "volume": 4880
+      },
+      "full_exchange_name": "NYSEArca",
+      "invalid_ohlc_rows": 0,
+      "missing_rows": 0,
+      "negative_volume_rows": 0,
+      "nonpositive_price_values": 0,
+      "rows": 4880,
+      "split_event_count": 0,
+      "start": "2007-05-25",
+      "symbol": "GLD",
+      "weekend_dates": 0
+    },
+    "IEF": {
+      "assertions": {
+        "arrays_aligned": true,
+        "ascending_unique_dates": true,
+        "currency_usd": true,
+        "daily_granularity": true,
+        "no_missing_rows": true,
+        "no_weekend_dates": true,
+        "nonnegative_volume": true,
+        "positive_prices": true,
+        "symbol_matches": true,
+        "valid_ohlc": true
+      },
+      "currency": "USD",
+      "dividend_event_count": 233,
+      "duplicate_dates": 0,
+      "end": "2026-10-16",
+      "exchange_name": "NGM",
+      "field_lengths": {
+        "adjclose": 4880,
+        "close": 4880,
+        "high": 4880,
+        "low": 4880,
+        "open": 4880,
+        "timestamp": 4880,
+        "volume": 4880
+      },
+      "full_exchange_name": "NasdaqGM",
+      "invalid_ohlc_rows": 0,
+      "missing_rows": 0,
+      "negative_volume_rows": 0,
+      "nonpositive_price_values": 0,
+      "rows": 4880,
+      "split_event_count": 0,
+      "start": "2007-05-25",
+      "symbol": "IEF",
+      "weekend_dates": 0
+    },
+    "SPY": {
+      "assertions": {
+        "arrays_aligned": true,
+        "ascending_unique_dates": true,
+        "currency_usd": true,
+        "daily_granularity": true,
+        "no_missing_rows": true,
+        "no_weekend_dates": true,
+        "nonnegative_volume": true,
+        "positive_prices": true,
+        "symbol_matches": true,
+        "valid_ohlc": true
+      },
+      "currency": "USD",
+      "dividend_event_count": 78,
+      "duplicate_dates": 0,
+      "end": "2026-10-16",
+      "exchange_name": "PCX",
+      "field_lengths": {
+        "adjclose": 4880,
+        "close": 4880,
+        "high": 4880,
+        "low": 4880,
+        "open": 4880,
+        "timestamp": 4880,
+        "volume": 4880
+      },
+      "full_exchange_name": "NYSEArca",
+      "invalid_ohlc_rows": 0,
+      "missing_rows": 0,
+      "negative_volume_rows": 0,
+      "nonpositive_price_values": 0,
+      "rows": 4880,
+      "split_event_count": 0,
+      "start": "2007-05-25",
+      "symbol": "SPY",
+      "weekend_dates": 0
+    }
+  },
+  "performance_computation_performed": false,
+  "schema_version": "g4-data-audit-1.0",
+  "scope": "STRUCTURE_CALENDAR_EVENTS_AND_ISSUER_FILES_ONLY",
+  "training_authorized": false,
+  "verdict": "G4_1_DATA_AUDIT_PASSED"
+}

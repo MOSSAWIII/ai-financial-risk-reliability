@@ -1,6 +1,8 @@
 {
   "schema_version": "g4-data-requirements-1.0",
-  "status": "FROZEN_BEFORE_G4_1_READINESS_EXECUTION",
+  "status": "ACQUISITION_HASHES_FROZEN_BEFORE_G4_1_STATISTICAL_AUDIT",
+  "initial_freeze": "Les quatre sources IEF/GLD étaient explicitement REQUIRED_NOT_ACQUIRED; leurs identifiants et rôles ont été gelés avant acquisition.",
+  "acquisition_amendment": "Le 2026-11-11, seuls les SHA-256 et statuts d'acquisition des quatre identifiants déjà gelés ont été renseignés avant l'audit statistique.",
   "candidate_instruments": ["SPY", "IEF", "GLD", "BIL"],
   "candidate_common_start": "2007-05-30",
   "market_data_convention": "COMMON_DAILY_OHLCV_PROXY_WITH_SPLIT_EVENTS",
@@ -38,31 +40,31 @@
       "asset": "IEF",
       "role": "MARKET_OHLCV",
       "dataset_id": "yahoo_ief_chart_ohlcv_g4",
-      "expected_sha256": null,
-      "status_before_audit": "REQUIRED_NOT_ACQUIRED"
+      "expected_sha256": "9daa83ee383e208e1b4c09e0148b19f92d82049056e71a967323cd54dc744108",
+      "status_before_audit": "ACQUIRED_FOR_G4_1_AUDIT"
     },
     {
       "asset": "IEF",
       "role": "DISTRIBUTIONS",
       "dataset_id": "ishares_ief_distribution_history_g4",
-      "expected_sha256": null,
+      "expected_sha256": "5558efd11d698945862e4f11f68ec9cd3faeb8a732cad4ec05704e18fab0b275",
       "official_source": "https://www.ishares.com/us/products/239456/ishares-7-10-year-treasury-bond-etf",
-      "status_before_audit": "REQUIRED_NOT_ACQUIRED"
+      "status_before_audit": "ACQUIRED_FOR_G4_1_AUDIT"
     },
     {
       "asset": "GLD",
       "role": "MARKET_OHLCV",
       "dataset_id": "yahoo_gld_chart_ohlcv_g4",
-      "expected_sha256": null,
-      "status_before_audit": "REQUIRED_NOT_ACQUIRED"
+      "expected_sha256": "39b8398c597fb20f03330319904ae9f9549b84e8e6b66d32e509a80daeae4172",
+      "status_before_audit": "ACQUIRED_FOR_G4_1_AUDIT"
     },
     {
       "asset": "GLD",
       "role": "ISSUER_HISTORY_AND_DISTRIBUTION_POLICY",
       "dataset_id": "spdr_gld_historical_archive_g4",
-      "expected_sha256": null,
+      "expected_sha256": "85c8770862db5a1411e29e2021d81e0f42240832ab7fdfd3f2a63d9ff66ccd04",
       "official_source": "https://www.spdrgoldshares.com/usa/gld/",
-      "status_before_audit": "REQUIRED_NOT_ACQUIRED"
+      "status_before_audit": "ACQUIRED_FOR_G4_1_AUDIT"
     },
     {
       "asset": "ALL",

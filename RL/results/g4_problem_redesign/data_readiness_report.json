@@ -1,0 +1,103 @@
+{
+  "blockers": [],
+  "manifest_sha256": "de336da065be2f71e44351022052d801e857359f18ea6f01a1d9a3212bc7e2ea",
+  "performance_computation_authorized": false,
+  "requirements": [
+    {
+      "asset": "SPY",
+      "dataset_id": "yahoo_spy_chart_ohlcv_20261019",
+      "expected_sha256": "b77099e8c46a954f045e95432d2b6220a526f15322c87b877aafae628da14f52",
+      "local_file": "data/raw/rl_market/yahoo_spy_2007-05-25_2026-10-16_acquired-2026-10-19_sha256-b77099e8c46a954f045e95432d2b6220a526f15322c87b877aafae628da14f52.json",
+      "observed_sha256": "b77099e8c46a954f045e95432d2b6220a526f15322c87b877aafae628da14f52",
+      "role": "MARKET_OHLCV",
+      "status": "VERIFIED"
+    },
+    {
+      "asset": "SPY",
+      "dataset_id": "ssga_spdr_distributions_20261019",
+      "expected_sha256": "6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320",
+      "local_file": "data/raw/rl_research/state_street/spdr-etf-historical-distributions_2026-10-19_sha256-6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320.xlsx",
+      "observed_sha256": "6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320",
+      "role": "DISTRIBUTIONS",
+      "status": "VERIFIED"
+    },
+    {
+      "asset": "BIL",
+      "dataset_id": "yahoo_bil_chart_ohlcv_20261019",
+      "expected_sha256": "2eaa0529ae97b0e8e078285e8daa5247176c42b6df114019d6e0e2c4b3f838d2",
+      "local_file": "data/raw/rl_market/yahoo_bil_2007-05-25_2026-10-16_acquired-2026-10-19_sha256-2eaa0529ae97b0e8e078285e8daa5247176c42b6df114019d6e0e2c4b3f838d2.json",
+      "observed_sha256": "2eaa0529ae97b0e8e078285e8daa5247176c42b6df114019d6e0e2c4b3f838d2",
+      "role": "MARKET_OHLCV",
+      "status": "VERIFIED"
+    },
+    {
+      "asset": "BIL",
+      "dataset_id": "ssga_spdr_distributions_20261019",
+      "expected_sha256": "6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320",
+      "local_file": "data/raw/rl_research/state_street/spdr-etf-historical-distributions_2026-10-19_sha256-6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320.xlsx",
+      "observed_sha256": "6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320",
+      "role": "DISTRIBUTIONS",
+      "status": "VERIFIED"
+    },
+    {
+      "asset": "IEF",
+      "dataset_id": "yahoo_ief_chart_ohlcv_g4",
+      "expected_sha256": "9daa83ee383e208e1b4c09e0148b19f92d82049056e71a967323cd54dc744108",
+      "local_file": "data/raw/rl_market/yahoo_ief_2007-05-25_2026-10-16_acquired-2026-11-11_sha256-9daa83ee383e208e1b4c09e0148b19f92d82049056e71a967323cd54dc744108.json",
+      "observed_sha256": "9daa83ee383e208e1b4c09e0148b19f92d82049056e71a967323cd54dc744108",
+      "role": "MARKET_OHLCV",
+      "status": "VERIFIED"
+    },
+    {
+      "asset": "IEF",
+      "dataset_id": "ishares_ief_distribution_history_g4",
+      "expected_sha256": "5558efd11d698945862e4f11f68ec9cd3faeb8a732cad4ec05704e18fab0b275",
+      "local_file": "data/raw/rl_research/ishares/ief_product_data_2026-11-11_sha256-5558efd11d698945862e4f11f68ec9cd3faeb8a732cad4ec05704e18fab0b275.xls",
+      "observed_sha256": "5558efd11d698945862e4f11f68ec9cd3faeb8a732cad4ec05704e18fab0b275",
+      "role": "DISTRIBUTIONS",
+      "status": "VERIFIED"
+    },
+    {
+      "asset": "GLD",
+      "dataset_id": "yahoo_gld_chart_ohlcv_g4",
+      "expected_sha256": "39b8398c597fb20f03330319904ae9f9549b84e8e6b66d32e509a80daeae4172",
+      "local_file": "data/raw/rl_market/yahoo_gld_2007-05-25_2026-10-16_acquired-2026-11-11_sha256-39b8398c597fb20f03330319904ae9f9549b84e8e6b66d32e509a80daeae4172.json",
+      "observed_sha256": "39b8398c597fb20f03330319904ae9f9549b84e8e6b66d32e509a80daeae4172",
+      "role": "MARKET_OHLCV",
+      "status": "VERIFIED"
+    },
+    {
+      "asset": "GLD",
+      "dataset_id": "spdr_gld_historical_archive_g4",
+      "expected_sha256": "85c8770862db5a1411e29e2021d81e0f42240832ab7fdfd3f2a63d9ff66ccd04",
+      "local_file": "data/raw/rl_research/spdr_gold/gld_historical_archive_2026-11-11_sha256-85c8770862db5a1411e29e2021d81e0f42240832ab7fdfd3f2a63d9ff66ccd04.xlsx",
+      "observed_sha256": "85c8770862db5a1411e29e2021d81e0f42240832ab7fdfd3f2a63d9ff66ccd04",
+      "role": "ISSUER_HISTORY_AND_DISTRIBUTION_POLICY",
+      "status": "VERIFIED"
+    },
+    {
+      "asset": "ALL",
+      "dataset_id": "nyse_trading_calendars_2022_2025_20261019",
+      "expected_sha256": "2c2e63b780c4a373d8d546904ae46c8ba7e8070ad9357d23d2c92749985bb6c9",
+      "local_file": "data/raw/rl_calendars/nyse_trading_calendar_2022.pdf",
+      "observed_sha256": "2c2e63b780c4a373d8d546904ae46c8ba7e8070ad9357d23d2c92749985bb6c9",
+      "role": "TRADING_CALENDAR",
+      "status": "VERIFIED"
+    },
+    {
+      "asset": "ALL",
+      "dataset_id": "sec_settlement_cycle_t1_2023_20261019",
+      "expected_sha256": "e214bf80244fe9107c867d7abeb6a6b969029c519566036e42b081977a9b575a",
+      "local_file": "data/raw/rl_calendars/sec_t1_final_rule_2023.pdf",
+      "observed_sha256": "e214bf80244fe9107c867d7abeb6a6b969029c519566036e42b081977a9b575a",
+      "role": "SETTLEMENT_RULE",
+      "status": "VERIFIED"
+    }
+  ],
+  "requirements_sha256": "af5092d2c72441f87ec17b41209f798eb799e02ba572756349b8acf8a1423f45",
+  "schema_version": "g4-data-readiness-1.0",
+  "statistical_audit_authorized": true,
+  "total_requirements": 10,
+  "verdict": "READY_FOR_G4_STATISTICAL_AUDIT",
+  "verified_requirements": 10
+}
