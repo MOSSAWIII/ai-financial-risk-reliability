@@ -35,6 +35,15 @@ jobs:
           python-version: "3.12"
       - name: Audit current Yahoo historical slices
         run: python RL/scripts/g4_source_semantic_audit.py --output-dir g4-source-audit
+      - name: Build empirical point-in-time transitions from causal slices
+        shell: bash
+        run: |
+          python RL/scripts/g4_transition_builder.py \
+            --output g4-source-audit/g4_weekly_market_transitions.jsonl \
+            --input "SPY=$(find g4-source-audit -name 'spy_historical_slice_*.json' -print -quit)" \
+            --input "IEF=$(find g4-source-audit -name 'ief_historical_slice_*.json' -print -quit)" \
+            --input "GLD=$(find g4-source-audit -name 'gld_historical_slice_*.json' -print -quit)" \
+            --input "BIL=$(find g4-source-audit -name 'bil_historical_slice_*.json' -print -quit)"
       - name: Upload canonical audit evidence
         uses: actions/upload-artifact@v4
         with:

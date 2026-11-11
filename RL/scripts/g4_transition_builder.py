@@ -150,7 +150,10 @@ def apply_controlled_transition(
 def parse_yahoo_chart(path: Path, expected_symbol: str) -> dict[date, MarketBar]:
     document = json.loads(path.read_text(encoding="utf-8"))
     try:
-        result = document["chart"]["result"][0]
+        if str(document.get("schema_version", "")).startswith("g4-yahoo-causal-slice-"):
+            result = document
+        else:
+            result = document["chart"]["result"][0]
         metadata = result["meta"]
         timestamps = result["timestamp"]
         closes = result["indicators"]["quote"][0]["close"]
@@ -290,8 +293,9 @@ def render_jsonl(rows: Sequence[Mapping[str, Any]]) -> str:
     return "".join(json.dumps(row, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n" for row in rows)
 
 
-def run(root: Path, output: Path) -> dict[str, Any]:
-    paths = _manifest_paths(root)
+def run_paths(paths: Mapping[str, Path], output: Path, source_contract: str) -> dict[str, Any]:
+    if set(paths) != set(ASSETS):
+        raise G4TransitionError("quatre sources SPY/IEF/GLD/BIL sont requises")
     series = {symbol: parse_yahoo_chart(path, symbol) for symbol, path in paths.items()}
     rows = build_market_transitions(series)
     rendered = render_jsonl(rows)
@@ -308,18 +312,31 @@ def run(root: Path, output: Path) -> dict[str, Any]:
         "state_lookback_weeks": LOOKBACK_WEEKS,
         "performance_comparison_performed": False,
         "rl_training_authorized": False,
+        "source_contract": source_contract,
         "source_sha256": {symbol: sha256_file(path) for symbol, path in paths.items()},
         "transitions_sha256": sha256_file(output),
     }
+
+
+def run(root: Path, output: Path) -> dict[str, Any]:
+    return run_paths(_manifest_paths(root), output, "G4_1_FROZEN_RAW_SHA256")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--input", action="append", default=[], metavar="SYMBOL=PATH")
     args = parser.parse_args()
     output = args.output or args.repo_root / "data" / "processed" / "rl" / "g4_weekly_market_transitions.jsonl"
-    report = run(args.repo_root, output)
+    explicit: dict[str, Path] = {}
+    for item in args.input:
+        symbol, value = item.split("=", 1)
+        explicit[symbol.upper()] = Path(value)
+    report = (
+        run_paths(explicit, output, "G4_CAUSAL_SLICE_SHA256")
+        if explicit else run(args.repo_root, output)
+    )
     report_path = output.with_suffix(".report.json")
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(report, ensure_ascii=False, sort_keys=True))

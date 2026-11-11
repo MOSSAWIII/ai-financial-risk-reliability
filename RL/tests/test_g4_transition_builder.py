@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import math
+import json
 import sys
+import tempfile
 import unittest
 from datetime import date, timedelta
 from pathlib import Path
@@ -20,6 +22,7 @@ from g4_transition_builder import (  # noqa: E402
     render_jsonl,
     simplex_actions,
     turnover,
+    parse_yahoo_chart,
 )
 
 
@@ -108,6 +111,26 @@ class G4TransitionBuilderTests(unittest.TestCase):
     def test_serialization_is_byte_deterministic(self):
         rows = build_market_transitions(synthetic_series())
         self.assertEqual(render_jsonl(rows), render_jsonl(build_market_transitions(synthetic_series())))
+
+    def test_canonical_causal_slice_is_accepted(self):
+        timestamps = [1578311400, 1578397800]
+        document = {
+            "schema_version": "g4-yahoo-causal-slice-1.2",
+            "meta": {
+                "symbol": "SPY", "currency": "USD", "exchangeName": "PCX",
+                "fullExchangeName": "NYSEArca", "exchangeTimezoneName": "America/New_York",
+                "dataGranularity": "1d"
+            },
+            "timestamp": timestamps,
+            "events": {"dividends": {str(timestamps[1]): {"date": timestamps[1], "amount": 0.5}}, "splits": {}},
+            "indicators": {"quote": [{"close": [100.0, 101.0]}]}
+        }
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "spy.json"
+            path.write_text(json.dumps(document), encoding="utf-8")
+            bars = parse_yahoo_chart(path, "SPY")
+        self.assertEqual(2, len(bars))
+        self.assertEqual(0.5, bars[max(bars)].distribution)
 
 
 if __name__ == "__main__":
