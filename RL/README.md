@@ -54,7 +54,8 @@ contrôle myope appris, sur la fenêtre 2 juin 2025–17 avril 2026. La
 [validation d'implémentation](docs/VALIDATION_G3_IMPLEMENTATION.md) documente
 les contrôles négatifs, les limites du close-à-close et le blocage documentaire
 à respecter si les deux sources Yahoo originales ne sont pas disponibles.
-**Aucun verdict empirique G3 n'est encore publié** et PPO reste hors périmètre.
+Le verdict empirique ne peut être publié qu'après validation exacte des sources
+et des sorties. PPO reste hors périmètre.
 
 La [reproduction empirique indépendante de G3A](docs/VALIDATION_G3A_EMPIRIQUE_INDEPENDANTE.md)
 a maintenant retrouvé les deux sources Yahoo originales avec concordance SHA-256.
@@ -63,8 +64,13 @@ Le critère comparatif prédéfini est positif (+5 297,85 USD par rapport à
 statique 100 % SPY après quatre semaines de warm-up. Aucune valeur séquentielle
 supplémentaire ni nécessité de PPO n'est démontrée. Les quatre empreintes CSV
 sont [consignées ici](results/g3_learning_value/independent_replication_audit.json).
-**Le script canonique doit encore être exécuté sur les originaux et confronté
-octet pour octet à la reproduction indépendante.**
+Le [rapport de validation canonique](docs/VALIDATION_G3A_CANONIQUE.md) confirme
+désormais l'exécution du script officiel sur les originaux : les quatre CSV
+correspondent octet pour octet aux empreintes de la reproduction indépendante.
+Le statut est `G3A_CANONICAL_VALIDATED`. Le verdict primaire reste positif face
+à `D_G2_FROZEN`, mais `D_G3_LEARNED` et `M_G3_LEARNED` sont identiques et se
+réduisent à 100 % SPY après le warm-up. G3A ne justifie donc ni PPO, ni CQL, ni
+IQL sur le problème SPY–BIL actuel.
 
 Ce dossier ouvre un axe de recherche autonome au sein de `ai-financial-risk-reliability`. Il contient un cadrage scientifique, une étude fondamentale sur la nature séquentielle d'une décision, une formalisation financière, un audit de faisabilité d'un mandat SPY–BIL et un patrimoine local de données documentées. BIL-A reste validée sous la convention à l'ex-date. SPY-B et BIL-B suivent les parts, les créances et leur réinvestissement à la date de paiement. BIL-B est validée pour l'analyse NAV du 4 mars 2008 au 15 octobre 2026 ; sa frontière exclut explicitement la distribution du 3 mars 2008 dont les dates historiques restent incohérentes. Aucun algorithme de Reinforcement Learning (RL), modèle prédictif, environnement de simulation, stratégie ou backtest n'a été créé.
 

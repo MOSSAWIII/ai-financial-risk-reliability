@@ -1,0 +1,32 @@
+{
+  "cost_bps": 10,
+  "initial_capital_usd": "100000",
+  "interpretation_boundary": "Exploratory unadjusted close-to-close proxy, not executable returns; no distribution credits, execution, shares or settlement; not PPO.",
+  "output_sha256": {
+    "model_estimates.csv": "0d714f511cdbbab8c10f1309c95b3659659ba54ab0181a25fd1aae0f2fdd59e5",
+    "paired_comparison.csv": "f28706978ac9aee57811ed20a0c6bcca38615b95b696b1e1a1fe43b2f3f6c192",
+    "policy_decisions.csv": "21af4ddd915f65d3db3434190e66b45891380a698d9345e524567a751bb6bb55",
+    "wealth_paths.csv": "1ae6c384afb895123744663ef0faa22fb6a104580e3e96501c721b53c7b1eb4e"
+  },
+  "period": {
+    "first_decision": "2025-06-02",
+    "last_decision": "2026-04-13",
+    "terminal": "2026-04-17"
+  },
+  "protocol_sha256": "5caba8a67da6a8ceef721ad2ddc2dde1d9a3cee7780674d6d7cd40309afefd79",
+  "schema_version": "g3-learning-value-1.0",
+  "source_sha256": {
+    "BIL": "2eaa0529ae97b0e8e078285e8daa5247176c42b6df114019d6e0e2c4b3f838d2",
+    "SPY": "b77099e8c46a954f045e95432d2b6220a526f15322c87b877aafae628da14f52"
+  },
+  "study": "G3A_CLOSE_TO_CLOSE",
+  "terminal_difference_usd": "5297.848748435325",
+  "threshold_usd": "250",
+  "training_policy": {
+    "excluded_g2_episode": "2024-05-29/2025-06-01",
+    "future_returns_strictly_excluded": true,
+    "initial_sample_end": "2024-05-28",
+    "online_update_from": "2025-06-02"
+  },
+  "verdict": "G3_LEARNING_VALUE_POSITIVE"
+}
