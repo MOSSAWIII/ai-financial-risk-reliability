@@ -57,7 +57,6 @@ def canonical_document(payload: bytes, expected_symbol: str) -> tuple[bytes, dic
         metadata = result["meta"]
         timestamps = result["timestamp"]
         quote = result["indicators"]["quote"][0]
-        adjusted = result["indicators"]["adjclose"][0]
     except (KeyError, IndexError, TypeError) as exc:
         raise G4SourceAuditError(f"r�ponse Yahoo invalide pour {expected_symbol}") from exc
     required_meta = {
@@ -73,13 +72,12 @@ def canonical_document(payload: bytes, expected_symbol: str) -> tuple[bytes, dic
     if required_meta["exchangeTimezoneName"] != "America/New_York" or required_meta["dataGranularity"] != "1d":
         raise G4SourceAuditError(f"horloge ou granularit� inattendue pour {expected_symbol}")
     fields = {name: quote.get(name) for name in ("open", "high", "low", "close", "volume")}
-    fields["adjclose"] = adjusted.get("adjclose")
     lengths = {"timestamp": len(timestamps), **{name: len(values or []) for name, values in fields.items()}}
     if len(set(lengths.values())) != 1 or any(value is None for values in fields.values() for value in values):
         raise G4SourceAuditError(f"tableaux d�salign�s ou incomplets pour {expected_symbol}")
     events = result.get("events") or {}
     canonical = {
-        "schema_version": "g4-yahoo-historical-slice-1.0",
+        "schema_version": "g4-yahoo-causal-slice-1.1",
         "meta": required_meta,
         "timestamp": timestamps,
         "events": {
@@ -88,7 +86,6 @@ def canonical_document(payload: bytes, expected_symbol: str) -> tuple[bytes, dic
         },
         "indicators": {
             "quote": [{name: fields[name] for name in ("open", "high", "low", "close", "volume")}],
-            "adjclose": [{"adjclose": fields["adjclose"]}],
         },
     }
     rendered = json.dumps(canonical, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8") + b"\n"
@@ -153,6 +150,10 @@ def audit_sources(output_dir: Path, local_inputs: dict[str, Path] | None = None)
         "schema_version": "g4-source-semantic-audit-1.0",
         "verdict": "G4_HISTORICAL_SLICES_STRUCTURALLY_CONFORMANT",
         "scope": "SOURCE_BYTES_AND_HISTORICAL_FIELDS_ONLY_NO_RETURNS",
+        "canonical_exclusions": [
+            "live_meta_fields",
+            "adjclose_revised_by_distributions_after_the_requested_period"
+        ],
         "performance_computation_performed": False,
         "sources": sources,
     }
