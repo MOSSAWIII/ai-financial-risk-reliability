@@ -23,3 +23,22 @@ jobs:
         run: python -m py_compile RL/scripts/g4_transition_builder.py
       - name: Run G4.2 synthetic causal tests
         run: python -m unittest discover -s RL/tests -p 'test_g4_transition_builder.py' -v
+      - name: Run G4.2 source semantic tests
+        run: python -m unittest discover -s RL/tests -p 'test_g4_source_semantic_audit.py' -v
+
+  source-semantic-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Audit current Yahoo historical slices
+        run: python RL/scripts/g4_source_semantic_audit.py --output-dir g4-source-audit
+      - name: Upload canonical audit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: g4-source-semantic-audit
+          path: g4-source-audit/
+          if-no-files-found: error
+          retention-days: 30
