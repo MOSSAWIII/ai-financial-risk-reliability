@@ -1,0 +1,84 @@
+{
+  "schema_version": "g4-data-requirements-1.0",
+  "status": "FROZEN_BEFORE_G4_1_READINESS_EXECUTION",
+  "candidate_instruments": ["SPY", "IEF", "GLD", "BIL"],
+  "candidate_common_start": "2007-05-30",
+  "market_data_convention": "COMMON_DAILY_OHLCV_PROXY_WITH_SPLIT_EVENTS",
+  "distribution_convention": "ISSUER_EX_DATE_RECORD_DATE_PAYMENT_DATE_AND_AMOUNT_OR_DOCUMENTED_NON_DISTRIBUTING_STRUCTURE",
+  "requirements": [
+    {
+      "asset": "SPY",
+      "role": "MARKET_OHLCV",
+      "dataset_id": "yahoo_spy_chart_ohlcv_20261019",
+      "expected_sha256": "b77099e8c46a954f045e95432d2b6220a526f15322c87b877aafae628da14f52",
+      "status_before_audit": "REUSED_VERIFIED_SOURCE"
+    },
+    {
+      "asset": "SPY",
+      "role": "DISTRIBUTIONS",
+      "dataset_id": "ssga_spdr_distributions_20261019",
+      "expected_sha256": "6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320",
+      "status_before_audit": "REUSED_VERIFIED_SOURCE"
+    },
+    {
+      "asset": "BIL",
+      "role": "MARKET_OHLCV",
+      "dataset_id": "yahoo_bil_chart_ohlcv_20261019",
+      "expected_sha256": "2eaa0529ae97b0e8e078285e8daa5247176c42b6df114019d6e0e2c4b3f838d2",
+      "status_before_audit": "REUSED_VERIFIED_SOURCE"
+    },
+    {
+      "asset": "BIL",
+      "role": "DISTRIBUTIONS",
+      "dataset_id": "ssga_spdr_distributions_20261019",
+      "expected_sha256": "6b65cbf956b5d25705d08470006a0e97e6a7d2a0d5cfd08b63f6f79783b06320",
+      "status_before_audit": "REUSED_VERIFIED_SOURCE"
+    },
+    {
+      "asset": "IEF",
+      "role": "MARKET_OHLCV",
+      "dataset_id": "yahoo_ief_chart_ohlcv_g4",
+      "expected_sha256": null,
+      "status_before_audit": "REQUIRED_NOT_ACQUIRED"
+    },
+    {
+      "asset": "IEF",
+      "role": "DISTRIBUTIONS",
+      "dataset_id": "ishares_ief_distribution_history_g4",
+      "expected_sha256": null,
+      "official_source": "https://www.ishares.com/us/products/239456/ishares-7-10-year-treasury-bond-etf",
+      "status_before_audit": "REQUIRED_NOT_ACQUIRED"
+    },
+    {
+      "asset": "GLD",
+      "role": "MARKET_OHLCV",
+      "dataset_id": "yahoo_gld_chart_ohlcv_g4",
+      "expected_sha256": null,
+      "status_before_audit": "REQUIRED_NOT_ACQUIRED"
+    },
+    {
+      "asset": "GLD",
+      "role": "ISSUER_HISTORY_AND_DISTRIBUTION_POLICY",
+      "dataset_id": "spdr_gld_historical_archive_g4",
+      "expected_sha256": null,
+      "official_source": "https://www.spdrgoldshares.com/usa/gld/",
+      "status_before_audit": "REQUIRED_NOT_ACQUIRED"
+    },
+    {
+      "asset": "ALL",
+      "role": "TRADING_CALENDAR",
+      "dataset_id": "nyse_trading_calendars_2022_2025_20261019",
+      "expected_sha256": "2c2e63b780c4a373d8d546904ae46c8ba7e8070ad9357d23d2c92749985bb6c9",
+      "status_before_audit": "REUSED_VERIFIED_SOURCE"
+    },
+    {
+      "asset": "ALL",
+      "role": "SETTLEMENT_RULE",
+      "dataset_id": "sec_settlement_cycle_t1_2023_20261019",
+      "expected_sha256": "e214bf80244fe9107c867d7abeb6a6b969029c519566036e42b081977a9b575a",
+      "status_before_audit": "REUSED_VERIFIED_SOURCE"
+    }
+  ],
+  "readiness_rule": "EVERY_REQUIREMENT_PRESENT_IN_MANIFEST_WITH_VERIFIED_LOCAL_BYTES_AND_NON_NULL_SHA256",
+  "performance_computation_authorized": false
+}
