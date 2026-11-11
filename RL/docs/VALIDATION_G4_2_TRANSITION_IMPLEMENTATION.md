@@ -2,7 +2,7 @@
 
 ## Verdict
 
-**`G4_2_IMPLEMENTATION_VALIDATED_AWAITING_EMPIRICAL_FREEZE`.**
+**`G4_2_IMPLEMENTATION_VALIDATED`.**
 
 Le constructeur point-in-time et la transition de l'�tat contr�l� sont
 impl�ment�s. Cette validation porte sur la causalit�, la comptabilit� du budget
@@ -42,13 +42,9 @@ Le budget cumulatif et les poids h�rit�s sont propag�s par une transition
 s�par�e du jeu de march�. Cette s�paration emp�che de traiter comme exog�ne une
 ressource consomm�e par les actions pass�es.
 
-## Travail encore requis
+## Suite
 
-Les quatre fichiers bruts audit�s restent exclus de GitHub. Ils doivent �tre
-restaur�s localement avec leurs SHA-256 gel�s avant de produire le JSONL
-empirique et son rapport. Tant que ce gel empirique n'est pas reproduit :
-
-- aucune comparaison oracle-myope n'est autoris�e ;
-- aucun benchmark de performance n'est autoris� ;
-- PPO, CQL et IQL restent interdits ;
-- rien ne doit �tre fusionn� dans `main`.
+Le gel empirique est d�sormais document� s�par�ment dans
+`VALIDATION_G4_2_EMPIRICAL_TRANSITIONS.md`. Le laboratoire synth�tique
+oracle-myope est autoris� ; les comparaisons historiques, PPO, CQL et IQL
+restent interdits. Rien n'est fusionn� dans `main`.

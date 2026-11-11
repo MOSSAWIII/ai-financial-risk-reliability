@@ -135,3 +135,14 @@ fichiers bruts audités restent exclus du dépôt. La seule opération empirique
 autorisée est leur restauration par SHA-256 puis la production déterministe du
 JSONL de transitions. Toute comparaison de performance, ainsi que PPO, CQL et
 IQL, demeure interdite.
+
+## 10. Gel empirique G4.2 — 11 novembre 2026
+
+Les quatre tranches causales, limitées aux dates, clôtures et événements
+consommés par le constructeur, sont gelées par SHA-256. Elles produisent 959
+transitions hebdomadaires point-in-time du 30 mai 2008 au 9 octobre 2026. Le
+JSONL a l'empreinte `dd95e2bd438fca90f9636cda3b8c7c86c1ab3b4e0c0834cc171f4af95fde9a0d`.
+
+Cette validation autorise uniquement le laboratoire synthétique préspecifié
+oracle-versus-myope de G4.2. Elle n'autorise ni comparaison historique de
+politiques, ni PPO, ni CQL, ni IQL.

@@ -1,6 +1,6 @@
 {
   "schema_version": "g4-problem-redesign-1.0",
-  "status": "G4_2_IMPLEMENTATION_VALIDATED_AWAITING_EMPIRICAL_FREEZE",
+  "status": "G4_2_EMPIRICAL_TRANSITIONS_FROZEN",
   "predecessor_status": "G3A_CANONICAL_VALIDATED",
   "closed_candidate": "SPY_BIL_RL_NECESSITY",
   "selected_problem": "LONG_ONLY_MULTI_ASSET_ALLOCATION_WITH_CUMULATIVE_TURNOVER_BUDGET",
@@ -51,9 +51,12 @@
   "g4_1_verdict": "G4_1_DATA_AUDIT_PASSED",
   "transition_protocol": "RL/configs/g4_transition_protocol.json",
   "g4_2_implementation": {
-    "causal_tests_passed": 7,
-    "empirical_transitions_frozen": false,
-    "performance_comparison_performed": false,
+    "causal_tests_passed": 13,
+    "empirical_transitions_frozen": true,
+    "empirical_transition_rows": 959,
+    "empirical_transition_sha256": "dd95e2bd438fca90f9636cda3b8c7c86c1ab3b4e0c0834cc171f4af95fde9a0d",
+    "structural_sequentiality_lab_authorized": true,
+    "historical_policy_comparison_performed": false,
     "rl_training_authorized": false
   }
 }

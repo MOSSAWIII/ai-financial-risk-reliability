@@ -1,0 +1,26 @@
+{
+  "action_count": 35,
+  "assets": [
+    "SPY",
+    "IEF",
+    "GLD",
+    "BIL"
+  ],
+  "ci_run_id": 43056193204,
+  "first_decision": "2008-05-30",
+  "last_decision": "2026-10-09",
+  "performance_comparison_performed": false,
+  "rl_training_authorized": false,
+  "rows": 959,
+  "schema_version": "g4-point-in-time-transitions-1.0",
+  "source_contract": "G4_CAUSAL_SLICE_SHA256",
+  "source_sha256": {
+    "BIL": "bd1b75b96dd83c07d54a1b115114a162a7b4f5f16471f947f406d26f0656cb02",
+    "GLD": "f1aa5a7075feb3c33a9a3de88c38f0cad8e21d7a89277a436250bdd9f4722305",
+    "IEF": "da6a037ec2b2b927874d991b4254019c3073b31566fc798818b28a6d2797f267",
+    "SPY": "1a5113d3ef96d4681bf6045ab34cb3d287ae37fe2a8ca186f890ddba71641948"
+  },
+  "state_lookback_weeks": 52,
+  "transitions_sha256": "dd95e2bd438fca90f9636cda3b8c7c86c1ab3b4e0c0834cc171f4af95fde9a0d",
+  "verdict": "G4_2_TRANSITIONS_BUILT"
+}

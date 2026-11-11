@@ -1,6 +1,6 @@
 {
   "schema_version": "g4-transition-protocol-1.0",
-  "status": "FROZEN_BEFORE_G4_2_EMPIRICAL_BUILD",
+  "status": "G4_2_EMPIRICAL_TRANSITIONS_FROZEN",
   "assets": ["SPY", "IEF", "GLD", "BIL"],
   "decision_clock": "LAST_COMMON_SESSION_OF_ISO_WEEK_AT_CLOSE",
   "information_cutoff": "DECISION_CLOSE_INCLUSIVE",
@@ -27,6 +27,21 @@
     "outcomes_never_enter_same_date_state_features",
     "serialization_is_deterministic"
   ],
+  "causal_source_sha256": {
+    "SPY": "1a5113d3ef96d4681bf6045ab34cb3d287ae37fe2a8ca186f890ddba71641948",
+    "IEF": "da6a037ec2b2b927874d991b4254019c3073b31566fc798818b28a6d2797f267",
+    "GLD": "f1aa5a7075feb3c33a9a3de88c38f0cad8e21d7a89277a436250bdd9f4722305",
+    "BIL": "bd1b75b96dd83c07d54a1b115114a162a7b4f5f16471f947f406d26f0656cb02"
+  },
+  "empirical_transition_freeze": {
+    "rows": 959,
+    "first_decision": "2008-05-30",
+    "last_decision": "2026-10-09",
+    "sha256": "dd95e2bd438fca90f9636cda3b8c7c86c1ab3b4e0c0834cc171f4af95fde9a0d",
+    "ci_run_id": 43056193204
+  },
+  "structural_sequentiality_lab_authorized": true,
+  "historical_policy_comparison_authorized": false,
   "performance_comparison_authorized": false,
   "rl_training_authorized": false
 }
