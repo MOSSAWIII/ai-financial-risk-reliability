@@ -1,0 +1,25 @@
+name: G4 transition causal checks
+
+on:
+  push:
+    branches:
+      - research/g4-problem-redesign
+  pull_request:
+    paths:
+      - "RL/scripts/g4_transition_builder.py"
+      - "RL/tests/test_g4_transition_builder.py"
+      - "RL/configs/g4_transition_protocol.json"
+      - ".github/workflows/g4-transition-checks.yml"
+
+jobs:
+  causal-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile transition builder
+        run: python -m py_compile RL/scripts/g4_transition_builder.py
+      - name: Run G4.2 synthetic causal tests
+        run: python -m unittest discover -s RL/tests -p 'test_g4_transition_builder.py' -v

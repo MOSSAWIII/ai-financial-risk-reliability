@@ -123,3 +123,15 @@ empiriques. La simple répétition de l'histoire ne constitue pas un simulateur.
 Seule G4.1 est autorisée : audit documentaire et statistique des quatre poches,
 avec inventaire des sources et couverture commune. Aucun backtest, réglage de
 signal, sélection de fenêtre ou entraînement n'est autorisé avant ce jalon.
+## 9. Mise à jour après G4.1 — 11 novembre 2026
+
+G4.1 est validé sur 4 878 séances communes SPY–IEF–GLD–BIL. Les quatre
+instruments sont adoptés pour le laboratoire G4. L'étape active devient G4.2 :
+construction point-in-time des transitions et validation de l'état contrôlé.
+
+L'implémentation causale G4.2 et ses sept tests synthétiques sont validés. Le
+jeu empirique n'est toutefois pas encore gelé dans ce commit, car les quatre
+fichiers bruts audités restent exclus du dépôt. La seule opération empirique
+autorisée est leur restauration par SHA-256 puis la production déterministe du
+JSONL de transitions. Toute comparaison de performance, ainsi que PPO, CQL et
+IQL, demeure interdite.

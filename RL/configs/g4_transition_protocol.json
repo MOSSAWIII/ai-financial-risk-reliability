@@ -1,0 +1,32 @@
+{
+  "schema_version": "g4-transition-protocol-1.0",
+  "status": "FROZEN_BEFORE_G4_2_EMPIRICAL_BUILD",
+  "assets": ["SPY", "IEF", "GLD", "BIL"],
+  "decision_clock": "LAST_COMMON_SESSION_OF_ISO_WEEK_AT_CLOSE",
+  "information_cutoff": "DECISION_CLOSE_INCLUSIVE",
+  "outcome_interval": "AFTER_DECISION_CLOSE_THROUGH_NEXT_DECISION_CLOSE",
+  "return_convention": "YAHOO_SPLIT_NORMALIZED_CLOSE_PLUS_EX_DATE_DISTRIBUTIONS",
+  "state_lookbacks_weeks": [1, 4, 13, 52],
+  "covariance_lookback_weeks": 52,
+  "action_grid_step": 0.25,
+  "action_count": 35,
+  "turnover_definition": "0.5_L1_TARGET_MINUS_INHERITED_WEIGHTS",
+  "per_decision_turnover_cap": 0.25,
+  "initial_cumulative_turnover_budget": 2.0,
+  "transaction_cost_bps_per_unit_turnover": 10.0,
+  "controlled_state": [
+    "inherited_weights_after_market_drift",
+    "remaining_cumulative_turnover_budget",
+    "wealth",
+    "wealth_peak"
+  ],
+  "anti_leakage_invariants": [
+    "state_history_ends_at_decision_close",
+    "future_price_shocks_do_not_change_past_states",
+    "distributions_are_credited_on_ex_date_only",
+    "outcomes_never_enter_same_date_state_features",
+    "serialization_is_deterministic"
+  ],
+  "performance_comparison_authorized": false,
+  "rl_training_authorized": false
+}
